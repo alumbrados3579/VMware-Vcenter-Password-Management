@@ -1,28 +1,3 @@
-{
-   "$id": "https://www.vmware.com/esxupdate/1.1/common.json",
-   "$schema": "http://json-schema.org/draft-07/schema#",
-   "allOf": [
-      {
-         "$ref": "https://www.vmware.com/esxupdate/common.json"
-      }
-   ],
-   "definitions": {
-      "quickPatchCompatibleVersions": {
-         "description": "The base image versions that can update to this base image using Quick Patch.",
-         "type": "array",
-         "uniqueItems": true,
-         "items": {
-            "type": "object",
-            "properties": {
-               "version": {
-                  "$ref": "https://www.vmware.com/esxupdate/common.json#/definitions/versionPattern"
-               },
-               "uiString": {
-                  "$ref": "https://www.vmware.com/esxupdate/common.json#/definitions/uiStringDef"
-               }
-            },
-            "additionalProperties": false
-         }
-      }
-   }
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:bf9ac487c374e3af8d63e717ae1cf8023d08e1a7ef63fe2e97930d601addd2b4
+size 922

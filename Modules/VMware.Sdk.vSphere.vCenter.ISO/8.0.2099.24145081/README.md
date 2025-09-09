@@ -1,16 +1,3 @@
-# VMware.Sdk.vSphere.vCenter.ISO
-
-The vcenter iso package provides structures and services that will let its client mount or unmount an ISO image on a virtual machine as a CD-ROM.
-
-<a name="frameworks-supported"></a>
-## Frameworks supported
-- PowerShell **5.1 or 7.0**
-
-<a name="installation"></a>
-## Installation
-
-**VMware.Sdk.vSphere.vCenter.ISO** module is part of the [VMware.PowerCLI](https://www.powershellgallery.com/packages/VMware.PowerCLI) module. To install **VMware.Sdk.vSphere.vCenter.ISO** run the following command:
-
-```powershell
-Install-Module -Name 'VMware.Sdk.vSphere.vCenter.ISO'
-```
+version https://git-lfs.github.com/spec/v1
+oid sha256:de0bafc1991fcd5cd9bd9e89da481c7bdfaa6299184dd3f653f1931b6838f2dd
+size 620

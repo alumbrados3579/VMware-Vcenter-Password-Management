@@ -1,16 +1,3 @@
-# VMware.Sdk.vSphere.vCenter.LCM
-
-The vcenter lcm package provides services for managing the vCenter Server lifecycle.
-
-<a name="frameworks-supported"></a>
-## Frameworks supported
-- PowerShell **5.1 or 7.0**
-
-<a name="installation"></a>
-## Installation
-
-**VMware.Sdk.vSphere.vCenter.LCM** module is part of the [VMware.PowerCLI](https://www.powershellgallery.com/packages/VMware.PowerCLI) module. To install **VMware.Sdk.vSphere.vCenter.LCM** run the following command:
-
-```powershell
-Install-Module -Name 'VMware.Sdk.vSphere.vCenter.LCM'
-```
+version https://git-lfs.github.com/spec/v1
+oid sha256:3ee5e18feff0020f919846f77d905b946a2078ef79a0cdf4e9da273b91b23d15
+size 559

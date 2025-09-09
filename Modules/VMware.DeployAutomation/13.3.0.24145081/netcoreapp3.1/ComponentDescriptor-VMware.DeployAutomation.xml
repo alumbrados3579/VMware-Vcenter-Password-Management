@@ -1,26 +1,3 @@
-<ComponentDescriptor>
-  <Name>VMware.DeployAutomation</Name>
-  <Assembly>VMware.DeployAutomation.Cmdlets</Assembly>
-  <ImplementingType>VMware.DeployAutomation.Commands.DeployCmdletsComponentImpl</ImplementingType>
-  <IsSnapin>true</IsSnapin>
-  <ProvidedServiceList>
-  </ProvidedServiceList>
-  <RequiredServiceList>
-    <ServiceDescriptor>
-      <Name>ViCoreService</Name>
-      <Version>1.0</Version>
-    </ServiceDescriptor>
-  </RequiredServiceList>
-  <ExtendedServiceList>
-  </ExtendedServiceList>
-  <Version>
-    <Major>13</Major>
-    <Minor>3</Minor>
-    <Revision>0</Revision>
-    <Build>24145081</Build>
-    <Company>Broadcom, Inc.</Company>
-    <Copyright>Copyright (c) Broadcom. All Rights Reserved.</Copyright>
-    <UserFriendlyVersion>VMware Deploy Automation PowerCLI Component PowerCLI Component 13.3 build 24145081</UserFriendlyVersion>
-    <Description>Provides cmdlets for managing VMware AutoDeploy.</Description>
-  </Version>
-</ComponentDescriptor>
+version https://git-lfs.github.com/spec/v1
+oid sha256:fec7f4d6f903eca7a9de75ea3d7aac38c29fd49361c7afa5f9a836f2ba37e79d
+size 991

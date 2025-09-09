@@ -1,10 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
-  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml" />
-  <Default Extension="psmdcp" ContentType="application/vnd.openxmlformats-package.core-properties+xml" />
-  <Default Extension="rtf" ContentType="application/octet" />
-  <Default Extension="cat" ContentType="application/octet" />
-  <Default Extension="ps1" ContentType="application/octet" />
-  <Default Extension="psd1" ContentType="application/octet" />
-  <Default Extension="nuspec" ContentType="application/octet" />
-</Types>
+version https://git-lfs.github.com/spec/v1
+oid sha256:b3b04704080df833fab089afc02f7564a5b2263d5c02504041a5f1c1caeec6e9
+size 655

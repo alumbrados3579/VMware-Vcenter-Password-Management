@@ -1,13 +1,3 @@
-# Target Users Configuration
-# Add usernames that can be targeted for password changes
-# One username per line, comments start with #
-
-# Standard ESXi Users:
-root
-# admin
-# serviceaccount
-
-# Custom Users (uncomment and modify as needed):
-# backup_user
-# monitoring_user
-# vmware_admin
+version https://git-lfs.github.com/spec/v1
+oid sha256:44409f87e970cddca5fca3625c40863d19fbe87eaf6cfbaccb39413293a43282
+size 284

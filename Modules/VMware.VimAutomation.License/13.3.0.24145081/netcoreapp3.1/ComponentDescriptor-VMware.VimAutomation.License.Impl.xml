@@ -1,22 +1,3 @@
-<ComponentDescriptor>
-	<Name>VMware.VimAutomation.License</Name>
-	<Assembly>VMware.VimAutomation.License.Impl</Assembly>
-	<ImplementingType>VMware.VimAutomation.License.Impl.LicenseComponent</ImplementingType>
-	<IsSnapin>false</IsSnapin>
-
-	<ProvidedServiceList>
-		<ServiceDescriptor>
-			<Name>LicenseService</Name>
-			<Version>1.0</Version>
-		</ServiceDescriptor>
-	</ProvidedServiceList>
-
-	<RequiredServiceList>
-		<ServiceDescriptor>
-			<Name>ViCoreService</Name>
-			<Version>1.0</Version>
-		</ServiceDescriptor>
-   </RequiredServiceList>
-
-	<ExtendedServiceList></ExtendedServiceList>
-</ComponentDescriptor>
+version https://git-lfs.github.com/spec/v1
+oid sha256:6bd865c8dd3f0374402af441ada565fa4d1d8da4752c78639586895b4c257a1d
+size 628

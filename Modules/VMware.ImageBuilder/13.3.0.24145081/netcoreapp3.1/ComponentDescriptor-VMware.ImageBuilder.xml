@@ -1,26 +1,3 @@
-<ComponentDescriptor>
-  <Name>VMware.ImageBuilder</Name>
-  <Assembly>VMware.ImageBuilder.Cmdlets</Assembly>
-  <ImplementingType>VMware.ImageBuilder.Commands.ImageBuilderCmdletsComponentImpl</ImplementingType>
-  <IsSnapin>true</IsSnapin>
-  <ProvidedServiceList>
-  </ProvidedServiceList>
-  <RequiredServiceList>
-    <ServiceDescriptor>
-      <Name>ViCoreService</Name>
-      <Version>1.0</Version>
-    </ServiceDescriptor>
-  </RequiredServiceList>
-  <ExtendedServiceList>
-  </ExtendedServiceList>
-  <Version>
-    <Major>13</Major>
-    <Minor>3</Minor>
-    <Revision>0</Revision>
-    <Build>24145081</Build>
-    <Company>Broadcom, Inc.</Company>
-    <Copyright>Copyright (c) Broadcom. All Rights Reserved.</Copyright>
-    <UserFriendlyVersion>VMware Image Builder PowerCLI Component PowerCLI Component 13.3 build 24145081</UserFriendlyVersion>
-    <Description>Provides cmdlets for building ESXi images.</Description>
-  </Version>
-</ComponentDescriptor>
+version https://git-lfs.github.com/spec/v1
+oid sha256:d78c8697059253370860b34eeec91eaa6436b5c606721a5fa9d4839c40d7180e
+size 975

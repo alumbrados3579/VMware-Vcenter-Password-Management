@@ -1,16 +1,3 @@
-# VMware.Sdk.vSphere.Appliance.Tls
-
-The appliance tls package provides services for managing the TLS Profiles.
-
-<a name="frameworks-supported"></a>
-## Frameworks supported
-- PowerShell **5.1 or 7.0**
-
-<a name="installation"></a>
-## Installation
-
-**VMware.Sdk.vSphere.Appliance.Tls** module is part of the [VMware.PowerCLI](https://www.powershellgallery.com/packages/VMware.PowerCLI) module. To install **VMware.Sdk.vSphere.Appliance.Tls** run the following command:
-
-```powershell
-Install-Module -Name 'VMware.Sdk.vSphere.Appliance.Tls'
-```
+version https://git-lfs.github.com/spec/v1
+oid sha256:7cb923feb3f8fee6f35d3ca12d0986e74c64becfa672d3979faabd4fb418c57b
+size 557

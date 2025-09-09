@@ -1,16 +1,3 @@
-# VMware.Sdk.vSphere.Esx.Settings
-
-The esx settings package provides services to manage ESX settings.
-
-<a name="frameworks-supported"></a>
-## Frameworks supported
-- PowerShell **5.1 or 7.0**
-
-<a name="installation"></a>
-## Installation
-
-**VMware.Sdk.vSphere.Esx.Settings** module is part of the [VMware.PowerCLI](https://www.powershellgallery.com/packages/VMware.PowerCLI) module. To install **VMware.Sdk.vSphere.Esx.Settings** run the following command:
-
-```powershell
-Install-Module -Name 'VMware.Sdk.vSphere.Esx.Settings'
-```
+version https://git-lfs.github.com/spec/v1
+oid sha256:ce3f274b6e44b6e4ea458f52b92a33a1886750d7f2051df5366197e41a92a537
+size 545

@@ -1,16 +1,3 @@
-# VMware.Sdk.vSphere.vCenter.Tagging
-
-The vcenter tagging package provides services for managing tags.
-
-<a name="frameworks-supported"></a>
-## Frameworks supported
-- PowerShell **5.1 or 7.0**
-
-<a name="installation"></a>
-## Installation
-
-**VMware.Sdk.vSphere.vCenter.Tagging** module is part of the [VMware.PowerCLI](https://www.powershellgallery.com/packages/VMware.PowerCLI) module. To install **VMware.Sdk.vSphere.vCenter.Tagging** run the following command:
-
-```powershell
-Install-Module -Name 'VMware.Sdk.vSphere.vCenter.Tagging'
-```
+version https://git-lfs.github.com/spec/v1
+oid sha256:e873ccc6e0cb746373b3572bc2f16bcb3cb08c597559528764d16b2109731ccf
+size 555

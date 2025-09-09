@@ -1,16 +1,3 @@
-# ESXi Hosts Configuration
-# Add your ESXi host IP addresses or FQDNs below
-# One host per line, comments start with #
-
-# Example Production Hosts:
-# 192.168.1.100
-# 192.168.1.101
-# 192.168.1.102
-
-# Example Development Hosts:
-# esxi-dev-01.domain.local
-# esxi-dev-02.domain.local
-
-# Example Lab Hosts:
-# 10.0.1.50
-# 10.0.1.51
+version https://git-lfs.github.com/spec/v1
+oid sha256:4b4807530204bd42e44bbdd4f5bf2abd23d7ad6340d0a8df3b65bfcbcf04f9b3
+size 325

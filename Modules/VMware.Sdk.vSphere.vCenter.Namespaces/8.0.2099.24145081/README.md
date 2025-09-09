@@ -1,16 +1,3 @@
-# VMware.Sdk.vSphere.vCenter.Namespaces
-
-The vcenter namespaces package provides services for managing namespaces related operations.
-
-<a name="frameworks-supported"></a>
-## Frameworks supported
-- PowerShell **5.1 or 7.0**
-
-<a name="installation"></a>
-## Installation
-
-**VMware.Sdk.vSphere.vCenter.Namespaces** module is part of the [VMware.PowerCLI](https://www.powershellgallery.com/packages/VMware.PowerCLI) module. To install **VMware.Sdk.vSphere.vCenter.Namespaces** run the following command:
-
-```powershell
-Install-Module -Name 'VMware.Sdk.vSphere.vCenter.Namespaces'
-```
+version https://git-lfs.github.com/spec/v1
+oid sha256:92bf714489c4d0b5fedd4df16bf8d1dd80445dc4d39afe239d345c586fd85855
+size 595

@@ -1,22 +1,3 @@
-<ComponentDescriptor>
-	<Name>VMware.CloudServices.Impl</Name>
-	<Assembly>VMware.CloudServices.Impl</Assembly>
-	<ImplementingType>VMware.CloudServices.Impl.V1.VcsImpl</ImplementingType>
-	<IsSnapin>false</IsSnapin>
-
-	<ProvidedServiceList>
-		<ServiceDescriptor>
-			<Name>VcsComponentService</Name>
-			<Version>1.0</Version>
-		</ServiceDescriptor>
-	</ProvidedServiceList>
-
-   <RequiredServiceList>
-       <ServiceDescriptor>
-           <Name>CommonOAuthService</Name>
-           <Version>1.0</Version>
-       </ServiceDescriptor>
-   </RequiredServiceList>
-
-	<ExtendedServiceList></ExtendedServiceList>
-</ComponentDescriptor>
+version https://git-lfs.github.com/spec/v1
+oid sha256:0d9480e36bf662d3bb331467280517f5c622a66aacac7197fbb1f0b987cde5b5
+size 643

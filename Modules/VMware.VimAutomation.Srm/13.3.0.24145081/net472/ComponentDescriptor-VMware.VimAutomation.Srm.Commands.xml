@@ -1,30 +1,3 @@
-<ComponentDescriptor>
-  <Name>VMware.VimAutomation.Srm.Commands</Name>
-  <Assembly>VMware.VimAutomation.Srm.Commands</Assembly>
-  <ImplementingType>VMware.VimAutomation.Srm.Commands.SrmCommandsComponentImpl</ImplementingType>
-  <IsSnapin>true</IsSnapin>
-  <ProvidedServiceList>
-  </ProvidedServiceList>
-  <RequiredServiceList>
-    <ServiceDescriptor>
-      <Name>ViCoreService</Name>
-      <Version>1.0</Version>
-    </ServiceDescriptor>
-    <ServiceDescriptor>
-      <Name>SrmService</Name>
-      <Version>1.0</Version>
-    </ServiceDescriptor>
-  </RequiredServiceList>
-  <ExtendedServiceList>
-  </ExtendedServiceList>
-  <Version>
-    <Major>13</Major>
-    <Minor>3</Minor>
-    <Revision>0</Revision>
-    <Build>24145081</Build>
-    <Company>Broadcom, Inc.</Company>
-    <Copyright>Copyright (c) Broadcom. All Rights Reserved.</Copyright>
-    <UserFriendlyVersion>VMware VimAutomation Srm PowerCLI Component PowerCLI Component 13.3 build 24145081</UserFriendlyVersion>
-    <Description>Provides cmdlets for managing Site Recovery Manager.</Description>
-  </Version>
-</ComponentDescriptor>
+version https://git-lfs.github.com/spec/v1
+oid sha256:9deb3ec221cfeec4f19baa9bb284fdc00fdc2e9ef0c9f5d141966d7fd2a4ed4a
+size 1118

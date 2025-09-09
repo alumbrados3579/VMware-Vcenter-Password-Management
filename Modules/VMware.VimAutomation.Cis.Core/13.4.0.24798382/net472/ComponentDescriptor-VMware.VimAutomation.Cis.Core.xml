@@ -1,18 +1,3 @@
-<ComponentDescriptor>
-	<Name>VMware.VimAutomation.Cis.Core</Name>
-	<Assembly>VMware.VimAutomation.Cis.Core.Impl</Assembly>
-	<ImplementingType>VMware.VimAutomation.Cis.Core.Impl.V1.CisComponentImpl</ImplementingType>
-	<IsSnapin>false</IsSnapin>
-
-	<ProvidedServiceList>
-		<ServiceDescriptor>
-			<Name>CisCoreService</Name>
-			<Version>1.0</Version>
-		</ServiceDescriptor>
-	</ProvidedServiceList>
-
-	<RequiredServiceList>
-  </RequiredServiceList>
-
-	<ExtendedServiceList></ExtendedServiceList>
-</ComponentDescriptor>
+version https://git-lfs.github.com/spec/v1
+oid sha256:aeda8b3b57d5c9f93e18a4ac63a9ebcbad2df608304a7222bac8032e2946e0d9
+size 528

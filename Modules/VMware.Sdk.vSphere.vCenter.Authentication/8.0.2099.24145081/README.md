@@ -1,16 +1,3 @@
-# VMware.Sdk.vSphere.vCenter.Authentication
-
-The vcenter authentication package provides authentication services specific to the com.vmware.vcenter package. The com.vmware.vcenter.authentication package is available starting in vSphere 7.0 U2.
-
-<a name="frameworks-supported"></a>
-## Frameworks supported
-- PowerShell **5.1 or 7.0**
-
-<a name="installation"></a>
-## Installation
-
-**VMware.Sdk.vSphere.vCenter.Authentication** module is part of the [VMware.PowerCLI](https://www.powershellgallery.com/packages/VMware.PowerCLI) module. To install **VMware.Sdk.vSphere.vCenter.Authentication** run the following command:
-
-```powershell
-Install-Module -Name 'VMware.Sdk.vSphere.vCenter.Authentication'
-```
+version https://git-lfs.github.com/spec/v1
+oid sha256:525c98a7d56e5bb652fe43eae840669a19d6d96934194063a82c2ebb20cebd2d
+size 717

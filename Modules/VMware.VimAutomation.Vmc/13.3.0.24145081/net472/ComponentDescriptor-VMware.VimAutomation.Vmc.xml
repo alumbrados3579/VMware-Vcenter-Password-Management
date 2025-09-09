@@ -1,23 +1,3 @@
-<ComponentDescriptor>
-   <Name>VMware.VimAutomation.Vmc</Name>
-   <Assembly>VMware.VimAutomation.Vmc.Impl</Assembly>
-   <ImplementingType>VMware.VimAutomation.Vmc.Impl.V1.VmcComponentImpl</ImplementingType>
-
-   <IsSnapin>false</IsSnapin>
-
-   <ProvidedServiceList>
-      <ServiceDescriptor>
-         <Name>VmcCoreService</Name>
-         <Version>1.0</Version>
-      </ServiceDescriptor>
-   </ProvidedServiceList>
-
-   <RequiredServiceList>
-       <ServiceDescriptor>
-           <Name>CommonOAuthService</Name>
-           <Version>1.0</Version>
-       </ServiceDescriptor>
-   </RequiredServiceList>
-
-   <ExtendedServiceList></ExtendedServiceList>
-</ComponentDescriptor>
+version https://git-lfs.github.com/spec/v1
+oid sha256:5119841efcee4f99a9f72f0be98f4c0e1b4ce32b64103c79a1a1568eac9b67e0
+size 690

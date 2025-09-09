@@ -1,26 +1,3 @@
-<ComponentDescriptor>
-  <Name>VMware.VimAutomation.ViCore.Cmdlets</Name>
-  <Assembly>VMware.VimAutomation.ViCore.Cmdlets</Assembly>
-  <ImplementingType>VMware.VimAutomation.ViCore.Cmdlets.ViCoreCmdletsComponentImpl</ImplementingType>
-  <IsSnapin>true</IsSnapin>
-  <ProvidedServiceList>
-  </ProvidedServiceList>
-  <RequiredServiceList>
-    <ServiceDescriptor>
-      <Name>ViCoreService</Name>
-      <Version>1.0</Version>
-    </ServiceDescriptor>
-  </RequiredServiceList>
-  <ExtendedServiceList>
-  </ExtendedServiceList>
-  <Version>
-    <Major>13</Major>
-    <Minor>3</Minor>
-    <Revision>0</Revision>
-    <Build>24145081</Build>
-    <Company>Broadcom, Inc.</Company>
-    <Copyright>Copyright (c) Broadcom. All Rights Reserved.</Copyright>
-    <UserFriendlyVersion>VMware VimAutomation VICore Commands PowerCLI Component PowerCLI Component 13.3 build 24145081</UserFriendlyVersion>
-    <Description>Provides core cmdlets for managing VMware vSphere.</Description>
-  </Version>
-</ComponentDescriptor>
+version https://git-lfs.github.com/spec/v1
+oid sha256:ee0b87ea01c5c1a854fc0e85afc931125c7964e435a283b16b9af963c0e00616
+size 1024

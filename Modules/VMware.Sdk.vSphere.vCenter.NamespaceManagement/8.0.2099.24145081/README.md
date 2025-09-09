@@ -1,16 +1,3 @@
-# VMware.Sdk.vSphere.vCenter.NamespaceManagement
-
-The vcenter namespace_management package provides services for managing Namespaces.
-
-<a name="frameworks-supported"></a>
-## Frameworks supported
-- PowerShell **5.1 or 7.0**
-
-<a name="installation"></a>
-## Installation
-
-**VMware.Sdk.vSphere.vCenter.NamespaceManagement** module is part of the [VMware.PowerCLI](https://www.powershellgallery.com/packages/VMware.PowerCLI) module. To install **VMware.Sdk.vSphere.vCenter.NamespaceManagement** run the following command:
-
-```powershell
-Install-Module -Name 'VMware.Sdk.vSphere.vCenter.NamespaceManagement'
-```
+version https://git-lfs.github.com/spec/v1
+oid sha256:c0100f93b65a69eb07799d26cfe783e949e89bf23d03cb23f765df1e6066a6c0
+size 622

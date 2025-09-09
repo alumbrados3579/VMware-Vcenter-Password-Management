@@ -1,16 +1,3 @@
-# VMware.Sdk.vSphere.Appliance.InfraProfile
-
-The appliance infraprofile package provides services to manage profile spec for the appliance
-
-<a name="frameworks-supported"></a>
-## Frameworks supported
-- PowerShell **5.1 or 7.0**
-
-<a name="installation"></a>
-## Installation
-
-**VMware.Sdk.vSphere.Appliance.InfraProfile** module is part of the [VMware.PowerCLI](https://www.powershellgallery.com/packages/VMware.PowerCLI) module. To install **VMware.Sdk.vSphere.Appliance.InfraProfile** run the following command:
-
-```powershell
-Install-Module -Name 'VMware.Sdk.vSphere.Appliance.InfraProfile'
-```
+version https://git-lfs.github.com/spec/v1
+oid sha256:79952ebe1216baee82a6283c524a5e2a406ce2d2a5604e174020c98d17d58626
+size 612

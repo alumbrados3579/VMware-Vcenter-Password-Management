@@ -1,30 +1,3 @@
-<ComponentDescriptor>
-  <Name>VMware.VimAutomation.Vds.Commands</Name>
-  <Assembly>VMware.VimAutomation.Vds.Commands</Assembly>
-  <ImplementingType>VMware.VimAutomation.Vds.Commands.VDCommandsComponentImpl</ImplementingType>
-  <IsSnapin>true</IsSnapin>
-  <ProvidedServiceList>
-  </ProvidedServiceList>
-  <RequiredServiceList>
-    <ServiceDescriptor>
-      <Name>ViCoreService</Name>
-      <Version>1.0</Version>
-    </ServiceDescriptor>
-    <ServiceDescriptor>
-      <Name>VDCoreService</Name>
-      <Version>1.0</Version>
-    </ServiceDescriptor>
-  </RequiredServiceList>
-  <ExtendedServiceList>
-  </ExtendedServiceList>
-  <Version>
-    <Major>13</Major>
-    <Minor>3</Minor>
-    <Revision>0</Revision>
-    <Build>24145081</Build>
-    <Company>Broadcom, Inc.</Company>
-    <Copyright>Copyright (c) Broadcom. All Rights Reserved.</Copyright>
-    <UserFriendlyVersion>VMware VimAutomation Vds Commands PowerCLI Component PowerCLI Component 13.3 build 24145081</UserFriendlyVersion>
-    <Description>Provides cmdlets for managing VMware Virtual Distributed Swtiches.</Description>
-  </Version>
-</ComponentDescriptor>
+version https://git-lfs.github.com/spec/v1
+oid sha256:b149ef395fa977aa73305dc8c250e19e5a96a39bb654ca8c199cf8baec82f838
+size 1143

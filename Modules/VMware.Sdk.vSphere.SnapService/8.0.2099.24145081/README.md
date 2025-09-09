@@ -1,16 +1,3 @@
-# VMware.Sdk.vSphere.SnapService
-
-The snapservice package provides services for configuring and managing vSAN protection groups and snapshots
-
-<a name="frameworks-supported"></a>
-## Frameworks supported
-- PowerShell **5.1 or 7.0**
-
-<a name="installation"></a>
-## Installation
-
-**VMware.Sdk.vSphere.SnapService** module is part of the [VMware.PowerCLI](https://www.powershellgallery.com/packages/VMware.PowerCLI) module. To install **VMware.Sdk.vSphere.SnapService** run the following command:
-
-```powershell
-Install-Module -Name 'VMware.Sdk.vSphere.SnapService'
-```
+version https://git-lfs.github.com/spec/v1
+oid sha256:c3c5310b98cdad947a8b88cb7fca4c07c6b37ed15c77c40a1d80d0b79a8b33e5
+size 582

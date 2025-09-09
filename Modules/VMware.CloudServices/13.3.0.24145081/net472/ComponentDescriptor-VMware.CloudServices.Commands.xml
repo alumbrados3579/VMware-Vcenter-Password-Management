@@ -1,26 +1,3 @@
-<ComponentDescriptor>
-  <Name>VMware.CloudServices.Commands</Name>
-  <Assembly>VMware.CloudServices.Commands</Assembly>
-  <ImplementingType>VMware.CloudServices.Commands.VcsCmdletsImpl</ImplementingType>
-  <IsSnapin>true</IsSnapin>
-  <ProvidedServiceList>
-  </ProvidedServiceList>
-  <RequiredServiceList>
-    <ServiceDescriptor>
-      <Name>VcsComponentService</Name>
-      <Version>1.0</Version>
-    </ServiceDescriptor>
-  </RequiredServiceList>
-  <ExtendedServiceList>
-  </ExtendedServiceList>
-  <Version>
-    <Major>13</Major>
-    <Minor>3</Minor>
-    <Revision>0</Revision>
-    <Build>24145081</Build>
-    <Company>Broadcom, Inc.</Company>
-    <Copyright>Copyright (c) Broadcom. All Rights Reserved.</Copyright>
-    <UserFriendlyVersion>VMware CloudServices PowerCLI Component PowerCLI Component 13.3 build 24145081</UserFriendlyVersion>
-    <Description>Provides test cmdlets.</Description>
-  </Version>
-</ComponentDescriptor>
+version https://git-lfs.github.com/spec/v1
+oid sha256:0694b30e0ebe8338a3adfdb00730b223b8533472674407aeb81071078364e75c
+size 956

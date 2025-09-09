@@ -1,16 +1,3 @@
-# VMware.Sdk.vSphere.Cis
-
-The cis package provides VMware common infrastructure services.
-
-<a name="frameworks-supported"></a>
-## Frameworks supported
-- PowerShell **5.1 or 7.0**
-
-<a name="installation"></a>
-## Installation
-
-**VMware.Sdk.vSphere.Cis** module is part of the [VMware.PowerCLI](https://www.powershellgallery.com/packages/VMware.PowerCLI) module. To install **VMware.Sdk.vSphere.Cis** run the following command:
-
-```powershell
-Install-Module -Name 'VMware.Sdk.vSphere.Cis'
-```
+version https://git-lfs.github.com/spec/v1
+oid sha256:96b38eeebc60364bbe83913db956c8ab8952ee4b2025af8f8fb53d504eecfc5d
+size 506
