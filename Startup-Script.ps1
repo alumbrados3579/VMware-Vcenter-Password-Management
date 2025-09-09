@@ -21,7 +21,7 @@ try {
 $script:StartupRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Definition }
 $script:ToolName = "VMware-Vcenter-Password-Management"
 $script:GitHubRepo = "https://github.com/alumbrados3579/VMware-Vcenter-Password-Management"
-$script:GitHubRawUrl = "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/master"
+$script:GitHubRawUrl = "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main"
 $script:LogFilePath = Join-Path $script:StartupRoot "startup_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
 
 # Platform detection
