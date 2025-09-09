@@ -55,6 +55,9 @@ config.json
 *.swp
 *.swo
 
+# GitHub workflows (temporarily excluded due to token scope)
+.github/workflows/
+
 # OS generated files
 .DS_Store
 .DS_Store?
