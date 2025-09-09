@@ -1,5 +1,9 @@
 *.zip filter=lfs diff=lfs merge=lfs -text
 *.gitignore filter=lfs diff=lfs merge=lfs -text
+# Critical scripts should NOT be in LFS for GitHub accessibility
+Startup-Script.ps1 -filter -diff -merge text
+VMware-Vcenter-Password-Management.ps1 -filter -diff -merge text
+# Other PowerShell scripts can be in LFS
 *.ps1 filter=lfs diff=lfs merge=lfs -text
 *.sh filter=lfs diff=lfs merge=lfs -text
 /LICENSE filter=lfs diff=lfs merge=lfs -text
