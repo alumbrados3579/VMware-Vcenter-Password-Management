@@ -14,9 +14,9 @@ test_write_permissions.tmp
 # hosts.txt - Keep template, users should modify
 # users.txt - Keep template, users should modify
 
-# PowerShell module cache
-Modules/
-*.zip
+# PowerShell module cache (allow split zip files)
+# Modules/ - commented out to allow PowerCLI split zip files
+# *.zip - commented out to allow PowerCLI split zip files
 
 # User-specific files
 .vscode/

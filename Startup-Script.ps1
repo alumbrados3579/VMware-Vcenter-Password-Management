@@ -1,6 +1,6 @@
 # VMware vCenter Password Management Tool - Startup Script
-# Version 1.0 - DoD Compliant Edition
-# Purpose: Download and setup the VMware vCenter Password Management Tool
+# Version 1.1 - DoD Compliant Edition
+# Purpose: Download and setup the VMware vCenter Password Management Tool from GitHub
 
 # Global error handling
 $ErrorActionPreference = "Continue"
@@ -20,7 +20,8 @@ try {
 # --- Global Variables ---
 $script:StartupRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Definition }
 $script:ToolName = "VMware-Vcenter-Password-Management"
-$script:GitHubRepo = "https://github.com/[USERNAME]/VMware-Vcenter-Password-Management"
+$script:GitHubRepo = "https://github.com/alumbrados3579/VMware-Vcenter-Password-Management"
+$script:GitHubRawUrl = "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/master"
 $script:LogFilePath = Join-Path $script:StartupRoot "startup_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
 
 # Platform detection
@@ -81,7 +82,7 @@ function Show-DoDStartupWarning {
     $dodWarningLines += "- Notwithstanding the above, using this IS does not constitute consent to PM, LE or CI investigative searching or monitoring of the content of privileged communications, or work product, related to personal representation or services by attorneys, psychotherapists, or clergy, and their assistants. Such communications and work product are private and confidential."
     $dodWarningLines += ""
     $dodWarningLines += "VMware vCenter Password Management Tool - Startup Script"
-    $dodWarningLines += "This script will download and install the DoD-compliant VMware management tool."
+    $dodWarningLines += "This script will download the DoD-compliant VMware management tool from GitHub."
     $dodWarningLines += ""
     $dodWarningLines += "Click 'OK' to indicate your understanding and acceptance of these terms."
 
@@ -181,12 +182,12 @@ function Test-Prerequisites {
     return $results
 }
 
-function Show-InstallationOptions {
-    Write-StartupLog "Showing installation options" "INFO"
+function Show-DownloadOptions {
+    Write-StartupLog "Showing download options" "INFO"
     
     if ($script:HasGUI) {
         $optionsForm = New-Object System.Windows.Forms.Form -Property @{
-            Text = "VMware vCenter Password Management - Installation Options"
+            Text = "VMware vCenter Password Management - Download Options"
             Size = New-Object System.Drawing.Size(700, 500)
             StartPosition = "CenterScreen"
             FormBorderStyle = "FixedDialog"
@@ -199,7 +200,7 @@ function Show-InstallationOptions {
         
         # Title
         $lblTitle = New-Object System.Windows.Forms.Label -Property @{
-            Text = "Choose Installation Method"
+            Text = "Choose Download Method"
             Location = New-Object System.Drawing.Point(20, 20)
             Size = New-Object System.Drawing.Size(650, 30)
             Font = $boldFont
@@ -208,19 +209,19 @@ function Show-InstallationOptions {
         }
         $optionsForm.Controls.Add($lblTitle)
         
-        # Full Installation Option
-        $rbFullInstall = New-Object System.Windows.Forms.RadioButton -Property @{
-            Text = "Full Installation (Recommended)"
+        # Full Download Option
+        $rbFullDownload = New-Object System.Windows.Forms.RadioButton -Property @{
+            Text = "Full Download (Recommended)"
             Location = New-Object System.Drawing.Point(30, 70)
             Size = New-Object System.Drawing.Size(600, 25)
             Font = $font
             Checked = $true
             ForeColor = [System.Drawing.Color]::DarkGreen
         }
-        $optionsForm.Controls.Add($rbFullInstall)
+        $optionsForm.Controls.Add($rbFullDownload)
         
         $lblFullDesc = New-Object System.Windows.Forms.Label -Property @{
-            Text = "Downloads all scripts, documentation, tools, and PowerCLI modules. Includes Modules.zip for complete offline capability. Perfect for first-time installation."
+            Text = "Downloads all scripts, documentation, tools, and PowerCLI modules. Includes split PowerCLI-Modules.zip files for complete offline capability. Perfect for first-time setup."
             Location = New-Object System.Drawing.Point(50, 95)
             Size = New-Object System.Drawing.Size(600, 40)
             Font = New-Object System.Drawing.Font("Segoe UI", 9)
@@ -239,7 +240,7 @@ function Show-InstallationOptions {
         $optionsForm.Controls.Add($rbScriptsOnly)
         
         $lblScriptsDesc = New-Object System.Windows.Forms.Label -Property @{
-            Text = "Downloads only scripts, tools, and documentation. Does NOT download Modules.zip. Use this for updates when you already have PowerCLI modules installed."
+            Text = "Downloads only scripts, tools, and documentation. Does NOT download PowerCLI modules. Use this for updates when you already have PowerCLI modules installed."
             Location = New-Object System.Drawing.Point(50, 175)
             Size = New-Object System.Drawing.Size(600, 40)
             Font = New-Object System.Drawing.Font("Segoe UI", 9)
@@ -247,9 +248,9 @@ function Show-InstallationOptions {
         }
         $optionsForm.Controls.Add($lblScriptsDesc)
         
-        # Custom Installation Option
+        # Custom Download Option
         $rbCustom = New-Object System.Windows.Forms.RadioButton -Property @{
-            Text = "Custom Installation"
+            Text = "Custom Download"
             Location = New-Object System.Drawing.Point(30, 230)
             Size = New-Object System.Drawing.Size(600, 25)
             Font = $font
@@ -258,7 +259,7 @@ function Show-InstallationOptions {
         $optionsForm.Controls.Add($rbCustom)
         
         $lblCustomDesc = New-Object System.Windows.Forms.Label -Property @{
-            Text = "Choose specific components to download. Allows you to select individual scripts, documentation sections, and whether to include Modules.zip."
+            Text = "Choose specific components to download. Allows you to select individual scripts, documentation sections, and whether to include PowerCLI modules."
             Location = New-Object System.Drawing.Point(50, 255)
             Size = New-Object System.Drawing.Size(600, 40)
             Font = New-Object System.Drawing.Font("Segoe UI", 9)
@@ -266,22 +267,22 @@ function Show-InstallationOptions {
         }
         $optionsForm.Controls.Add($lblCustomDesc)
         
-        # Installation Directory
-        $lblInstallDir = New-Object System.Windows.Forms.Label -Property @{
-            Text = "Installation Directory:"
+        # Download Directory
+        $lblDownloadDir = New-Object System.Windows.Forms.Label -Property @{
+            Text = "Download Directory:"
             Location = New-Object System.Drawing.Point(30, 310)
             Size = New-Object System.Drawing.Size(150, 25)
             Font = $font
         }
-        $optionsForm.Controls.Add($lblInstallDir)
+        $optionsForm.Controls.Add($lblDownloadDir)
         
-        $txtInstallDir = New-Object System.Windows.Forms.TextBox -Property @{
+        $txtDownloadDir = New-Object System.Windows.Forms.TextBox -Property @{
             Location = New-Object System.Drawing.Point(190, 310)
             Size = New-Object System.Drawing.Size(350, 25)
             Font = $font
             Text = Join-Path $env:USERPROFILE "VMware-Tools"
         }
-        $optionsForm.Controls.Add($txtInstallDir)
+        $optionsForm.Controls.Add($txtDownloadDir)
         
         $btnBrowse = New-Object System.Windows.Forms.Button -Property @{
             Text = "Browse"
@@ -293,7 +294,7 @@ function Show-InstallationOptions {
         
         # Progress Information
         $lblProgress = New-Object System.Windows.Forms.Label -Property @{
-            Text = "Installation will create a complete local directory structure with all necessary files and documentation."
+            Text = "Download will create a complete local directory structure with all necessary files and documentation from GitHub."
             Location = New-Object System.Drawing.Point(30, 350)
             Size = New-Object System.Drawing.Size(600, 40)
             Font = New-Object System.Drawing.Font("Segoe UI", 9, [System.Drawing.FontStyle]::Italic)
@@ -302,15 +303,15 @@ function Show-InstallationOptions {
         $optionsForm.Controls.Add($lblProgress)
         
         # Buttons
-        $btnInstall = New-Object System.Windows.Forms.Button -Property @{
-            Text = "Start Installation"
+        $btnDownload = New-Object System.Windows.Forms.Button -Property @{
+            Text = "Start Download"
             Location = New-Object System.Drawing.Point(450, 410)
             Size = New-Object System.Drawing.Size(120, 35)
             Font = $font
             DialogResult = "OK"
             BackColor = [System.Drawing.Color]::LightGreen
         }
-        $optionsForm.Controls.Add($btnInstall)
+        $optionsForm.Controls.Add($btnDownload)
         
         $btnCancel = New-Object System.Windows.Forms.Button -Property @{
             Text = "Cancel"
@@ -326,86 +327,173 @@ function Show-InstallationOptions {
         $btnBrowse.Add_Click({
             $folderDialog = New-Object System.Windows.Forms.FolderBrowserDialog
             $folderDialog.Description = "Select installation directory"
-            $folderDialog.SelectedPath = $txtInstallDir.Text
+            $folderDialog.SelectedPath = $txtDownloadDir.Text
             
             if ($folderDialog.ShowDialog() -eq "OK") {
-                $txtInstallDir.Text = $folderDialog.SelectedPath
+                $txtDownloadDir.Text = $folderDialog.SelectedPath
             }
         })
         
-        $optionsForm.AcceptButton = $btnInstall
+        $optionsForm.AcceptButton = $btnDownload
         $optionsForm.CancelButton = $btnCancel
         
         $result = $optionsForm.ShowDialog()
         
         if ($result -eq "OK") {
-            $installationType = if ($rbFullInstall.Checked) { "Full" } elseif ($rbScriptsOnly.Checked) { "Scripts" } else { "Custom" }
+            $downloadType = if ($rbFullDownload.Checked) { "Full" } elseif ($rbScriptsOnly.Checked) { "Scripts" } else { "Custom" }
             
-            Write-StartupLog "User selected installation type: $installationType" "INFO"
+            Write-StartupLog "User selected download type: $downloadType" "INFO"
             
             return @{
-                InstallationType = $installationType
-                InstallDirectory = $txtInstallDir.Text
+                DownloadType = $downloadType
+                DownloadDirectory = $txtDownloadDir.Text
                 Cancelled = $false
             }
         } else {
-            Write-StartupLog "User cancelled installation" "INFO"
+            Write-StartupLog "User cancelled download" "INFO"
             return @{
-                InstallationType = ""
-                InstallDirectory = ""
+                DownloadType = ""
+                DownloadDirectory = ""
                 Cancelled = $true
             }
         }
     } else {
         # Console fallback
         Write-Host ""
-        Write-Host "=== Installation Options ===" -ForegroundColor Cyan
-        Write-Host "1. Full Installation (Recommended) - All files including Modules.zip"
-        Write-Host "2. Scripts and Documentation Only - No Modules.zip"
-        Write-Host "3. Custom Installation - Choose components"
+        Write-Host "=== Download Options ===" -ForegroundColor Cyan
+        Write-Host "1. Full Download (Recommended) - All files including PowerCLI modules"
+        Write-Host "2. Scripts and Documentation Only - No PowerCLI modules"
+        Write-Host "3. Custom Download - Choose components"
         Write-Host ""
         
-        $choice = Read-Host "Select installation type (1, 2, or 3)"
-        $installDir = Read-Host "Installation directory (default: $env:USERPROFILE\VMware-Tools)"
+        $choice = Read-Host "Select download type (1, 2, or 3)"
+        $downloadDir = Read-Host "Download directory (default: $env:USERPROFILE\VMware-Tools)"
         
-        if ([string]::IsNullOrWhiteSpace($installDir)) {
-            $installDir = Join-Path $env:USERPROFILE "VMware-Tools"
+        if ([string]::IsNullOrWhiteSpace($downloadDir)) {
+            $downloadDir = Join-Path $env:USERPROFILE "VMware-Tools"
         }
         
-        $installationType = switch ($choice) {
+        $downloadType = switch ($choice) {
             "1" { "Full" }
             "2" { "Scripts" }
             "3" { "Custom" }
             default { "Full" }
         }
         
-        Write-StartupLog "User selected installation type: $installationType" "INFO"
+        Write-StartupLog "User selected download type: $downloadType" "INFO"
         
         return @{
-            InstallationType = $installationType
-            InstallDirectory = $installDir
+            DownloadType = $downloadType
+            DownloadDirectory = $downloadDir
             Cancelled = $false
         }
     }
 }
 
-function Start-Installation {
+function Download-GitHubFile {
     param(
-        [string]$InstallationType,
-        [string]$InstallDirectory
+        [string]$GitHubRawUrl,
+        [string]$FilePath,
+        [string]$LocalPath
     )
     
-    Write-StartupLog "Starting $InstallationType installation to $InstallDirectory" "INFO" -ToConsole
-    
-    # Create installation directory
     try {
-        if (-not (Test-Path $InstallDirectory)) {
-            New-Item -Path $InstallDirectory -ItemType Directory -Force | Out-Null
-            Write-Host "✅ Created installation directory: $InstallDirectory" -ForegroundColor Green
+        $url = "$GitHubRawUrl/$FilePath"
+        Write-StartupLog "Downloading: $url" "INFO"
+        
+        # Create directory if it doesn't exist
+        $localDir = Split-Path $LocalPath -Parent
+        if (-not (Test-Path $localDir)) {
+            New-Item -Path $localDir -ItemType Directory -Force | Out-Null
+        }
+        
+        # Download file with proper encoding
+        Invoke-WebRequest -Uri $url -OutFile $LocalPath -UseBasicParsing -ErrorAction Stop
+        
+        # Verify file was downloaded and has content
+        if ((Test-Path $LocalPath) -and (Get-Item $LocalPath).Length -gt 0) {
+            Write-StartupLog "Successfully downloaded: $FilePath" "SUCCESS"
+            return $true
+        } else {
+            Write-StartupLog "Downloaded file is empty or missing: $FilePath" "ERROR"
+            return $false
         }
     } catch {
-        Write-Host "❌ Failed to create installation directory: $($_.Exception.Message)" -ForegroundColor Red
-        Write-StartupLog "Failed to create installation directory: $($_.Exception.Message)" "ERROR"
+        Write-StartupLog "Failed to download $FilePath`: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function Combine-SplitZipFiles {
+    param(
+        [string]$BaseDirectory,
+        [string]$BaseFileName
+    )
+    
+    try {
+        Write-StartupLog "Combining split zip files for $BaseFileName" "INFO"
+        
+        # Find all split files
+        $splitFiles = Get-ChildItem -Path $BaseDirectory -Filter "$BaseFileName.*" | Sort-Object Name
+        
+        if ($splitFiles.Count -eq 0) {
+            Write-StartupLog "No split files found for $BaseFileName" "WARN"
+            return $false
+        }
+        
+        $outputFile = Join-Path $BaseDirectory "$BaseFileName"
+        
+        # Combine files
+        $outputStream = [System.IO.File]::Create($outputFile)
+        try {
+            foreach ($file in $splitFiles) {
+                Write-StartupLog "Processing split file: $($file.Name)" "INFO"
+                $inputStream = [System.IO.File]::OpenRead($file.FullName)
+                try {
+                    $inputStream.CopyTo($outputStream)
+                } finally {
+                    $inputStream.Close()
+                }
+            }
+        } finally {
+            $outputStream.Close()
+        }
+        
+        Write-StartupLog "Successfully combined split files into: $outputFile" "SUCCESS"
+        return $true
+    } catch {
+        Write-StartupLog "Failed to combine split files: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function Start-Download {
+    param(
+        [string]$DownloadType,
+        [string]$DownloadDirectory
+    )
+    
+    Write-StartupLog "Starting $DownloadType download to $DownloadDirectory" "INFO" -ToConsole
+    
+    # Create download directory structure
+    try {
+        if (-not (Test-Path $DownloadDirectory)) {
+            New-Item -Path $DownloadDirectory -ItemType Directory -Force | Out-Null
+            Write-Host "✅ Created download directory: $DownloadDirectory" -ForegroundColor Green
+        }
+        
+        # Create necessary subdirectories
+        $subDirectories = @("Documentation", "Documentation/Security", "Logs", "Modules", "Tools", "Scripts")
+        foreach ($subDir in $subDirectories) {
+            $fullPath = Join-Path $DownloadDirectory $subDir
+            if (-not (Test-Path $fullPath)) {
+                New-Item -Path $fullPath -ItemType Directory -Force | Out-Null
+                Write-Host "✅ Created directory: $subDir" -ForegroundColor Green
+            }
+        }
+    } catch {
+        Write-Host "❌ Failed to create directory structure: $($_.Exception.Message)" -ForegroundColor Red
+        Write-StartupLog "Failed to create directory structure: $($_.Exception.Message)" "ERROR"
         return $false
     }
     
@@ -416,7 +504,7 @@ function Start-Installation {
     
     if ($script:HasGUI) {
         $progressForm = New-Object System.Windows.Forms.Form -Property @{
-            Text = "Installing VMware vCenter Password Management Tool"
+            Text = "Downloading VMware vCenter Password Management Tool"
             Size = New-Object System.Drawing.Size(600, 200)
             StartPosition = "CenterScreen"
             FormBorderStyle = "FixedDialog"
@@ -428,7 +516,7 @@ function Start-Installation {
         $font = New-Object System.Drawing.Font("Segoe UI", 10)
         
         $statusLabel = New-Object System.Windows.Forms.Label -Property @{
-            Text = "Preparing installation..."
+            Text = "Preparing download..."
             Location = New-Object System.Drawing.Point(20, 20)
             Size = New-Object System.Drawing.Size(550, 30)
             Font = $font
@@ -444,7 +532,7 @@ function Start-Installation {
         $progressForm.Controls.Add($progressBar)
         
         $detailsLabel = New-Object System.Windows.Forms.Label -Property @{
-            Text = "Please wait while the installation completes..."
+            Text = "Please wait while the download completes..."
             Location = New-Object System.Drawing.Point(20, 100)
             Size = New-Object System.Drawing.Size(550, 50)
             Font = New-Object System.Drawing.Font("Segoe UI", 9)
@@ -457,94 +545,95 @@ function Start-Installation {
         $progressForm.Refresh()
     }
     
-    # Define installation steps
-    $installationSteps = @()
+    # Define files to download
+    $filesToDownload = @()
     
-    switch ($InstallationType) {
+    switch ($DownloadType) {
         "Full" {
-            $installationSteps = @(
-                @{ Name = "Main script"; File = "VMware-Vcenter-Password-Management.ps1"; Required = $true },
-                @{ Name = "Documentation"; File = "README.md"; Required = $true },
-                @{ Name = "Security documentation"; File = "Documentation/Security/*"; Required = $true },
-                @{ Name = "Tools and scripts"; File = "Tools/*"; Required = $true },
-                @{ Name = "PowerCLI modules"; File = "Modules.zip"; Required = $true },
-                @{ Name = "Getting started guide"; File = "Documentation/GETTING-STARTED.md"; Required = $true },
-                @{ Name = "GitHub workflows"; File = ".github/workflows/*"; Required = $false }
+            $filesToDownload = @(
+                @{ Name = "Main script"; GitHubPath = "VMware-Vcenter-Password-Management.ps1"; LocalPath = "VMware-Vcenter-Password-Management.ps1"; Required = $true },
+                @{ Name = "Startup script"; GitHubPath = "Startup-Script.ps1"; LocalPath = "Startup-Script.ps1"; Required = $true },
+                @{ Name = "README documentation"; GitHubPath = "README.md"; LocalPath = "README.md"; Required = $true },
+                @{ Name = "Getting started guide"; GitHubPath = "Documentation/GETTING-STARTED.md"; LocalPath = "Documentation/GETTING-STARTED.md"; Required = $true },
+                @{ Name = "Security documentation"; GitHubPath = "Documentation/Security/SECURITY.md"; LocalPath = "Documentation/Security/SECURITY.md"; Required = $true },
+                @{ Name = "Workflow diagrams"; GitHubPath = "Documentation/WORKFLOW-DIAGRAM.md"; LocalPath = "Documentation/WORKFLOW-DIAGRAM.md"; Required = $true },
+                @{ Name = "Hosts configuration"; GitHubPath = "hosts.txt"; LocalPath = "hosts.txt"; Required = $true },
+                @{ Name = "Users configuration"; GitHubPath = "users.txt"; LocalPath = "users.txt"; Required = $true },
+                @{ Name = "License file"; GitHubPath = "LICENSE"; LocalPath = "LICENSE"; Required = $true },
+                @{ Name = "PowerCLI Module 1"; GitHubPath = "Modules/PowerCLI-Modules.zip.001"; LocalPath = "Modules/PowerCLI-Modules.zip.001"; Required = $true },
+                @{ Name = "PowerCLI Module 2"; GitHubPath = "Modules/PowerCLI-Modules.zip.002"; LocalPath = "Modules/PowerCLI-Modules.zip.002"; Required = $true },
+                @{ Name = "PowerCLI Module 3"; GitHubPath = "Modules/PowerCLI-Modules.zip.003"; LocalPath = "Modules/PowerCLI-Modules.zip.003"; Required = $true },
+                @{ Name = "PowerCLI Module 4"; GitHubPath = "Modules/PowerCLI-Modules.zip.004"; LocalPath = "Modules/PowerCLI-Modules.zip.004"; Required = $true }
             )
         }
         "Scripts" {
-            $installationSteps = @(
-                @{ Name = "Main script"; File = "VMware-Vcenter-Password-Management.ps1"; Required = $true },
-                @{ Name = "Documentation"; File = "README.md"; Required = $true },
-                @{ Name = "Security documentation"; File = "Documentation/Security/*"; Required = $true },
-                @{ Name = "Tools and scripts"; File = "Tools/*"; Required = $true },
-                @{ Name = "Getting started guide"; File = "Documentation/GETTING-STARTED.md"; Required = $true }
+            $filesToDownload = @(
+                @{ Name = "Main script"; GitHubPath = "VMware-Vcenter-Password-Management.ps1"; LocalPath = "VMware-Vcenter-Password-Management.ps1"; Required = $true },
+                @{ Name = "Startup script"; GitHubPath = "Startup-Script.ps1"; LocalPath = "Startup-Script.ps1"; Required = $true },
+                @{ Name = "README documentation"; GitHubPath = "README.md"; LocalPath = "README.md"; Required = $true },
+                @{ Name = "Getting started guide"; GitHubPath = "Documentation/GETTING-STARTED.md"; LocalPath = "Documentation/GETTING-STARTED.md"; Required = $true },
+                @{ Name = "Security documentation"; GitHubPath = "Documentation/Security/SECURITY.md"; LocalPath = "Documentation/Security/SECURITY.md"; Required = $true },
+                @{ Name = "Workflow diagrams"; GitHubPath = "Documentation/WORKFLOW-DIAGRAM.md"; LocalPath = "Documentation/WORKFLOW-DIAGRAM.md"; Required = $true },
+                @{ Name = "Hosts configuration"; GitHubPath = "hosts.txt"; LocalPath = "hosts.txt"; Required = $true },
+                @{ Name = "Users configuration"; GitHubPath = "users.txt"; LocalPath = "users.txt"; Required = $true },
+                @{ Name = "License file"; GitHubPath = "LICENSE"; LocalPath = "LICENSE"; Required = $true }
             )
         }
         "Custom" {
             # For demo purposes, use Scripts configuration
-            $installationSteps = @(
-                @{ Name = "Main script"; File = "VMware-Vcenter-Password-Management.ps1"; Required = $true },
-                @{ Name = "Documentation"; File = "README.md"; Required = $true },
-                @{ Name = "Tools and scripts"; File = "Tools/*"; Required = $true }
+            $filesToDownload = @(
+                @{ Name = "Main script"; GitHubPath = "VMware-Vcenter-Password-Management.ps1"; LocalPath = "VMware-Vcenter-Password-Management.ps1"; Required = $true },
+                @{ Name = "README documentation"; GitHubPath = "README.md"; LocalPath = "README.md"; Required = $true },
+                @{ Name = "Hosts configuration"; GitHubPath = "hosts.txt"; LocalPath = "hosts.txt"; Required = $true },
+                @{ Name = "Users configuration"; GitHubPath = "users.txt"; LocalPath = "users.txt"; Required = $true }
             )
         }
     }
     
     if ($progressBar) {
-        $progressBar.Maximum = $installationSteps.Count
+        $progressBar.Maximum = $filesToDownload.Count
         $progressBar.Value = 0
     }
     
     $successCount = 0
     $failureCount = 0
     
-    # Simulate installation process
-    foreach ($step in $installationSteps) {
+    # Download files from GitHub
+    foreach ($file in $filesToDownload) {
         if ($statusLabel) {
-            $statusLabel.Text = "Installing: $($step.Name)"
+            $statusLabel.Text = "Downloading: $($file.Name)"
             $statusLabel.Refresh()
         }
         
-        Write-Host "Installing: $($step.Name)" -ForegroundColor Cyan
-        Write-StartupLog "Installing component: $($step.Name)" "INFO"
+        Write-Host "Downloading: $($file.Name)" -ForegroundColor Cyan
+        Write-StartupLog "Downloading file: $($file.Name)" "INFO"
         
         try {
-            # Simulate download and installation
-            Start-Sleep -Milliseconds 1500
+            $localFilePath = Join-Path $DownloadDirectory $file.LocalPath
+            $downloadSuccess = Download-GitHubFile -GitHubRawUrl $script:GitHubRawUrl -FilePath $file.GitHubPath -LocalPath $localFilePath
             
-            # Create placeholder files/directories
-            $targetPath = Join-Path $InstallDirectory $step.File
-            $targetDir = Split-Path $targetPath -Parent
-            
-            if (-not (Test-Path $targetDir)) {
-                New-Item -Path $targetDir -ItemType Directory -Force | Out-Null
-            }
-            
-            if ($step.File.EndsWith("*")) {
-                # Create directory structure
-                $baseDir = $step.File.Replace("/*", "")
-                $fullDir = Join-Path $InstallDirectory $baseDir
-                if (-not (Test-Path $fullDir)) {
-                    New-Item -Path $fullDir -ItemType Directory -Force | Out-Null
-                }
+            if ($downloadSuccess) {
+                Write-Host "✅ $($file.Name) downloaded successfully" -ForegroundColor Green
+                Write-StartupLog "File downloaded successfully: $($file.Name)" "SUCCESS"
+                $successCount++
             } else {
-                # Create placeholder file
-                "# $($step.Name) - Downloaded by startup script on $(Get-Date)" | Set-Content -Path $targetPath
+                if ($file.Required) {
+                    Write-Host "❌ Failed to download required file: $($file.Name)" -ForegroundColor Red
+                    Write-StartupLog "Failed to download required file: $($file.Name)" "ERROR"
+                    $failureCount++
+                } else {
+                    Write-Host "⚠️ Optional file download failed: $($file.Name)" -ForegroundColor Yellow
+                    Write-StartupLog "Optional file download failed: $($file.Name)" "WARN"
+                }
             }
-            
-            Write-Host "✅ $($step.Name) installed successfully" -ForegroundColor Green
-            Write-StartupLog "Component installed successfully: $($step.Name)" "SUCCESS"
-            $successCount++
-            
         } catch {
-            if ($step.Required) {
-                Write-Host "❌ Failed to install $($step.Name): $($_.Exception.Message)" -ForegroundColor Red
-                Write-StartupLog "Failed to install required component $($step.Name): $($_.Exception.Message)" "ERROR"
+            if ($file.Required) {
+                Write-Host "❌ Failed to download $($file.Name): $($_.Exception.Message)" -ForegroundColor Red
+                Write-StartupLog "Failed to download required file $($file.Name): $($_.Exception.Message)" "ERROR"
                 $failureCount++
             } else {
-                Write-Host "⚠️ Optional component $($step.Name) failed: $($_.Exception.Message)" -ForegroundColor Yellow
-                Write-StartupLog "Optional component failed $($step.Name): $($_.Exception.Message)" "WARN"
+                Write-Host "⚠️ Optional file $($file.Name) failed: $($_.Exception.Message)" -ForegroundColor Yellow
+                Write-StartupLog "Optional file failed $($file.Name): $($_.Exception.Message)" "WARN"
             }
         }
         
@@ -554,7 +643,54 @@ function Start-Installation {
         }
     }
     
-    # Create additional required files
+    # Handle PowerCLI modules if downloaded
+    if ($DownloadType -eq "Full") {
+        if ($statusLabel) {
+            $statusLabel.Text = "Processing PowerCLI modules..."
+            $statusLabel.Refresh()
+        }
+        
+        Write-Host "Processing PowerCLI modules..." -ForegroundColor Cyan
+        
+        $modulesDir = Join-Path $DownloadDirectory "Modules"
+        $combineSuccess = Combine-SplitZipFiles -BaseDirectory $modulesDir -BaseFileName "PowerCLI-Modules.zip"
+        
+        if ($combineSuccess) {
+            Write-Host "✅ PowerCLI modules combined successfully" -ForegroundColor Green
+            Write-StartupLog "PowerCLI modules combined successfully" "SUCCESS"
+            
+            # Extract the combined zip file
+            try {
+                $zipFile = Join-Path $modulesDir "PowerCLI-Modules.zip"
+                $extractPath = Join-Path $modulesDir "VMware.PowerCLI"
+                
+                if (Test-Path $zipFile) {
+                    Write-Host "Extracting PowerCLI modules..." -ForegroundColor Cyan
+                    Expand-Archive -Path $zipFile -DestinationPath $modulesDir -Force
+                    
+                    # Rename the extracted folder if needed
+                    $extractedFolder = Get-ChildItem -Path $modulesDir -Directory | Where-Object { $_.Name -like "*PowerCLI*" -and $_.Name -ne "VMware.PowerCLI" } | Select-Object -First 1
+                    if ($extractedFolder -and $extractedFolder.Name -ne "VMware.PowerCLI") {
+                        $oldPath = $extractedFolder.FullName
+                        $newPath = Join-Path $modulesDir "VMware.PowerCLI"
+                        if (Test-Path $newPath) {
+                            Remove-Item -Path $newPath -Recurse -Force
+                        }
+                        Rename-Item -Path $oldPath -NewName "VMware.PowerCLI"
+                        Write-Host "✅ PowerCLI modules extracted and renamed" -ForegroundColor Green
+                    }
+                }
+            } catch {
+                Write-Host "⚠️ Failed to extract PowerCLI modules: $($_.Exception.Message)" -ForegroundColor Yellow
+                Write-StartupLog "Failed to extract PowerCLI modules: $($_.Exception.Message)" "WARN"
+            }
+        } else {
+            Write-Host "⚠️ Failed to combine PowerCLI modules" -ForegroundColor Yellow
+            Write-StartupLog "Failed to combine PowerCLI modules" "WARN"
+        }
+    }
+    
+    # Create additional configuration files
     if ($statusLabel) {
         $statusLabel.Text = "Creating configuration files..."
         $statusLabel.Refresh()
@@ -562,8 +698,13 @@ function Start-Installation {
     
     Write-Host "Creating configuration files..." -ForegroundColor Cyan
     
-    # Create hosts.txt
-    $hostsContent = @"
+    # Only create config files if they don't exist (don't overwrite downloaded ones)
+    $hostsFile = Join-Path $DownloadDirectory "hosts.txt"
+    $usersFile = Join-Path $DownloadDirectory "users.txt"
+    
+    if (-not (Test-Path $hostsFile)) {
+        # Create hosts.txt
+        $hostsContent = @"
 # ESXi Hosts Configuration
 # Add your ESXi host IP addresses or FQDNs below
 # One host per line, comments start with #
@@ -574,10 +715,12 @@ function Start-Installation {
 # esxi-host-01.domain.local
 # esxi-host-02.domain.local
 "@
-    $hostsContent | Set-Content -Path (Join-Path $InstallDirectory "hosts.txt")
+        $hostsContent | Set-Content -Path $hostsFile
+    }
     
-    # Create users.txt
-    $usersContent = @"
+    if (-not (Test-Path $usersFile)) {
+        # Create users.txt
+        $usersContent = @"
 # Target Users Configuration
 # Add usernames that can be targeted for password changes
 # One username per line, comments start with #
@@ -587,20 +730,21 @@ root
 # admin
 # serviceaccount
 "@
-    $usersContent | Set-Content -Path (Join-Path $InstallDirectory "users.txt")
+        $usersContent | Set-Content -Path $usersFile
+    }
     
     # Create desktop shortcut if on Windows
     if ($script:IsWindowsPlatform) {
         try {
             $desktopPath = [Environment]::GetFolderPath("Desktop")
             $shortcutPath = Join-Path $desktopPath "VMware vCenter Password Management.lnk"
-            $targetPath = Join-Path $InstallDirectory "VMware-Vcenter-Password-Management.ps1"
+            $targetPath = Join-Path $DownloadDirectory "VMware-Vcenter-Password-Management.ps1"
             
             $shell = New-Object -ComObject WScript.Shell
             $shortcut = $shell.CreateShortcut($shortcutPath)
             $shortcut.TargetPath = "powershell.exe"
             $shortcut.Arguments = "-ExecutionPolicy Bypass -File `"$targetPath`""
-            $shortcut.WorkingDirectory = $InstallDirectory
+            $shortcut.WorkingDirectory = $DownloadDirectory
             $shortcut.Description = "VMware vCenter Password Management Tool - DoD Compliant Edition"
             $shortcut.Save()
             
@@ -617,17 +761,17 @@ root
         $progressForm.Close()
     }
     
-    # Installation summary
+    # Download summary
     Write-Host ""
-    Write-Host "=== Installation Complete ===" -ForegroundColor Green
-    Write-Host "Installation Directory: $InstallDirectory" -ForegroundColor Cyan
-    Write-Host "Components Installed: $successCount" -ForegroundColor Green
-    Write-Host "Failed Components: $failureCount" -ForegroundColor $(if ($failureCount -gt 0) { "Red" } else { "Green" })
+    Write-Host "=== Download Complete ===" -ForegroundColor Green
+    Write-Host "Download Directory: $DownloadDirectory" -ForegroundColor Cyan
+    Write-Host "Files Downloaded: $successCount" -ForegroundColor Green
+    Write-Host "Failed Downloads: $failureCount" -ForegroundColor $(if ($failureCount -gt 0) { "Red" } else { "Green" })
     
-    if ($InstallationType -eq "Full") {
-        Write-Host "Modules.zip: Included (PowerCLI modules for offline use)" -ForegroundColor Green
+    if ($DownloadType -eq "Full") {
+        Write-Host "PowerCLI Modules: Included (split zip files combined and extracted)" -ForegroundColor Green
     } else {
-        Write-Host "Modules.zip: Not included (install PowerCLI separately)" -ForegroundColor Yellow
+        Write-Host "PowerCLI Modules: Not included (install PowerCLI separately)" -ForegroundColor Yellow
     }
     
     Write-Host ""
@@ -640,22 +784,22 @@ root
         Write-Host "4. Use the desktop shortcut for easy access" -ForegroundColor White
     }
     
-    Write-StartupLog "Installation completed: $successCount successes, $failureCount failures" "INFO"
+    Write-StartupLog "Download completed: $successCount successes, $failureCount failures" "INFO"
     
     # Show completion dialog
     if ($script:HasGUI) {
-        $completionMessage = "Installation completed successfully!`n`nInstallation Directory: $InstallDirectory`nComponents Installed: $successCount`n`nNext steps:`n1. Edit hosts.txt with your ESXi hosts`n2. Run the main script to begin`n`nWould you like to open the installation directory now?"
+        $completionMessage = "Download completed successfully!`n`nDownload Directory: $DownloadDirectory`nFiles Downloaded: $successCount`n`nNext steps:`n1. Edit hosts.txt with your ESXi hosts`n2. Run the main script to begin`n`nWould you like to open the download directory now?"
         
         $result = [System.Windows.Forms.MessageBox]::Show(
             $completionMessage,
-            "Installation Complete",
+            "Download Complete",
             [System.Windows.Forms.MessageBoxButtons]::YesNo,
             [System.Windows.Forms.MessageBoxIcon]::Information
         )
         
         if ($result -eq [System.Windows.Forms.DialogResult]::Yes) {
             try {
-                Invoke-Item $InstallDirectory
+                Invoke-Item $DownloadDirectory
             } catch {
                 Write-Host "Could not open directory: $($_.Exception.Message)" -ForegroundColor Yellow
             }
@@ -714,30 +858,30 @@ function Start-StartupScript {
         }
     }
     
-    # Show installation options
+    # Show download options
     Write-Host ""
-    Write-Host "=== Installation Options ===" -ForegroundColor Cyan
-    $installOptions = Show-InstallationOptions
+    Write-Host "=== Download Options ===" -ForegroundColor Cyan
+    $downloadOptions = Show-DownloadOptions
     
-    if ($installOptions.Cancelled) {
-        Write-Host "Installation cancelled by user" -ForegroundColor Yellow
-        Write-StartupLog "Installation cancelled by user" "INFO"
+    if ($downloadOptions.Cancelled) {
+        Write-Host "Download cancelled by user" -ForegroundColor Yellow
+        Write-StartupLog "Download cancelled by user" "INFO"
         return
     }
     
-    # Start installation
+    # Start download
     Write-Host ""
-    Write-Host "=== Starting Installation ===" -ForegroundColor Cyan
-    $installSuccess = Start-Installation -InstallationType $installOptions.InstallationType -InstallDirectory $installOptions.InstallDirectory
+    Write-Host "=== Starting Download from GitHub ===" -ForegroundColor Cyan
+    $downloadSuccess = Start-Download -DownloadType $downloadOptions.DownloadType -DownloadDirectory $downloadOptions.DownloadDirectory
     
-    if ($installSuccess) {
+    if ($downloadSuccess) {
         Write-Host ""
-        Write-Host "🎉 Installation completed successfully!" -ForegroundColor Green
+        Write-Host "🎉 Download completed successfully!" -ForegroundColor Green
         Write-Host "The VMware vCenter Password Management Tool is ready to use." -ForegroundColor Green
         Write-StartupLog "Startup script completed successfully" "SUCCESS"
     } else {
         Write-Host ""
-        Write-Host "⚠️ Installation completed with some issues." -ForegroundColor Yellow
+        Write-Host "⚠️ Download completed with some issues." -ForegroundColor Yellow
         Write-Host "Check the log file for details: $script:LogFilePath" -ForegroundColor Yellow
         Write-StartupLog "Startup script completed with issues" "WARN"
     }
