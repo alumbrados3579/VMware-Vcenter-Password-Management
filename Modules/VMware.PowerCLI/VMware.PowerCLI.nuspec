@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>VMware.PowerCLI</id>
+    <version>13.3.0.24145083</version>
+    <authors>Broadcom</authors>
+    <owners>Broadcom, Inc.</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <projectUrl>https://developer.broadcom.com/powercli</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/vmware/PowerCLI-Example-Scripts/1710f7ccbdd9fe9a3ab3f000e920fa6e8e042c63/resources/powercli-psgallery-icon.svg</iconUrl>
+    <description>This module is deprecated. Please use the module VCF.PowerCLI instead. For more information, see https://developer.broadcom.com/powercli/installation-guide</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright (c) Broadcom. All Rights Reserved.</copyright>
+    <tags>PSModule</tags>
+    <dependencies>
+      <dependency id="VMware.VimAutomation.Sdk" version="[13.3.0.24145081]" />
+      <dependency id="VMware.VimAutomation.Common" version="[13.3.0.24145081]" />
+      <dependency id="VMware.Vim" version="[8.3.0.24145081]" />
+      <dependency id="VMware.VimAutomation.Cis.Core" version="[13.3.0.24145081]" />
+      <dependency id="VMware.VimAutomation.Core" version="[13.3.0.24145081]" />
+      <dependency id="VMware.VimAutomation.Storage" version="[13.3.0.24145081]" />
+      <dependency id="VMware.VimAutomation.Srm" version="[13.3.0.24145081]" />
+      <dependency id="VMware.VimAutomation.License" version="[13.3.0.24145081]" />
+      <dependency id="VMware.VimAutomation.Vds" version="[13.3.0.24145081]" />
+      <dependency id="VMware.CloudServices" version="[13.3.0.24145081]" />
+      <dependency id="VMware.VimAutomation.Vmc" version="[13.3.0.24145081]" />
+      <dependency id="VMware.VimAutomation.Nsxt" version="[13.3.0.24145081]" />
+      <dependency id="VMware.VimAutomation.vROps" version="[13.3.0.24145081]" />
+      <dependency id="VMware.VimAutomation.Cloud" version="[13.3.0.24145081]" />
+      <dependency id="VMware.ImageBuilder" version="[13.3.0.24145081]" />
+      <dependency id="VMware.DeployAutomation" version="[13.3.0.24145081]" />
+      <dependency id="VMware.VimAutomation.StorageUtility" version="[1.6.0]" />
+      <dependency id="VMware.VumAutomation" version="[13.3.0.24145081]" />
+      <dependency id="VMware.VimAutomation.Security" version="[13.3.0.24145081]" />
+      <dependency id="VMware.VimAutomation.Hcx" version="[13.3.0.24145081]" />
+      <dependency id="VMware.VimAutomation.WorkloadManagement" version="[13.3.0.24145081]" />
+      <dependency id="VMware.Sdk.Runtime" version="[1.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphereRuntime" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.Appliance" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.Appliance.Access" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.Appliance.Health" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.Appliance.InfraProfile" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.Appliance.LocalAccounts" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.Appliance.Logging" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.Appliance.Networking" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.Appliance.Recovery" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.Appliance.SupportBundle" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.Appliance.System" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.Appliance.Tls" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.Appliance.Update" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.Cis" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.Cis.Tagging" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.Content" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.ContentLibrary" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.Esx.Hcl" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.Esx.Hosts" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.Esx.Settings" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.SnapService" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.VAPI.Metadata" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.vCenter" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.vCenter.Authentication" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.vCenter.Authorization" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.vCenter.CertManagement" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.vCenter.ConsumptionDomains" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.vCenter.Content" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.vCenter.Datastore" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.vCenter.Deployment" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.vCenter.Guest" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.vCenter.HVC" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.vCenter.Identity" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.vCenter.Inventory" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.vCenter.ISO" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.vCenter.LCM" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.vCenter.NamespaceManagement" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.vCenter.Namespaces" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.vCenter.OVF" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.vCenter.Services" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.vCenter.Storage" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.vCenter.SystemConfig" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.vCenter.Tagging" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.vCenter.Topology" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.vCenter.TrustedInfrastructure" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.vCenter.VCHA" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.vCenter.Vm" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.vCenter.VmTemplate" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere.vStats" version="[8.0.2099.24145081]" />
+      <dependency id="VMware.Sdk.vSphere" version="[13.3.2099.24145081]" />
+      <dependency id="VMware.PowerCLI.Sdk.Types" version="[13.3.0.24145081]" />
+      <dependency id="VMware.PowerCLI.Sdk" version="[13.3.0.24145081]" />
+      <dependency id="VMware.PowerCLI.VCenter.Types.ApplianceService" version="[13.3.0.24145081]" />
+      <dependency id="VMware.PowerCLI.VCenter.Types.CertificateManagement" version="[13.3.0.24145081]" />
+      <dependency id="VMware.PowerCLI.VCenter" version="[13.3.0.24145081]" />
+      <dependency id="VMware.Sdk.Nsx.Policy" version="[13.3.0.24145081]" />
+      <dependency id="VMware.Sdk.Srm" version="[13.3.0.24145081]" />
+      <dependency id="VMware.Sdk.Vr" version="[13.3.0.24145081]" />
+      <dependency id="VMware.Sdk.Vcf.CloudBuilder" version="[13.3.0.24145081]" />
+      <dependency id="VMware.Sdk.Vcf.SddcManager" version="[13.3.0.24145081]" />
+    </dependencies>
+  </metadata>
+</package>
