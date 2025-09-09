@@ -1087,7 +1087,7 @@ function Execute-PasswordChangeHandler {
         } catch {
             $LogsTextBox.AppendText("$(Get-Date -Format 'HH:mm:ss') - ERROR: Failed to process host '$hostName': $($_.Exception.Message)`r`n")
             $failureCount++
-            Write-VerboseLog "Password change failed for host $hostName: $($_.Exception.Message)" "ERROR"
+            Write-VerboseLog "Password change failed for host ${hostName}: $($_.Exception.Message)" "ERROR"
         }
         
         $ProgressBar.Value++
