@@ -22,7 +22,13 @@ $script:StartupRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Pa
 $script:ToolName = "VMware-Vcenter-Password-Management"
 $script:GitHubRepo = "https://github.com/alumbrados3579/VMware-Vcenter-Password-Management"
 $script:GitHubRawUrl = "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main"
-$script:LogFilePath = Join-Path $script:StartupRoot "startup_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
+$script:LogsPath = Join-Path $script:StartupRoot "Logs"
+$script:LogFilePath = Join-Path $script:LogsPath "startup_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
+
+# Ensure Logs directory exists
+if (-not (Test-Path $script:LogsPath)) {
+    New-Item -Path $script:LogsPath -ItemType Directory -Force | Out-Null
+}
 
 # Platform detection
 $script:IsWindowsPlatform = ($PSVersionTable.PSVersion.Major -le 5) -or (Get-Variable -Name 'IsWindows' -ErrorAction SilentlyContinue -ValueOnly)
@@ -483,7 +489,7 @@ function Start-Download {
         }
         
         # Create necessary subdirectories
-        $subDirectories = @("Documentation", "Documentation/Security", "Logs", "Modules", "Tools", "Scripts")
+        $subDirectories = @("Documentation", "Documentation/Security", "Logs", "Modules")
         foreach ($subDir in $subDirectories) {
             $fullPath = Join-Path $DownloadDirectory $subDir
             if (-not (Test-Path $fullPath)) {

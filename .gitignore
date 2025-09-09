@@ -1,9 +1,10 @@
 # VMware vCenter Password Management Tool - Git Ignore
 
-# Logs
+# Logs (all logs go in Logs directory)
 Logs/*.log
+Logs/startup_*.log
+Logs/vcenter_password_manager_*.log
 *.log
-startup_*.log
 
 # Temporary files
 *.tmp

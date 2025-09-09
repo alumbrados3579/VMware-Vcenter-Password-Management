@@ -243,8 +243,8 @@ The application provides two main tabs:
 
 ### Detailed Documentation
 - **Documentation/Security/**: Security implementation details
-- **Documentation/Workflows/**: Detailed workflow documentation
-- **Documentation/Troubleshooting/**: Common issues and solutions
+- **Documentation/WORKFLOW-DIAGRAM.md**: Comprehensive workflow diagrams
+- **Documentation/GETTING-STARTED.md**: Step-by-step getting started guide
 
 ### API Documentation
 - **PowerCLI Integration**: VMware PowerCLI usage and best practices

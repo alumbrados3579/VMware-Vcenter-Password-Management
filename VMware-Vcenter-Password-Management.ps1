@@ -40,6 +40,11 @@ try {
 $script:PSScriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Definition }
 $script:LogsPath = Join-Path $script:PSScriptRoot "Logs"
 $script:LogFilePath = Join-Path $script:LogsPath "vcenter_password_manager_$(Get-Date -Format 'yyyyMMdd').log"
+
+# Ensure Logs directory exists
+if (-not (Test-Path $script:LogsPath)) {
+    New-Item -Path $script:LogsPath -ItemType Directory -Force | Out-Null
+}
 $script:HostsFilePath = Join-Path $script:PSScriptRoot "hosts.txt"
 $script:UsersFilePath = Join-Path $script:PSScriptRoot "users.txt"
 
