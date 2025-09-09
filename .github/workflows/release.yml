@@ -1,0 +1,299 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  create-release:
+    runs-on: windows-latest
+    
+    permissions:
+      contents: write
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup PowerShell
+      uses: microsoft/setup-powershell@v1
+      
+    - name: Determine version
+      id: version
+      shell: pwsh
+      run: |
+        if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+          $version = "${{ github.event.inputs.version }}"
+        } else {
+          $version = "${{ github.ref_name }}"
+        }
+        
+        # Remove 'v' prefix if present
+        $version = $version -replace '^v', ''
+        
+        Write-Host "Release version: $version"
+        echo "version=$version" >> $env:GITHUB_OUTPUT
+        echo "tag=v$version" >> $env:GITHUB_OUTPUT
+        
+    - name: Create release package
+      shell: pwsh
+      run: |
+        $version = "${{ steps.version.outputs.version }}"
+        $packageName = "VMware-vCenter-Password-Management-v$version"
+        
+        Write-Host "Creating release package: $packageName"
+        
+        # Create package directory
+        New-Item -ItemType Directory -Force -Path "release-package"
+        New-Item -ItemType Directory -Force -Path "release-package/$packageName"
+        
+        # Copy main files (excluding Modules.zip as requested)
+        $filesToInclude = @(
+          "VMware-Vcenter-Password-Management.ps1",
+          "Startup-Script.ps1",
+          "README.md",
+          "LICENSE",
+          "hosts.txt",
+          "users.txt"
+        )
+        
+        foreach ($file in $filesToInclude) {
+          if (Test-Path $file) {
+            Copy-Item $file "release-package/$packageName/"
+            Write-Host "Included: $file"
+          } else {
+            Write-Warning "File not found: $file"
+          }
+        }
+        
+        # Copy directories
+        $directoriesToInclude = @(
+          "Documentation",
+          "Tools",
+          "Scripts",
+          ".github"
+        )
+        
+        foreach ($dir in $directoriesToInclude) {
+          if (Test-Path $dir) {
+            Copy-Item $dir "release-package/$packageName/" -Recurse
+            Write-Host "Included directory: $dir"
+          } else {
+            Write-Warning "Directory not found: $dir"
+          }
+        }
+        
+        # Create sample configuration files
+        @"
+# ESXi Hosts Configuration
+# Add your ESXi host IP addresses or FQDNs below
+# One host per line, comments start with #
+
+# Example:
+# 192.168.1.100
+# 192.168.1.101
+# esxi-host-01.domain.local
+# esxi-host-02.domain.local
+"@ | Set-Content "release-package/$packageName/hosts.txt"
+
+        @"
+# Target Users Configuration
+# Add usernames that can be targeted for password changes
+# One username per line, comments start with #
+
+# Common ESXi users:
+root
+# admin
+# serviceaccount
+"@ | Set-Content "release-package/$packageName/users.txt"
+        
+        # Create installation instructions
+        @"
+# VMware vCenter Password Management Tool v$version
+# Installation Instructions
+
+## Quick Start
+1. Extract this package to your desired directory
+2. Edit hosts.txt with your ESXi host addresses
+3. Run VMware-Vcenter-Password-Management.ps1
+
+## Full Installation (with PowerCLI modules)
+1. Run Startup-Script.ps1 for automated installation
+2. Choose 'Full Installation' to include PowerCLI modules
+3. Follow the installation wizard
+
+## Documentation
+- README.md: Comprehensive overview
+- Documentation/GETTING-STARTED.md: Detailed getting started guide
+- Documentation/Security/SECURITY.md: Security implementation details
+
+## Support
+- GitHub Repository: https://github.com/${{ github.repository }}
+- Issues: https://github.com/${{ github.repository }}/issues
+- Documentation: https://github.com/${{ github.repository }}/wiki
+
+Version: $version
+Release Date: $(Get-Date -Format 'yyyy-MM-dd')
+"@ | Set-Content "release-package/$packageName/INSTALLATION.txt"
+        
+        # Create ZIP package
+        Compress-Archive -Path "release-package/$packageName" -DestinationPath "release-package/$packageName.zip"
+        
+        Write-Host "Release package created: $packageName.zip"
+        
+        # Create checksums
+        $hash = Get-FileHash "release-package/$packageName.zip" -Algorithm SHA256
+        "$($hash.Hash)  $packageName.zip" | Set-Content "release-package/$packageName.zip.sha256"
+        
+        Write-Host "SHA256 checksum created"
+        
+    - name: Generate release notes
+      id: release_notes
+      shell: pwsh
+      run: |
+        $version = "${{ steps.version.outputs.version }}"
+        
+        $releaseNotes = @"
+# VMware vCenter Password Management Tool v$version
+
+## 🚀 Release Highlights
+
+This release provides a comprehensive, DoD-compliant solution for managing VMware vCenter and ESXi passwords across multiple hosts.
+
+## ✨ Features
+
+### 🔐 Core Password Management
+- **vCenter Integration**: Connect to VMware vCenter Server for centralized management
+- **Bulk Operations**: Change passwords across multiple ESXi hosts simultaneously
+- **Dry Run Mode**: Test operations safely before making live changes
+- **Live Mode**: Execute real password changes with comprehensive warnings
+- **User Query**: Automatically discover and list users across all ESXi hosts
+
+### 🛡️ Security & Compliance
+- **DoD Compliance**: Government warning banners and audit requirements
+- **Enhanced Security**: Secure credential handling with automatic memory cleanup
+- **Comprehensive Logging**: Verbose logging with credential filtering for audit trails
+- **Multi-Level Warnings**: Progressive authorization prompts for live operations
+
+### 🐙 GitHub Integration
+- **Repository Management**: Push tools to personal GitHub repositories
+- **Selective Upload**: Choose which files to include (Modules.zip excluded)
+- **Version Control**: Download latest versions from GitHub repositories
+- **Token Authentication**: Secure GitHub Personal Access Token authentication
+
+### 📁 Smart Installation
+- **One-Click Setup**: Startup script for automated installation
+- **Selective Downloads**: Choose full installation or scripts-only updates
+- **Local Directory**: No dependency on OneDrive, GPOs, or system installations
+- **Module Management**: Optional PowerCLI module download (Modules.zip)
+
+## 📦 Installation Options
+
+### Option 1: Automated Installation (Recommended)
+``````powershell
+# Download and run the startup script
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/${{ github.repository }}/main/Startup-Script.ps1" -OutFile "Startup-Script.ps1"
+.\Startup-Script.ps1
+``````
+
+### Option 2: Manual Installation
+1. Download the release package below
+2. Extract to your desired directory
+3. Run VMware-Vcenter-Password-Management.ps1
+
+## 🔒 Security Features
+
+- **DoD Warning Banners**: Required government system access warnings
+- **Secure Credential Handling**: No persistent credential storage
+- **Comprehensive Auditing**: Complete audit trail of all operations
+- **Input Validation**: Comprehensive validation and sanitization
+- **Encrypted Communications**: All network traffic encrypted
+
+## 📋 Requirements
+
+- **PowerShell**: 5.1 or later
+- **Operating System**: Windows 10/11 or Windows Server 2016+
+- **VMware PowerCLI**: 12.0+ (can be installed automatically)
+- **Network Access**: Internet connectivity for GitHub operations
+- **Permissions**: Local user permissions (no admin rights required)
+
+## 🔧 What's Included
+
+This release package includes:
+- Main application script
+- Automated startup/installation script
+- Comprehensive documentation
+- Security implementation details
+- Sample configuration files
+- GitHub workflows for CI/CD
+
+**Note**: Modules.zip is not included in this package as requested. Use the startup script for full installation including PowerCLI modules.
+
+## 📚 Documentation
+
+- **README.md**: Comprehensive overview and features
+- **GETTING-STARTED.md**: Step-by-step getting started guide
+- **SECURITY.md**: Detailed security features and compliance information
+- **INSTALLATION.txt**: Quick installation instructions
+
+## 🔍 Verification
+
+**SHA256 Checksum**: See .sha256 file for package verification
+
+## 📞 Support
+
+- **GitHub Repository**: https://github.com/${{ github.repository }}
+- **Issues**: https://github.com/${{ github.repository }}/issues
+- **Documentation**: https://github.com/${{ github.repository }}/wiki
+
+---
+
+**Release Date**: $(Get-Date -Format 'yyyy-MM-dd')
+**Version**: v$version
+**Compatibility**: Windows 10/11, Windows Server 2016+
+"@
+        
+        # Save release notes to file
+        $releaseNotes | Set-Content "release-notes.md"
+        
+        # Output for GitHub Actions (escape newlines)
+        $escapedNotes = $releaseNotes -replace "`r`n", "%0A" -replace "`n", "%0A"
+        echo "notes=$escapedNotes" >> $env:GITHUB_OUTPUT
+        
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.version.outputs.tag }}
+        name: VMware vCenter Password Management Tool ${{ steps.version.outputs.tag }}
+        body_path: release-notes.md
+        files: |
+          release-package/*.zip
+          release-package/*.sha256
+        draft: false
+        prerelease: false
+        
+    - name: Upload release artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-package-${{ steps.version.outputs.version }}
+        path: release-package/
+        
+    - name: Release summary
+      shell: pwsh
+      run: |
+        Write-Host "=== Release Summary ==="
+        Write-Host "Version: ${{ steps.version.outputs.version }}"
+        Write-Host "Tag: ${{ steps.version.outputs.tag }}"
+        Write-Host "Repository: ${{ github.repository }}"
+        Write-Host "Release Date: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')"
+        Write-Host "Package: VMware-vCenter-Password-Management-v${{ steps.version.outputs.version }}.zip"
+        Write-Host "Status: Released"
+        Write-Host ""
+        Write-Host "🎉 Release completed successfully!"

@@ -1,0 +1,13 @@
+# Target Users Configuration
+# Add usernames that can be targeted for password changes
+# One username per line, comments start with #
+
+# Standard ESXi Users:
+root
+# admin
+# serviceaccount
+
+# Custom Users (uncomment and modify as needed):
+# backup_user
+# monitoring_user
+# vmware_admin

@@ -1,0 +1,64 @@
+# VMware vCenter Password Management Tool - Git Ignore
+
+# Logs
+Logs/*.log
+*.log
+startup_*.log
+
+# Temporary files
+*.tmp
+*.temp
+test_write_permissions.tmp
+
+# Sensitive configuration files (keep templates)
+# hosts.txt - Keep template, users should modify
+# users.txt - Keep template, users should modify
+
+# PowerShell module cache
+Modules/
+*.zip
+
+# User-specific files
+.vscode/
+*.code-workspace
+
+# Windows specific
+Thumbs.db
+Desktop.ini
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Security scan results
+security-results/
+
+# Release packages
+release-package/
+
+# Test files
+test-*
+*-test.*
+
+# Personal access tokens or credentials (if accidentally created)
+*.token
+*.key
+.env
+config.json
+
+# PowerShell specific
+*.ps1xml
+
+# IDE files
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db

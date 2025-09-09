@@ -1,0 +1,156 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run security scan daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  security-scan:
+    runs-on: windows-latest
+    
+    permissions:
+      contents: read
+      security-events: write
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup PowerShell
+      uses: microsoft/setup-powershell@v1
+      
+    - name: Install PSScriptAnalyzer
+      shell: pwsh
+      run: |
+        Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser
+        
+    - name: Run PowerShell Script Analysis
+      shell: pwsh
+      run: |
+        $results = Invoke-ScriptAnalyzer -Path . -Recurse -ReportSummary
+        
+        # Create results directory
+        New-Item -ItemType Directory -Force -Path "security-results"
+        
+        # Export results
+        $results | Export-Csv -Path "security-results/pssa-results.csv" -NoTypeInformation
+        
+        # Check for critical issues
+        $criticalIssues = $results | Where-Object { $_.Severity -eq 'Error' }
+        if ($criticalIssues.Count -gt 0) {
+          Write-Host "Critical security issues found:"
+          $criticalIssues | Format-Table
+          exit 1
+        }
+        
+        Write-Host "Security scan completed successfully"
+        
+    - name: Upload security results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: security-scan-results
+        path: security-results/
+        
+    - name: Security Summary
+      shell: pwsh
+      run: |
+        Write-Host "=== Security Scan Summary ==="
+        Write-Host "Repository: ${{ github.repository }}"
+        Write-Host "Branch: ${{ github.ref_name }}"
+        Write-Host "Commit: ${{ github.sha }}"
+        Write-Host "Scan Date: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')"
+        Write-Host "Status: Completed"
+
+  dependency-check:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup PowerShell
+      uses: microsoft/setup-powershell@v1
+      
+    - name: Check PowerShell Module Dependencies
+      shell: pwsh
+      run: |
+        Write-Host "=== Dependency Security Check ==="
+        
+        # Check for required modules
+        $requiredModules = @('VMware.PowerCLI')
+        
+        foreach ($module in $requiredModules) {
+          Write-Host "Checking module: $module"
+          
+          try {
+            $moduleInfo = Find-Module -Name $module -ErrorAction Stop
+            Write-Host "  Version: $($moduleInfo.Version)"
+            Write-Host "  Publisher: $($moduleInfo.Author)"
+            Write-Host "  Status: Available"
+          } catch {
+            Write-Warning "  Status: Not found or error - $($_.Exception.Message)"
+          }
+        }
+        
+        Write-Host "Dependency check completed"
+
+  secrets-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Run TruffleHog OSS
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: main
+        head: HEAD
+        extra_args: --debug --only-verified
+
+  compliance-check:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: DoD Compliance Check
+      shell: pwsh
+      run: |
+        Write-Host "=== DoD Compliance Verification ==="
+        
+        # Check for DoD warning banners
+        $mainScript = Get-Content "VMware-Vcenter-Password-Management.ps1" -Raw
+        $startupScript = Get-Content "Startup-Script.ps1" -Raw
+        
+        $dodWarningPattern = "U\.S\. Government.*Information System"
+        
+        $complianceResults = @{
+          MainScriptWarning = $mainScript -match $dodWarningPattern
+          StartupScriptWarning = $startupScript -match $dodWarningPattern
+          SecurityDocumentation = Test-Path "Documentation/Security/SECURITY.md"
+          AuditLogging = $mainScript -match "Write.*Log"
+        }
+        
+        Write-Host "Compliance Check Results:"
+        $complianceResults.GetEnumerator() | ForEach-Object {
+          $status = if ($_.Value) { "✅ PASS" } else { "❌ FAIL" }
+          Write-Host "  $($_.Key): $status"
+        }
+        
+        # Fail if any compliance check fails
+        $failedChecks = $complianceResults.Values | Where-Object { $_ -eq $false }
+        if ($failedChecks.Count -gt 0) {
+          Write-Error "DoD compliance checks failed"
+          exit 1
+        }
+        
+        Write-Host "✅ All DoD compliance checks passed"
