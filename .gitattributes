@@ -1,9 +1,11 @@
+# Critical scripts should NOT be in LFS for GitHub accessibility
+Startup-Script.ps1 text
+VMware-Vcenter-Password-Management.ps1 text
+
+# Everything else in LFS
 *.zip filter=lfs diff=lfs merge=lfs -text
 *.gitignore filter=lfs diff=lfs merge=lfs -text
-# Critical scripts should NOT be in LFS for GitHub accessibility
-Startup-Script.ps1 -filter -diff -merge text
-VMware-Vcenter-Password-Management.ps1 -filter -diff -merge text
-# Other PowerShell scripts can be in LFS
+*.md filter=lfs diff=lfs merge=lfs -text
 *.ps1 filter=lfs diff=lfs merge=lfs -text
 *.sh filter=lfs diff=lfs merge=lfs -text
 /LICENSE filter=lfs diff=lfs merge=lfs -text
@@ -35,4 +37,3 @@ VMware-Vcenter-Password-Management.ps1 -filter -diff -merge text
 /Modules/VMware.VimAutomation.Core/13.4.0.24798382/net472/Scripts/GuestDiskExpansion_rhel5Guest filter=lfs diff=lfs merge=lfs -text
 /Modules/VMware.VimAutomation.Core/13.4.0.24798382/netcoreapp3.1/Scripts/GuestDiskExpansion_LinuxGuest filter=lfs diff=lfs merge=lfs -text
 /Modules/VMware.VimAutomation.Core/13.4.0.24798382/netcoreapp3.1/Scripts/GuestDiskExpansion_rhel5Guest filter=lfs diff=lfs merge=lfs -text
-*.md filter=lfs diff=lfs merge=lfs -text
