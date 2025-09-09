@@ -430,48 +430,7 @@ function Download-GitHubFile {
     }
 }
 
-function Combine-SplitZipFiles {
-    param(
-        [string]$BaseDirectory,
-        [string]$BaseFileName
-    )
-    
-    try {
-        Write-StartupLog "Combining split zip files for $BaseFileName" "INFO"
-        
-        # Find all split files
-        $splitFiles = Get-ChildItem -Path $BaseDirectory -Filter "$BaseFileName.*" | Sort-Object Name
-        
-        if ($splitFiles.Count -eq 0) {
-            Write-StartupLog "No split files found for $BaseFileName" "WARN"
-            return $false
-        }
-        
-        $outputFile = Join-Path $BaseDirectory "$BaseFileName"
-        
-        # Combine files
-        $outputStream = [System.IO.File]::Create($outputFile)
-        try {
-            foreach ($file in $splitFiles) {
-                Write-StartupLog "Processing split file: $($file.Name)" "INFO"
-                $inputStream = [System.IO.File]::OpenRead($file.FullName)
-                try {
-                    $inputStream.CopyTo($outputStream)
-                } finally {
-                    $inputStream.Close()
-                }
-            }
-        } finally {
-            $outputStream.Close()
-        }
-        
-        Write-StartupLog "Successfully combined split files into: $outputFile" "SUCCESS"
-        return $true
-    } catch {
-        Write-StartupLog "Failed to combine split files: $($_.Exception.Message)" "ERROR"
-        return $false
-    }
-}
+# Note: Combine-SplitZipFiles function removed as PowerCLI modules are now directly available
 
 function Start-Download {
     param(
@@ -565,11 +524,8 @@ function Start-Download {
                 @{ Name = "Workflow diagrams"; GitHubPath = "Documentation/WORKFLOW-DIAGRAM.md"; LocalPath = "Documentation/WORKFLOW-DIAGRAM.md"; Required = $true },
                 @{ Name = "Hosts configuration"; GitHubPath = "hosts.txt"; LocalPath = "hosts.txt"; Required = $true },
                 @{ Name = "Users configuration"; GitHubPath = "users.txt"; LocalPath = "users.txt"; Required = $true },
-                @{ Name = "License file"; GitHubPath = "LICENSE"; LocalPath = "LICENSE"; Required = $true },
-                @{ Name = "PowerCLI Module 1"; GitHubPath = "Modules/PowerCLI-Modules.zip.001"; LocalPath = "Modules/PowerCLI-Modules.zip.001"; Required = $true },
-                @{ Name = "PowerCLI Module 2"; GitHubPath = "Modules/PowerCLI-Modules.zip.002"; LocalPath = "Modules/PowerCLI-Modules.zip.002"; Required = $true },
-                @{ Name = "PowerCLI Module 3"; GitHubPath = "Modules/PowerCLI-Modules.zip.003"; LocalPath = "Modules/PowerCLI-Modules.zip.003"; Required = $true },
-                @{ Name = "PowerCLI Module 4"; GitHubPath = "Modules/PowerCLI-Modules.zip.004"; LocalPath = "Modules/PowerCLI-Modules.zip.004"; Required = $true }
+                @{ Name = "License file"; GitHubPath = "LICENSE"; LocalPath = "LICENSE"; Required = $true }
+                # Note: PowerCLI modules are now directly included in the repository
             )
         }
         "Scripts" {
@@ -649,50 +605,17 @@ function Start-Download {
         }
     }
     
-    # Handle PowerCLI modules if downloaded
+    # PowerCLI modules are now directly available in the Modules directory
     if ($DownloadType -eq "Full") {
-        if ($statusLabel) {
-            $statusLabel.Text = "Processing PowerCLI modules..."
-            $statusLabel.Refresh()
-        }
-        
-        Write-Host "Processing PowerCLI modules..." -ForegroundColor Cyan
-        
         $modulesDir = Join-Path $DownloadDirectory "Modules"
-        $combineSuccess = Combine-SplitZipFiles -BaseDirectory $modulesDir -BaseFileName "PowerCLI-Modules.zip"
+        $powerCLIModules = Get-ChildItem -Path $modulesDir -Directory | Where-Object { $_.Name -like "VMware.*" }
         
-        if ($combineSuccess) {
-            Write-Host "✅ PowerCLI modules combined successfully" -ForegroundColor Green
-            Write-StartupLog "PowerCLI modules combined successfully" "SUCCESS"
-            
-            # Extract the combined zip file
-            try {
-                $zipFile = Join-Path $modulesDir "PowerCLI-Modules.zip"
-                $extractPath = Join-Path $modulesDir "VMware.PowerCLI"
-                
-                if (Test-Path $zipFile) {
-                    Write-Host "Extracting PowerCLI modules..." -ForegroundColor Cyan
-                    Expand-Archive -Path $zipFile -DestinationPath $modulesDir -Force
-                    
-                    # Rename the extracted folder if needed
-                    $extractedFolder = Get-ChildItem -Path $modulesDir -Directory | Where-Object { $_.Name -like "*PowerCLI*" -and $_.Name -ne "VMware.PowerCLI" } | Select-Object -First 1
-                    if ($extractedFolder -and $extractedFolder.Name -ne "VMware.PowerCLI") {
-                        $oldPath = $extractedFolder.FullName
-                        $newPath = Join-Path $modulesDir "VMware.PowerCLI"
-                        if (Test-Path $newPath) {
-                            Remove-Item -Path $newPath -Recurse -Force
-                        }
-                        Rename-Item -Path $oldPath -NewName "VMware.PowerCLI"
-                        Write-Host "✅ PowerCLI modules extracted and renamed" -ForegroundColor Green
-                    }
-                }
-            } catch {
-                Write-Host "⚠️ Failed to extract PowerCLI modules: $($_.Exception.Message)" -ForegroundColor Yellow
-                Write-StartupLog "Failed to extract PowerCLI modules: $($_.Exception.Message)" "WARN"
-            }
+        if ($powerCLIModules.Count -gt 0) {
+            Write-Host "✅ PowerCLI modules are ready: $($powerCLIModules.Count) modules available" -ForegroundColor Green
+            Write-StartupLog "PowerCLI modules available: $($powerCLIModules.Count) modules" "SUCCESS"
         } else {
-            Write-Host "⚠️ Failed to combine PowerCLI modules" -ForegroundColor Yellow
-            Write-StartupLog "Failed to combine PowerCLI modules" "WARN"
+            Write-Host "⚠️ No PowerCLI modules found in Modules directory" -ForegroundColor Yellow
+            Write-StartupLog "No PowerCLI modules found" "WARN"
         }
     }
     
@@ -704,11 +627,12 @@ function Start-Download {
     
     Write-Host "Creating configuration files..." -ForegroundColor Cyan
     
-    # Only create config files if they don't exist (don't overwrite downloaded ones)
+    # Only create config files if they don't exist (don't overwrite existing ones)
     $hostsFile = Join-Path $DownloadDirectory "hosts.txt"
     $usersFile = Join-Path $DownloadDirectory "users.txt"
     
     if (-not (Test-Path $hostsFile)) {
+        Write-Host "Creating hosts.txt configuration template..." -ForegroundColor Cyan
         # Create hosts.txt
         $hostsContent = @"
 # ESXi Hosts Configuration
@@ -722,9 +646,13 @@ function Start-Download {
 # esxi-host-02.domain.local
 "@
         $hostsContent | Set-Content -Path $hostsFile
+        Write-Host "✅ Created hosts.txt template" -ForegroundColor Green
+    } else {
+        Write-Host "✅ hosts.txt already exists - preserving existing configuration" -ForegroundColor Yellow
     }
     
     if (-not (Test-Path $usersFile)) {
+        Write-Host "Creating users.txt configuration template..." -ForegroundColor Cyan
         # Create users.txt
         $usersContent = @"
 # Target Users Configuration
@@ -737,6 +665,9 @@ root
 # serviceaccount
 "@
         $usersContent | Set-Content -Path $usersFile
+        Write-Host "✅ Created users.txt template" -ForegroundColor Green
+    } else {
+        Write-Host "✅ users.txt already exists - preserving existing configuration" -ForegroundColor Yellow
     }
     
     # Create desktop shortcut if on Windows
@@ -775,7 +706,7 @@ root
     Write-Host "Failed Downloads: $failureCount" -ForegroundColor $(if ($failureCount -gt 0) { "Red" } else { "Green" })
     
     if ($DownloadType -eq "Full") {
-        Write-Host "PowerCLI Modules: Included (split zip files combined and extracted)" -ForegroundColor Green
+        Write-Host "PowerCLI Modules: Included (directly available in Modules directory)" -ForegroundColor Green
     } else {
         Write-Host "PowerCLI Modules: Not included (install PowerCLI separately)" -ForegroundColor Yellow
     }

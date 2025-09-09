@@ -167,9 +167,22 @@ function Test-VCenterConnection {
     Write-VerboseLog "Testing vCenter connection to $VCenterServer" "INFO" -ToConsole
     
     try {
-        # Import PowerCLI module
+        # Import PowerCLI module (check local Modules directory first)
+        $localModulesPath = Join-Path $script:PSScriptRoot "Modules"
+        $powerCLIModule = $null
+        
+        # Check if PowerCLI is available in local Modules directory
+        if (Test-Path $localModulesPath) {
+            $powerCLIModulePath = Join-Path $localModulesPath "VMware.PowerCLI"
+            if (Test-Path $powerCLIModulePath) {
+                $env:PSModulePath = "$localModulesPath;$env:PSModulePath"
+                Write-VerboseLog "Using local PowerCLI modules from: $localModulesPath" "INFO"
+            }
+        }
+        
+        # Try to get PowerCLI module
         if (-not (Get-Module -Name VMware.PowerCLI -ListAvailable)) {
-            throw "VMware PowerCLI module not found. Please install PowerCLI first."
+            throw "VMware PowerCLI module not found. Please install PowerCLI or ensure modules are in the Modules directory."
         }
         
         Import-Module VMware.PowerCLI -ErrorAction Stop
@@ -216,6 +229,15 @@ function Get-ESXiUsers {
     Write-VerboseLog "Querying ESXi users from vCenter" "INFO" -ToConsole
     
     try {
+        # Use the same module path setup as Test-VCenterConnection
+        $localModulesPath = Join-Path $script:PSScriptRoot "Modules"
+        if (Test-Path $localModulesPath) {
+            $powerCLIModulePath = Join-Path $localModulesPath "VMware.PowerCLI"
+            if (Test-Path $powerCLIModulePath) {
+                $env:PSModulePath = "$localModulesPath;$env:PSModulePath"
+            }
+        }
+        
         Import-Module VMware.PowerCLI -ErrorAction Stop
         Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false -ErrorAction SilentlyContinue
         
@@ -976,9 +998,14 @@ function Test-VCenterConnectionHandler {
             $HostsList.SetSelected($i, $true)
         }
         
-        # Save hosts to file
-        $hostNames = $result.Hosts | ForEach-Object { $_.Name }
-        $hostNames | Set-Content -Path $script:HostsFilePath
+        # Save hosts to file (only if file doesn't exist or is empty)
+        if (-not (Test-Path $script:HostsFilePath) -or (Get-Content $script:HostsFilePath -ErrorAction SilentlyContinue | Where-Object { $_ -notmatch '^#' -and $_.Trim() -ne '' }).Count -eq 0) {
+            $hostNames = $result.Hosts | ForEach-Object { $_.Name }
+            $hostNames | Set-Content -Path $script:HostsFilePath
+            Write-VerboseLog "Updated hosts.txt with discovered hosts" "INFO"
+        } else {
+            Write-VerboseLog "hosts.txt already contains configuration - preserving existing entries" "INFO"
+        }
         
     } else {
         $LogsTextBox.AppendText("$(Get-Date -Format 'HH:mm:ss') - ERROR: $($result.Message)`r`n")
@@ -1004,8 +1031,13 @@ function Query-ESXiUsersHandler {
             $LogsTextBox.AppendText("  - $($user.Username)`r`n")
         }
         
-        # Save users to file
-        $uniqueUsers | ForEach-Object { $_.Username } | Set-Content -Path $script:UsersFilePath
+        # Save users to file (only if file doesn't exist or is empty)
+        if (-not (Test-Path $script:UsersFilePath) -or (Get-Content $script:UsersFilePath -ErrorAction SilentlyContinue | Where-Object { $_ -notmatch '^#' -and $_.Trim() -ne '' }).Count -eq 0) {
+            $uniqueUsers | ForEach-Object { $_.Username } | Set-Content -Path $script:UsersFilePath
+            Write-VerboseLog "Updated users.txt with discovered users" "INFO"
+        } else {
+            Write-VerboseLog "users.txt already contains configuration - preserving existing entries" "INFO"
+        }
         
         $LogsTextBox.ForeColor = [System.Drawing.Color]::LimeGreen
     } else {
