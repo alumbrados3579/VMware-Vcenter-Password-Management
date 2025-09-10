@@ -103,8 +103,9 @@ Smart Launcher:
 Full GUI Application:
 .\VMware-Password-Manager.ps1   # Complete functionality
 
-Quick Test Launcher:
-.\Test-Startup.ps1              # Bypass setup for testing
+Quick Access Options:
+.\VMware-Password-Manager-Modular.ps1  # Smart launcher with tool selection
+.\VMware-Password-Manager.ps1           # Full GUI application
 
 ================================================================================
 AIR-GAPPED NETWORK DEPLOYMENT

@@ -51,7 +51,6 @@ VMware-Vcenter-Password-Management/
 ├── VMware-Password-Manager.ps1         # Main monolithic application
 ├── VMware-Password-Manager-Modular.ps1 # Smart launcher
 ├── VMware-Host-Manager.ps1             # Standalone host manager
-├── Test-Startup.ps1                    # Quick test launcher
 ├── Tools/                              # Modular components directory
 │   ├── Common.ps1                      # Shared utilities library
 │   ├── CLIWorkspace.ps1               # Standalone PowerCLI terminal
