@@ -1,6 +1,6 @@
 # VMware vCenter Password Management Tool - GUI Edition
-# Version 2.1 - PowerShell Gallery Edition with Windows Forms GUI
-# Features: vCenter/ESXi password management with local modules and GUI interface
+# Version 0.5 BETA - Enterprise Password Management Suite
+# Features: vCenter/ESXi password management with intuitive GUI interface
 
 # Global error handling
 $ErrorActionPreference = "Continue"
@@ -198,7 +198,7 @@ function Get-UsersFromFile {
 # --- GUI Creation Functions ---
 function Create-MainForm {
     $form = New-Object System.Windows.Forms.Form
-    $form.Text = "VMware vCenter Password Management Tool - GUI Edition"
+    $form.Text = "VMware vCenter Password Management Tool - Version 0.5 BETA"
     $form.Size = New-Object System.Drawing.Size(900, 700)
     $form.StartPosition = "CenterScreen"
     $form.FormBorderStyle = "FixedDialog"
@@ -660,7 +660,7 @@ function Load-UsersConfiguration {
 
 # --- Main Application ---
 function Start-Application {
-    Write-Log "VMware vCenter Password Management Tool - GUI Edition starting..." "INFO"
+    Write-Log "VMware vCenter Password Management Tool - Version 0.5 BETA starting..." "INFO"
     
     # Show DoD Warning
     Show-DoDWarning

@@ -1,6 +1,6 @@
 # VMware vCenter Password Management Tool - Setup Script
-# Version 2.0 - PowerShell Gallery Edition
-# Purpose: Setup PowerCLI from PowerShell Gallery and launch the management tool
+# Version 0.5 BETA - Automated Setup Edition
+# Purpose: Complete automated setup and launch of the password management tool
 
 # Global error handling
 $ErrorActionPreference = "Continue"
@@ -325,25 +325,41 @@ function Start-VMwareSetup {
         Write-Host "✅ VMware PowerCLI is installed and configured" -ForegroundColor Green
         Write-Host "✅ Configuration files are ready" -ForegroundColor Green
         Write-Host ""
-        Write-Host "Next Steps:" -ForegroundColor Cyan
-        Write-Host "1. Edit hosts.txt with your ESXi host addresses" -ForegroundColor White
-        Write-Host "2. Edit users.txt with target usernames (optional)" -ForegroundColor White
-        Write-Host "3. Run the VMware management tool with GUI interface" -ForegroundColor White
+        # Download and setup the main GUI application
+        Write-Host "Setting up VMware Password Manager GUI..." -ForegroundColor Cyan
         
-        # Check if main tool exists
         $scriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
         $mainTool = Join-Path $scriptRoot "VMware-Password-Manager.ps1"
+        
+        # Download the latest GUI application from GitHub
+        try {
+            Write-Host "Downloading latest VMware Password Manager GUI..." -ForegroundColor Green
+            $guiUrl = "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Password-Manager.ps1"
+            Invoke-WebRequest -Uri $guiUrl -OutFile $mainTool -UseBasicParsing
+            Write-Host "✅ VMware Password Manager GUI downloaded successfully" -ForegroundColor Green
+        } catch {
+            Write-Host "⚠️ Could not download GUI application: $($_.Exception.Message)" -ForegroundColor Yellow
+            Write-Host "You can manually download VMware-Password-Manager.ps1 from GitHub" -ForegroundColor Cyan
+        }
+        
+        Write-Host ""
+        Write-Host "=== Setup Complete ===" -ForegroundColor Green
+        Write-Host "Next Steps:" -ForegroundColor Cyan
+        Write-Host "1. Configure your ESXi hosts and users in the GUI" -ForegroundColor White
+        Write-Host "2. Test vCenter connectivity" -ForegroundColor White
+        Write-Host "3. Run password operations (Dry Run first!)" -ForegroundColor White
+        
         if (Test-Path $mainTool) {
             Write-Host ""
-            $runNow = Read-Host "Would you like to run the VMware Password Manager with GUI now? (Y/N)"
+            $runNow = Read-Host "Would you like to launch the VMware Password Manager GUI now? (Y/N)"
             if ($runNow -eq "Y" -or $runNow -eq "y") {
-                Write-Host "Starting VMware Password Manager with GUI..." -ForegroundColor Green
+                Write-Host "Launching VMware Password Manager GUI..." -ForegroundColor Green
+                Start-Sleep -Seconds 2
                 & $mainTool
             }
         } else {
             Write-Host ""
-            Write-Host "Note: Download the main VMware-Password-Manager.ps1 script to complete the setup" -ForegroundColor Yellow
-            Write-Host "The GUI interface will be available once you have the main script" -ForegroundColor Cyan
+            Write-Host "Manual download required: VMware-Password-Manager.ps1" -ForegroundColor Yellow
         }
     } else {
         Write-Host "❌ PowerCLI installation failed" -ForegroundColor Red
