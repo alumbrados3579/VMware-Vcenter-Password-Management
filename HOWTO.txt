@@ -1,0 +1,203 @@
+VMware vCenter Password Management Tool - Version 1.0
+HOWTO Guide - Complete Usage Instructions
+
+================================================================================
+OVERVIEW
+================================================================================
+
+The VMware vCenter Password Management Tool is a professional, DoD-compliant 
+solution for managing passwords across VMware vCenter and ESXi environments. 
+This tool provides both a comprehensive GUI interface and fast standalone 
+components for specific tasks.
+
+Key Features:
+- DoD compliance with government warning banners and audit logging
+- Safe operations with mandatory dry-run testing before live changes
+- Role separation between admin and target users
+- Comprehensive logging with export capabilities
+- Modular architecture for fast individual tool usage
+- Interactive PowerCLI workspace for advanced users
+
+================================================================================
+QUICK START
+================================================================================
+
+1. INITIAL SETUP
+   Run the automated setup wizard:
+   > VMware-Setup.ps1
+   
+   This will:
+   - Configure PowerShell environment securely
+   - Install VMware PowerCLI to local directory
+   - Create configuration templates
+   - Download the latest application components
+
+2. CHOOSE YOUR APPROACH
+   
+   For Full Functionality:
+   > VMware-Password-Manager.ps1
+   
+   For Fast Individual Tools:
+   > Tools\CLIWorkspace.ps1        (PowerCLI Terminal)
+   > Tools\Configuration.ps1       (Config Editor)
+   
+   For Smart Launcher:
+   > VMware-Password-Manager-Modular.ps1
+
+================================================================================
+USAGE SCENARIOS
+================================================================================
+
+SCENARIO 1: FIRST-TIME SETUP
+1. Run VMware-Setup.ps1
+2. Type 'AGREE' to acknowledge DoD warning
+3. Wait for PowerCLI installation (may take several minutes)
+4. Launch the main application when prompted
+
+SCENARIO 2: DAILY POWERCLI USAGE (FASTEST)
+1. Run Tools\CLIWorkspace.ps1
+2. Acknowledge DoD warning
+3. Connect to vCenter using the connection fields
+4. Execute PowerCLI commands directly in the terminal
+
+SCENARIO 3: CONFIGURATION MANAGEMENT
+1. Run Tools\Configuration.ps1
+2. Load existing hosts.txt and users.txt files
+3. Edit configurations as needed
+4. Save and validate configurations
+
+SCENARIO 4: PASSWORD OPERATIONS
+1. Run VMware-Password-Manager.ps1
+2. Configure vCenter connection in Password Management tab
+3. Test connection to verify connectivity
+4. Select target user and enter new password
+5. Run DRY RUN first to test the operation
+6. Execute LIVE RUN only after successful dry run
+
+================================================================================
+CONFIGURATION FILES
+================================================================================
+
+HOSTS.TXT
+Location: Root directory
+Purpose: Define ESXi host addresses for password operations
+Format: One host per line (IP addresses or FQDNs)
+Example:
+192.168.1.100
+192.168.1.101
+esxi-host-01.domain.local
+
+USERS.TXT
+Location: Root directory
+Purpose: Define target ESXi users for password changes
+Format: One username per line
+Example:
+root
+admin_swm
+admin_kms
+
+================================================================================
+SECURITY CONSIDERATIONS
+================================================================================
+
+DoD COMPLIANCE
+- Government system warning displayed on startup
+- All operations logged with timestamps
+- Audit trail maintained in Logs directory
+- Secure credential handling
+
+SAFE OPERATIONS
+- Mandatory dry-run testing before live changes
+- Connection validation before operations
+- Comprehensive error handling and reporting
+- Local module installation to avoid OneDrive conflicts
+
+ROLE SEPARATION
+- vCenter admin credentials for connection
+- Target ESXi users for password changes
+- Clear distinction between administrative and target accounts
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+POWERCLI ISSUES
+Problem: PowerCLI not found or loading errors
+Solution: Re-run VMware-Setup.ps1 to reinstall PowerCLI locally
+
+CONNECTION ISSUES
+Problem: Cannot connect to vCenter
+Solution: Verify server address, credentials, and network connectivity
+
+CONFIGURATION ISSUES
+Problem: No hosts or users found
+Solution: Edit hosts.txt and users.txt files with valid entries
+
+PERFORMANCE ISSUES
+Problem: Slow startup times
+Solution: Use individual tools (Tools\CLIWorkspace.ps1) for faster startup
+
+================================================================================
+ADVANCED USAGE
+================================================================================
+
+COMMAND LINE OPTIONS
+VMware-Password-Manager-Modular.ps1 -Tool CLI
+VMware-Password-Manager-Modular.ps1 -Tool Config
+VMware-Password-Manager-Modular.ps1 -List
+
+POWERCLI WORKSPACE FEATURES
+- Press ENTER to execute commands
+- Use UP/DOWN arrows for command history
+- Type 'help' for built-in help
+- Type 'clear' to clear the terminal
+- Type 'exit' to close the workspace
+
+AUTOMATION POSSIBILITIES
+- Script individual tools for automated workflows
+- Export logs for compliance reporting
+- Batch configuration management
+- Integration with existing PowerShell scripts
+
+================================================================================
+SYSTEM REQUIREMENTS
+================================================================================
+
+- Windows with PowerShell 5.1 or later
+- Network access to vCenter and ESXi hosts
+- Administrative privileges on target systems
+- Internet access for initial setup (one-time requirement)
+- Minimum 4GB RAM recommended
+- 500MB free disk space for modules and logs
+
+================================================================================
+SUPPORT AND MAINTENANCE
+================================================================================
+
+LOG FILES
+Location: Logs directory
+Format: vcenter_password_manager_YYYYMMDD.log
+Purpose: Detailed operation tracking and troubleshooting
+
+UPDATES
+- Re-run VMware-Setup.ps1 to get latest versions
+- Use GitHub Manager tab in full GUI for repository access
+- Check GitHub repository for latest releases
+
+BACKUP RECOMMENDATIONS
+- Backup hosts.txt and users.txt configuration files
+- Export logs regularly for compliance
+- Maintain local copy of Modules directory
+
+================================================================================
+VERSION INFORMATION
+================================================================================
+
+Version: 1.0
+Release Date: September 2025
+Architecture: Modular with backward compatibility
+Compliance: DoD standards with audit logging
+Platform: Windows PowerShell with VMware PowerCLI
+
+For additional support and documentation, refer to the Documents directory
+for detailed guides on each component and tool.
