@@ -1,16 +1,26 @@
-# VMware vCenter Password Management Tool - Setup Script
-# Version 0.5 BETA - Automated Setup Edition
-# Purpose: Complete automated setup and launch of the password management tool
+# VMware vCenter Password Management Tool - GUI Setup Script
+# Version 0.5 BETA - Automated GUI Setup Edition
+# Purpose: Complete automated setup with GUI progress tracking
 
 # Global error handling
 $ErrorActionPreference = "Continue"
 trap {
-    Write-Host "CRITICAL ERROR: $($_.Exception.Message)" -ForegroundColor Red
-    Read-Host "Press Enter to exit"
+    [System.Windows.Forms.MessageBox]::Show("CRITICAL ERROR: $($_.Exception.Message)", "Setup Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
     exit 1
 }
 
-# --- DoD Warning Banner ---
+# Load Windows Forms
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Drawing
+
+# Global variables
+$script:SetupForm = $null
+$script:ProgressBar = $null
+$script:StatusLabel = $null
+$script:DetailedStatusTextBox = $null
+$script:CurrentStep = 0
+$script:TotalSteps = 6
+
 function Show-DoDWarning {
     $dodWarning = @"
 *** U.S. GOVERNMENT COMPUTER SYSTEM WARNING ***
@@ -24,240 +34,310 @@ By using this IS (which includes any device attached to this IS), you consent to
 - At any time, the USG may inspect and seize data stored on this IS.
 - Communications using, or data stored on, this IS are not private, are subject to routine monitoring, 
   interception, and search, and may be disclosed or used for any USG-authorized purpose.
-- This IS includes security mechanisms to protect USG interests--not for your personal benefit or privacy.
 
-VMware vCenter Password Management Tool - DoD Compliant Edition
-This tool provides secure password management for VMware vCenter and ESXi environments.
+VMware vCenter Password Management Tool - Version 0.5 BETA Setup
 
-Press Enter to acknowledge and continue...
+Click OK to acknowledge and continue...
 "@
     
-    Write-Host $dodWarning -ForegroundColor Yellow
-    Read-Host
+    [System.Windows.Forms.MessageBox]::Show($dodWarning, "DoD System Warning", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning)
 }
 
-# --- PowerShell Environment Setup ---
+function Create-SetupForm {
+    $form = New-Object System.Windows.Forms.Form
+    $form.Text = "VMware Password Manager - Setup Wizard"
+    $form.Size = New-Object System.Drawing.Size(700, 500)
+    $form.StartPosition = "CenterScreen"
+    $form.FormBorderStyle = "FixedDialog"
+    $form.MaximizeBox = $false
+    $form.MinimizeBox = $false
+    $form.Icon = [System.Drawing.SystemIcons]::Shield
+    
+    # Title
+    $titleLabel = New-Object System.Windows.Forms.Label
+    $titleLabel.Text = "VMware vCenter Password Management Tool"
+    $titleLabel.Font = New-Object System.Drawing.Font("Arial", 14, [System.Drawing.FontStyle]::Bold)
+    $titleLabel.Location = New-Object System.Drawing.Point(20, 20)
+    $titleLabel.Size = New-Object System.Drawing.Size(650, 30)
+    $titleLabel.TextAlign = "MiddleCenter"
+    $titleLabel.ForeColor = [System.Drawing.Color]::DarkBlue
+    
+    # Subtitle
+    $subtitleLabel = New-Object System.Windows.Forms.Label
+    $subtitleLabel.Text = "Version 0.5 BETA - Automated Setup Wizard"
+    $subtitleLabel.Font = New-Object System.Drawing.Font("Arial", 10)
+    $subtitleLabel.Location = New-Object System.Drawing.Point(20, 50)
+    $subtitleLabel.Size = New-Object System.Drawing.Size(650, 20)
+    $subtitleLabel.TextAlign = "MiddleCenter"
+    $subtitleLabel.ForeColor = [System.Drawing.Color]::DarkGreen
+    
+    # Warning message
+    $warningLabel = New-Object System.Windows.Forms.Label
+    $warningLabel.Text = "⚠️ This process may take several minutes. Please be patient and do not close this window."
+    $warningLabel.Font = New-Object System.Drawing.Font("Arial", 9, [System.Drawing.FontStyle]::Bold)
+    $warningLabel.Location = New-Object System.Drawing.Point(20, 80)
+    $warningLabel.Size = New-Object System.Drawing.Size(650, 20)
+    $warningLabel.TextAlign = "MiddleCenter"
+    $warningLabel.ForeColor = [System.Drawing.Color]::DarkOrange
+    
+    # Progress bar
+    $script:ProgressBar = New-Object System.Windows.Forms.ProgressBar
+    $script:ProgressBar.Location = New-Object System.Drawing.Point(20, 120)
+    $script:ProgressBar.Size = New-Object System.Drawing.Size(650, 25)
+    $script:ProgressBar.Style = "Continuous"
+    $script:ProgressBar.Maximum = $script:TotalSteps
+    
+    # Status label
+    $script:StatusLabel = New-Object System.Windows.Forms.Label
+    $script:StatusLabel.Text = "Initializing setup..."
+    $script:StatusLabel.Location = New-Object System.Drawing.Point(20, 155)
+    $script:StatusLabel.Size = New-Object System.Drawing.Size(650, 20)
+    $script:StatusLabel.ForeColor = [System.Drawing.Color]::Blue
+    
+    # Detailed status text box
+    $detailLabel = New-Object System.Windows.Forms.Label
+    $detailLabel.Text = "Detailed Progress:"
+    $detailLabel.Location = New-Object System.Drawing.Point(20, 185)
+    $detailLabel.Size = New-Object System.Drawing.Size(200, 20)
+    
+    $script:DetailedStatusTextBox = New-Object System.Windows.Forms.TextBox
+    $script:DetailedStatusTextBox.Location = New-Object System.Drawing.Point(20, 210)
+    $script:DetailedStatusTextBox.Size = New-Object System.Drawing.Size(650, 200)
+    $script:DetailedStatusTextBox.Multiline = $true
+    $script:DetailedStatusTextBox.ScrollBars = "Vertical"
+    $script:DetailedStatusTextBox.ReadOnly = $true
+    $script:DetailedStatusTextBox.BackColor = [System.Drawing.Color]::Black
+    $script:DetailedStatusTextBox.ForeColor = [System.Drawing.Color]::Lime
+    $script:DetailedStatusTextBox.Font = New-Object System.Drawing.Font("Consolas", 9)
+    
+    # Close button (initially disabled)
+    $script:CloseButton = New-Object System.Windows.Forms.Button
+    $script:CloseButton.Text = "Setup in Progress..."
+    $script:CloseButton.Location = New-Object System.Drawing.Point(300, 425)
+    $script:CloseButton.Size = New-Object System.Drawing.Size(120, 30)
+    $script:CloseButton.Enabled = $false
+    $script:CloseButton.Add_Click({
+        $form.Close()
+    })
+    
+    $form.Controls.AddRange(@($titleLabel, $subtitleLabel, $warningLabel, $script:ProgressBar, $script:StatusLabel, $detailLabel, $script:DetailedStatusTextBox, $script:CloseButton))
+    
+    return $form
+}
+
+function Update-Progress {
+    param(
+        [string]$Status,
+        [string]$DetailedMessage
+    )
+    
+    $script:CurrentStep++
+    $script:ProgressBar.Value = $script:CurrentStep
+    $script:StatusLabel.Text = "[$script:CurrentStep/$script:TotalSteps] $Status"
+    
+    $timestamp = Get-Date -Format "HH:mm:ss"
+    $script:DetailedStatusTextBox.AppendText("[$timestamp] $DetailedMessage`r`n")
+    $script:DetailedStatusTextBox.ScrollToCaret()
+    
+    [System.Windows.Forms.Application]::DoEvents()
+}
+
+function Add-DetailedStatus {
+    param([string]$Message)
+    
+    $timestamp = Get-Date -Format "HH:mm:ss"
+    $script:DetailedStatusTextBox.AppendText("[$timestamp] $Message`r`n")
+    $script:DetailedStatusTextBox.ScrollToCaret()
+    [System.Windows.Forms.Application]::DoEvents()
+}
+
 function Initialize-PowerShellEnvironment {
-    Write-Host "=== Initializing PowerShell Environment ===" -ForegroundColor Cyan
+    Update-Progress "Configuring PowerShell Environment" "Setting up PowerShell execution policy and environment..."
     
-    # Set execution policy (RemoteSigned is better than Bypass for security)
     try {
-        Write-Host "Setting execution policy to RemoteSigned (secure but allows local scripts)..." -ForegroundColor Green
+        Add-DetailedStatus "Setting execution policy to RemoteSigned (secure but allows local scripts)..."
         Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force
-        Write-Host "✅ Execution policy set to RemoteSigned for CurrentUser" -ForegroundColor Green
-        Write-Host "   This allows local scripts while maintaining security for downloaded scripts" -ForegroundColor Cyan
+        Add-DetailedStatus "✅ Execution policy configured successfully"
+        Add-DetailedStatus "   This allows local scripts while maintaining security for downloaded scripts"
     } catch {
-        Write-Host "⚠️ Warning: Could not set execution policy: $($_.Exception.Message)" -ForegroundColor Yellow
+        Add-DetailedStatus "⚠️ Warning: Could not set execution policy: $($_.Exception.Message)"
     }
     
-    # Ensure TLS 1.2 for secure downloads
     try {
+        Add-DetailedStatus "Enabling TLS 1.2 for secure downloads..."
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-        Write-Host "✅ TLS 1.2 enabled for secure downloads" -ForegroundColor Green
+        Add-DetailedStatus "✅ TLS 1.2 enabled for secure connections"
     } catch {
-        Write-Host "⚠️ Warning: Could not set TLS 1.2" -ForegroundColor Yellow
+        Add-DetailedStatus "⚠️ Warning: Could not configure TLS: $($_.Exception.Message)"
     }
     
-    # Add PowerShell Gallery to trusted repositories
-    try {
-        Write-Host "Configuring PowerShell Gallery..." -ForegroundColor Green
-        if (-not (Get-PSRepository -Name "PSGallery" -ErrorAction SilentlyContinue)) {
-            Register-PSRepository -Default
-        }
-        Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
-        Write-Host "✅ PowerShell Gallery configured as trusted repository" -ForegroundColor Green
-    } catch {
-        Write-Host "⚠️ Warning: Could not configure PowerShell Gallery: $($_.Exception.Message)" -ForegroundColor Yellow
-    }
+    Start-Sleep -Milliseconds 500
 }
 
-# --- NuGet Provider Setup ---
 function Install-NuGetProvider {
-    Write-Host "=== Checking NuGet Provider ===" -ForegroundColor Cyan
+    Update-Progress "Installing NuGet Provider" "Installing package management components..."
     
     try {
-        $nugetProvider = Get-PackageProvider -Name "NuGet" -ErrorAction SilentlyContinue
-        if (-not $nugetProvider) {
-            Write-Host "Installing NuGet package provider..." -ForegroundColor Green
-            Install-PackageProvider -Name "NuGet" -Force -Scope CurrentUser
-            Write-Host "✅ NuGet provider installed successfully" -ForegroundColor Green
-        } else {
-            Write-Host "✅ NuGet provider already available (Version: $($nugetProvider.Version))" -ForegroundColor Green
-        }
-    } catch {
-        Write-Host "❌ Failed to install NuGet provider: $($_.Exception.Message)" -ForegroundColor Red
-        Write-Host "This may affect module installation capabilities" -ForegroundColor Yellow
-    }
-}
-
-# --- PowerShellGet Module Update ---
-function Update-PowerShellGet {
-    Write-Host "=== Checking PowerShellGet Module ===" -ForegroundColor Cyan
-    
-    try {
-        $psGetModule = Get-Module -Name "PowerShellGet" -ListAvailable | Sort-Object Version -Descending | Select-Object -First 1
+        Add-DetailedStatus "Checking for NuGet provider..."
+        $nuget = Get-PackageProvider -Name "NuGet" -ErrorAction SilentlyContinue
         
-        if (-not $psGetModule -or $psGetModule.Version -lt [Version]"2.0.0") {
-            Write-Host "Updating PowerShellGet module..." -ForegroundColor Green
-            Install-Module -Name "PowerShellGet" -Force -Scope CurrentUser -AllowClobber
-            Write-Host "✅ PowerShellGet module updated" -ForegroundColor Green
-            Write-Host "⚠️ Please restart PowerShell and run this script again for best results" -ForegroundColor Yellow
+        if (-not $nuget) {
+            Add-DetailedStatus "Installing NuGet provider (required for PowerShell Gallery)..."
+            Install-PackageProvider -Name "NuGet" -MinimumVersion 2.8.5.201 -Force -Scope CurrentUser
+            Add-DetailedStatus "✅ NuGet provider installed successfully"
         } else {
-            Write-Host "✅ PowerShellGet module is current (Version: $($psGetModule.Version))" -ForegroundColor Green
+            Add-DetailedStatus "✅ NuGet provider already installed (Version: $($nuget.Version))"
         }
     } catch {
-        Write-Host "⚠️ Warning: Could not update PowerShellGet: $($_.Exception.Message)" -ForegroundColor Yellow
+        Add-DetailedStatus "⚠️ Warning: Could not install NuGet provider: $($_.Exception.Message)"
     }
+    
+    Start-Sleep -Milliseconds 500
 }
 
-# --- VMware PowerCLI Local Installation ---
-function Install-VMwarePowerCLI {
-    Write-Host "=== Installing VMware PowerCLI to Local Modules Directory ===" -ForegroundColor Cyan
-    Write-Host "This avoids OneDrive sync issues and keeps modules in your working directory" -ForegroundColor Yellow
+function Update-PowerShellGet {
+    Update-Progress "Updating PowerShellGet Module" "Ensuring latest package management capabilities..."
     
-    # Get script directory and create local Modules path
+    try {
+        Add-DetailedStatus "Checking PowerShellGet module version..."
+        $psGet = Get-Module -Name "PowerShellGet" -ListAvailable | Sort-Object Version -Descending | Select-Object -First 1
+        
+        if ($psGet) {
+            Add-DetailedStatus "Current PowerShellGet version: $($psGet.Version)"
+        }
+        
+        Add-DetailedStatus "Updating PowerShellGet module..."
+        Install-Module -Name "PowerShellGet" -Force -Scope CurrentUser -AllowClobber
+        Add-DetailedStatus "✅ PowerShellGet module updated successfully"
+    } catch {
+        Add-DetailedStatus "⚠️ Warning: Could not update PowerShellGet: $($_.Exception.Message)"
+    }
+    
+    Start-Sleep -Milliseconds 500
+}
+
+function Install-VMwarePowerCLI {
+    Update-Progress "Installing VMware PowerCLI" "This step may take several minutes - downloading and configuring VMware modules..."
+    
     $scriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
     $localModulesPath = Join-Path $scriptRoot "Modules"
     
     try {
-        # Create local Modules directory if it doesn't exist
+        Add-DetailedStatus "Creating local Modules directory for enterprise-safe installation..."
         if (-not (Test-Path $localModulesPath)) {
-            Write-Host "Creating local Modules directory: $localModulesPath" -ForegroundColor Green
             New-Item -Path $localModulesPath -ItemType Directory -Force | Out-Null
+            Add-DetailedStatus "✅ Local Modules directory created: $localModulesPath"
         }
         
-        # Add local modules path to PSModulePath (highest priority)
+        Add-DetailedStatus "Adding local modules to PowerShell module path..."
         $currentPSModulePath = $env:PSModulePath
         if ($currentPSModulePath -notlike "*$localModulesPath*") {
             $env:PSModulePath = "$localModulesPath;$currentPSModulePath"
-            Write-Host "✅ Added local Modules directory to PowerShell module path" -ForegroundColor Green
+            Add-DetailedStatus "✅ Local Modules directory added to PowerShell module path"
         }
         
-        # Check if PowerCLI is already available locally (thorough check)
+        # Check if PowerCLI already exists locally
         $localPowerCLIPath = Join-Path $localModulesPath "VMware.PowerCLI"
         $powerCLIExists = $false
         
         if (Test-Path $localPowerCLIPath) {
-            # Check for PowerCLI manifest file to verify it's a complete installation
+            Add-DetailedStatus "Checking existing PowerCLI installation..."
             $manifestFiles = Get-ChildItem -Path $localPowerCLIPath -Filter "VMware.PowerCLI.psd1" -Recurse -ErrorAction SilentlyContinue
             
             if ($manifestFiles) {
                 try {
                     $manifestData = Import-PowerShellDataFile $manifestFiles[0].FullName
-                    Write-Host "✅ VMware PowerCLI found in local Modules directory" -ForegroundColor Green
-                    Write-Host "Local PowerCLI Version: $($manifestData.ModuleVersion)" -ForegroundColor Cyan
-                    Write-Host "Location: $localPowerCLIPath" -ForegroundColor Gray
+                    Add-DetailedStatus "✅ VMware PowerCLI found in local directory"
+                    Add-DetailedStatus "   Version: $($manifestData.ModuleVersion)"
+                    Add-DetailedStatus "   Location: $localPowerCLIPath"
                     $powerCLIExists = $true
                 } catch {
-                    Write-Host "⚠️ Local PowerCLI found but manifest is corrupted, will re-download" -ForegroundColor Yellow
+                    Add-DetailedStatus "⚠️ Local PowerCLI found but manifest is corrupted, will re-download"
                 }
             } else {
-                Write-Host "⚠️ Local PowerCLI directory exists but appears incomplete, will re-download" -ForegroundColor Yellow
+                Add-DetailedStatus "⚠️ Local PowerCLI directory exists but appears incomplete, will re-download"
             }
         }
         
         if (-not $powerCLIExists) {
-            Write-Host "Downloading VMware PowerCLI to local Modules directory..." -ForegroundColor Green
-            Write-Host "This may take a few minutes and avoids OneDrive sync conflicts" -ForegroundColor Yellow
-            Write-Host "Target directory: $localModulesPath" -ForegroundColor Gray
+            Add-DetailedStatus "Downloading VMware PowerCLI to local directory..."
+            Add-DetailedStatus "⏳ This may take several minutes depending on your internet connection"
+            Add-DetailedStatus "   Target directory: $localModulesPath"
             
             # Remove incomplete installation if it exists
             if (Test-Path $localPowerCLIPath) {
-                Write-Host "Removing incomplete PowerCLI installation..." -ForegroundColor Yellow
+                Add-DetailedStatus "Removing incomplete PowerCLI installation..."
                 Remove-Item -Path $localPowerCLIPath -Recurse -Force -ErrorAction SilentlyContinue
             }
             
             # Download PowerCLI modules to local directory
             Save-Module -Name "VMware.PowerCLI" -Path $localModulesPath -Force
-            Write-Host "✅ VMware PowerCLI downloaded to local Modules directory" -ForegroundColor Green
+            Add-DetailedStatus "✅ VMware PowerCLI downloaded to local directory successfully"
         } else {
-            Write-Host "✅ Using existing local PowerCLI installation (no download needed)" -ForegroundColor Green
+            Add-DetailedStatus "✅ Using existing local PowerCLI installation (no download needed)"
         }
         
         # Check if PowerCLI is already loaded in current session
         $loadedPowerCLI = Get-Module -Name "VMware.PowerCLI" -ErrorAction SilentlyContinue
         
         if ($loadedPowerCLI) {
-            Write-Host "✅ VMware PowerCLI already loaded in current session" -ForegroundColor Green
-            Write-Host "Version: $($loadedPowerCLI.Version)" -ForegroundColor Cyan
-            Write-Host "Location: $($loadedPowerCLI.ModuleBase)" -ForegroundColor Cyan
+            Add-DetailedStatus "✅ VMware PowerCLI already loaded in current session"
+            Add-DetailedStatus "   Version: $($loadedPowerCLI.Version)"
+            Add-DetailedStatus "   Location: $($loadedPowerCLI.ModuleBase)"
         } else {
-            # Try to import the module
-            Write-Host "Loading VMware PowerCLI..." -ForegroundColor Green
+            Add-DetailedStatus "Loading VMware PowerCLI modules..."
+            Add-DetailedStatus "⏳ This step may take 1-2 minutes - please be patient"
+            
             try {
-                # Try to import without forcing to avoid conflicts
                 Import-Module VMware.PowerCLI -ErrorAction Stop
-                Write-Host "✅ VMware PowerCLI loaded successfully" -ForegroundColor Green
-            } catch {
-                Write-Host "⚠️ Could not load PowerCLI, checking for conflicts..." -ForegroundColor Yellow
+                $loadedModule = Get-Module -Name "VMware.PowerCLI"
+                Add-DetailedStatus "✅ VMware PowerCLI loaded successfully"
+                Add-DetailedStatus "   Version: $($loadedModule.Version)"
                 
-                # Check if any VMware modules are already loaded
+                if ($loadedModule.ModuleBase -like "*$localModulesPath*") {
+                    Add-DetailedStatus "✅ Using LOCAL modules (enterprise-safe installation)"
+                } else {
+                    Add-DetailedStatus "⚠️ Using SYSTEM modules"
+                }
+            } catch {
+                Add-DetailedStatus "⚠️ Could not load PowerCLI, checking for conflicts..."
+                
                 $vmwareModules = Get-Module | Where-Object { $_.Name -like "VMware.*" }
                 if ($vmwareModules) {
-                    Write-Host "Found existing VMware modules in memory:" -ForegroundColor Yellow
+                    Add-DetailedStatus "Found existing VMware modules in memory:"
                     foreach ($module in $vmwareModules) {
-                        Write-Host "  - $($module.Name) v$($module.Version)" -ForegroundColor Gray
+                        Add-DetailedStatus "  - $($module.Name) v$($module.Version)"
                     }
-                    Write-Host "These modules are already loaded and working. Continuing..." -ForegroundColor Green
+                    Add-DetailedStatus "✅ These modules are already loaded and working"
                 } else {
-                    # Fallback: try to install system-wide if local fails
-                    try {
-                        Write-Host "Attempting system-wide installation..." -ForegroundColor Yellow
-                        Install-Module -Name "VMware.PowerCLI" -Scope CurrentUser -Force -AllowClobber
-                        Import-Module VMware.PowerCLI -Force
-                        Write-Host "✅ VMware PowerCLI installed and loaded from system location" -ForegroundColor Green
-                    } catch {
-                        throw "Failed to install PowerCLI: $($_.Exception.Message)"
-                    }
+                    throw "Failed to load PowerCLI: $($_.Exception.Message)"
                 }
             }
         }
         
-        # Configure PowerCLI settings
+        Add-DetailedStatus "Configuring PowerCLI settings..."
         Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false -Scope User -ErrorAction SilentlyContinue
         Set-PowerCLIConfiguration -ParticipateInCEIP $false -Confirm:$false -Scope User -ErrorAction SilentlyContinue
-        
-        Write-Host "✅ VMware PowerCLI configured and ready" -ForegroundColor Green
-        
-        # Display PowerCLI version and location info
-        try {
-            $powerCLIModule = Get-Module -Name "VMware.PowerCLI"
-            if ($powerCLIModule) {
-                Write-Host "VMware PowerCLI Version: $($powerCLIModule.Version)" -ForegroundColor Cyan
-                Write-Host "Module Location: $($powerCLIModule.ModuleBase)" -ForegroundColor Cyan
-                
-                if ($powerCLIModule.ModuleBase -like "*$localModulesPath*") {
-                    Write-Host "✅ Using LOCAL modules (OneDrive-safe)" -ForegroundColor Green
-                } else {
-                    Write-Host "⚠️ Using SYSTEM modules" -ForegroundColor Yellow
-                }
-            }
-        } catch {
-            Write-Host "PowerCLI loaded but version info unavailable" -ForegroundColor Cyan
-        }
+        Add-DetailedStatus "✅ VMware PowerCLI configured and ready for use"
         
         return $true
     } catch {
-        Write-Host "❌ Failed to install VMware PowerCLI: $($_.Exception.Message)" -ForegroundColor Red
-        Write-Host "Please check your internet connection and PowerShell Gallery access" -ForegroundColor Yellow
-        Write-Host "Local Modules Path: $localModulesPath" -ForegroundColor Gray
+        Add-DetailedStatus "❌ Failed to install VMware PowerCLI: $($_.Exception.Message)"
+        Add-DetailedStatus "Please check your internet connection and try again"
         return $false
     }
 }
 
-# --- Create Configuration Files ---
 function Create-ConfigurationFiles {
-    Write-Host "=== Creating Configuration Files ===" -ForegroundColor Cyan
+    Update-Progress "Creating Configuration Files" "Setting up hosts.txt and users.txt configuration files..."
     
-    $scriptRoot = $PSScriptRoot
-    if (-not $scriptRoot) {
-        $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Definition
-    }
+    $scriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
     
-    # Create hosts.txt if it doesn't exist
-    $hostsFile = Join-Path $scriptRoot "hosts.txt"
-    if (-not (Test-Path $hostsFile)) {
-        $hostsContent = @"
+    try {
+        # Create hosts.txt
+        $hostsFile = Join-Path $scriptRoot "hosts.txt"
+        if (-not (Test-Path $hostsFile)) {
+            $hostsContent = @"
 # ESXi Hosts Configuration
 # Add your ESXi host IP addresses or FQDNs below
 # One host per line, comments start with #
@@ -268,108 +348,130 @@ function Create-ConfigurationFiles {
 # esxi-host-01.domain.local
 # esxi-host-02.domain.local
 "@
-        $hostsContent | Set-Content -Path $hostsFile
-        Write-Host "✅ Created hosts.txt configuration file" -ForegroundColor Green
-    } else {
-        Write-Host "✅ hosts.txt configuration file already exists" -ForegroundColor Green
-    }
-    
-    # Create users.txt if it doesn't exist
-    $usersFile = Join-Path $scriptRoot "users.txt"
-    if (-not (Test-Path $usersFile)) {
-        $usersContent = @"
+            $hostsContent | Set-Content -Path $hostsFile
+            Add-DetailedStatus "✅ Created hosts.txt configuration file"
+        } else {
+            Add-DetailedStatus "✅ hosts.txt already exists"
+        }
+        
+        # Create users.txt
+        $usersFile = Join-Path $scriptRoot "users.txt"
+        if (-not (Test-Path $usersFile)) {
+            $usersContent = @"
 # Target Users Configuration
-# Add usernames that can be targeted for password changes
+# Add usernames for password operations
 # One username per line, comments start with #
 
 # Common ESXi users:
 root
 # admin
+# administrator
 # serviceaccount
 "@
-        $usersContent | Set-Content -Path $usersFile
-        Write-Host "✅ Created users.txt configuration file" -ForegroundColor Green
-    } else {
-        Write-Host "✅ users.txt configuration file already exists" -ForegroundColor Green
-    }
-}
-
-# --- Main Setup Function ---
-function Start-VMwareSetup {
-    Write-Host "=== VMware vCenter Password Management Tool - Setup ===" -ForegroundColor Cyan
-    Write-Host "PowerShell Gallery Edition - Automated PowerCLI Installation" -ForegroundColor Cyan
-    Write-Host ""
-    
-    # Show DoD Warning
-    Show-DoDWarning
-    
-    # Initialize PowerShell environment
-    Initialize-PowerShellEnvironment
-    
-    # Install/Update NuGet provider
-    Install-NuGetProvider
-    
-    # Update PowerShellGet if needed
-    Update-PowerShellGet
-    
-    # Install/Update VMware PowerCLI
-    $powerCLISuccess = Install-VMwarePowerCLI
-    
-    # Create configuration files
-    Create-ConfigurationFiles
-    
-    Write-Host ""
-    Write-Host "=== Setup Complete ===" -ForegroundColor Green
-    
-    if ($powerCLISuccess) {
-        Write-Host "✅ VMware PowerCLI is installed and configured" -ForegroundColor Green
-        Write-Host "✅ Configuration files are ready" -ForegroundColor Green
-        Write-Host ""
-        # Download and setup the main GUI application
-        Write-Host "Setting up VMware Password Manager GUI..." -ForegroundColor Cyan
-        
-        $scriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
-        $mainTool = Join-Path $scriptRoot "VMware-Password-Manager.ps1"
-        
-        # Download the latest GUI application from GitHub
-        try {
-            Write-Host "Downloading latest VMware Password Manager GUI..." -ForegroundColor Green
-            $guiUrl = "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Password-Manager.ps1"
-            Invoke-WebRequest -Uri $guiUrl -OutFile $mainTool -UseBasicParsing
-            Write-Host "✅ VMware Password Manager GUI downloaded successfully" -ForegroundColor Green
-        } catch {
-            Write-Host "⚠️ Could not download GUI application: $($_.Exception.Message)" -ForegroundColor Yellow
-            Write-Host "You can manually download VMware-Password-Manager.ps1 from GitHub" -ForegroundColor Cyan
-        }
-        
-        Write-Host ""
-        Write-Host "=== Setup Complete ===" -ForegroundColor Green
-        Write-Host "Next Steps:" -ForegroundColor Cyan
-        Write-Host "1. Configure your ESXi hosts and users in the GUI" -ForegroundColor White
-        Write-Host "2. Test vCenter connectivity" -ForegroundColor White
-        Write-Host "3. Run password operations (Dry Run first!)" -ForegroundColor White
-        
-        if (Test-Path $mainTool) {
-            Write-Host ""
-            $runNow = Read-Host "Would you like to launch the VMware Password Manager GUI now? (Y/N)"
-            if ($runNow -eq "Y" -or $runNow -eq "y") {
-                Write-Host "Launching VMware Password Manager GUI..." -ForegroundColor Green
-                Start-Sleep -Seconds 2
-                & $mainTool
-            }
+            $usersContent | Set-Content -Path $usersFile
+            Add-DetailedStatus "✅ Created users.txt configuration file"
         } else {
-            Write-Host ""
-            Write-Host "Manual download required: VMware-Password-Manager.ps1" -ForegroundColor Yellow
+            Add-DetailedStatus "✅ users.txt already exists"
         }
-    } else {
-        Write-Host "❌ PowerCLI installation failed" -ForegroundColor Red
-        Write-Host "Please check your internet connection and try again" -ForegroundColor Yellow
+        
+        Add-DetailedStatus "Configuration files are ready for customization"
+        
+    } catch {
+        Add-DetailedStatus "⚠️ Warning: Could not create configuration files: $($_.Exception.Message)"
     }
     
-    Write-Host ""
-    Write-Host "Press Enter to exit..." -ForegroundColor Gray
-    Read-Host
+    Start-Sleep -Milliseconds 500
 }
 
-# Start the setup
-Start-VMwareSetup
+function Download-MainApplication {
+    Update-Progress "Downloading Main Application" "Getting the latest GUI application from repository..."
+    
+    $scriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
+    $mainTool = Join-Path $scriptRoot "VMware-Password-Manager.ps1"
+    
+    try {
+        Add-DetailedStatus "Downloading latest VMware Password Manager GUI..."
+        $guiUrl = "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Password-Manager.ps1"
+        Invoke-WebRequest -Uri $guiUrl -OutFile $mainTool -UseBasicParsing
+        Add-DetailedStatus "✅ VMware Password Manager GUI downloaded successfully"
+        Add-DetailedStatus "   Application ready to launch"
+    } catch {
+        Add-DetailedStatus "⚠️ Could not download GUI application: $($_.Exception.Message)"
+        Add-DetailedStatus "You can manually download VMware-Password-Manager.ps1 from GitHub"
+    }
+    
+    Start-Sleep -Milliseconds 500
+}
+
+function Complete-Setup {
+    Update-Progress "Setup Complete!" "All components installed and configured successfully"
+    
+    Add-DetailedStatus ""
+    Add-DetailedStatus "=== SETUP COMPLETE ==="
+    Add-DetailedStatus "✅ PowerShell environment configured"
+    Add-DetailedStatus "✅ VMware PowerCLI installed and ready"
+    Add-DetailedStatus "✅ Configuration files created"
+    Add-DetailedStatus "✅ Main application downloaded"
+    Add-DetailedStatus ""
+    Add-DetailedStatus "Next Steps:"
+    Add-DetailedStatus "1. Configure your ESXi hosts and users"
+    Add-DetailedStatus "2. Test vCenter connectivity"
+    Add-DetailedStatus "3. Run password operations (Dry Run first!)"
+    Add-DetailedStatus ""
+    Add-DetailedStatus "Ready to launch the VMware Password Manager!"
+    
+    $script:CloseButton.Text = "Launch Application"
+    $script:CloseButton.Enabled = $true
+    $script:StatusLabel.Text = "Setup completed successfully! Click 'Launch Application' to continue."
+    $script:StatusLabel.ForeColor = [System.Drawing.Color]::Green
+}
+
+function Start-SetupProcess {
+    try {
+        Initialize-PowerShellEnvironment
+        Install-NuGetProvider
+        Update-PowerShellGet
+        $powerCLISuccess = Install-VMwarePowerCLI
+        Create-ConfigurationFiles
+        Download-MainApplication
+        
+        if ($powerCLISuccess) {
+            Complete-Setup
+        } else {
+            $script:StatusLabel.Text = "Setup completed with warnings. Check detailed log for issues."
+            $script:StatusLabel.ForeColor = [System.Drawing.Color]::Orange
+            $script:CloseButton.Text = "Close"
+            $script:CloseButton.Enabled = $true
+        }
+    } catch {
+        Add-DetailedStatus "❌ Setup failed: $($_.Exception.Message)"
+        $script:StatusLabel.Text = "Setup failed. Check detailed log for errors."
+        $script:StatusLabel.ForeColor = [System.Drawing.Color]::Red
+        $script:CloseButton.Text = "Close"
+        $script:CloseButton.Enabled = $true
+    }
+}
+
+# Main execution
+Show-DoDWarning
+
+$script:SetupForm = Create-SetupForm
+$script:SetupForm.Add_Shown({
+    # Start setup process after form is shown
+    Start-Sleep -Milliseconds 500
+    Start-SetupProcess
+    
+    # Check if we should launch the main application
+    if ($script:CloseButton.Text -eq "Launch Application") {
+        $script:CloseButton.Add_Click({
+            $scriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
+            $mainTool = Join-Path $scriptRoot "VMware-Password-Manager.ps1"
+            if (Test-Path $mainTool) {
+                Start-Process PowerShell -ArgumentList "-File `"$mainTool`"" -WindowStyle Normal
+            }
+        })
+    }
+})
+
+[System.Windows.Forms.Application]::EnableVisualStyles()
+$script:SetupForm.ShowDialog()

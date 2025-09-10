@@ -1,89 +1,147 @@
 # VMware vCenter Password Management Tool
-## Version 0.5 BETA - GUI Edition
+## Version 0.5 BETA - Enterprise Password Management Suite
 
-A DoD-compliant tool for managing passwords on VMware vCenter and ESXi environments with an intuitive Windows Forms GUI interface.
+A professional, DoD-compliant tool for managing passwords across VMware vCenter and ESXi environments with an intuitive Windows Forms GUI interface.
 
 ## 🚀 Quick Start
 
-### **Step 1: Run Setup**
+### **Step 1: Run the Setup Wizard**
 ```powershell
-# Download and run the setup script - it does everything for you
+# Download and run the automated setup wizard
 .\VMware-Setup.ps1
 ```
 
-### **Step 2: Use the Tool**
-The setup script will automatically:
-- ✅ Configure your PowerShell environment
-- ✅ Download required VMware modules locally
-- ✅ Create configuration files
-- ✅ Launch the GUI application
+The setup wizard will:
+- ✅ Configure your PowerShell environment securely
+- ✅ Install required VMware management components
+- ✅ Create configuration templates
+- ✅ Download the latest application
+- ✅ Launch the password management tool
 
-## 🖥️ GUI Interface
+**⏳ Note**: Initial setup may take several minutes depending on your internet connection.
 
-### **Three Simple Tabs**
-- **VMware Management** - Connect to vCenter and manage passwords
-- **Configuration** - Edit your hosts and users
-- **Logs** - Monitor operations in real-time
+### **Step 2: Configure and Use**
+The application will guide you through:
+1. **Configuration**: Add your ESXi hosts and target users
+2. **Connection Testing**: Verify vCenter connectivity
+3. **Password Operations**: Change passwords safely with dry-run testing
 
-### **Key Features**
-- ✅ **Test Connection** - Verify vCenter connectivity before operations
-- ✅ **Dry Run Mode** - Test password changes safely before going live
-- ✅ **Live Mode** - Execute actual password changes
-- ✅ **Progress Tracking** - Visual feedback for all operations
-- ✅ **Real-time Logging** - Monitor everything that happens
+## 🖥️ Features
+
+### **Professional GUI Interface**
+- **Password Management Tab**: Main operations with real-time progress tracking
+- **Configuration Tab**: Built-in editors for hosts and users
+- **GitHub Manager Tab**: Application updates and repository access
+- **Logs Tab**: Comprehensive logging with export capabilities
+
+### **Enterprise Security**
+- ✅ **DoD Compliance**: Government warning banners and audit logging
+- ✅ **Safe Operations**: Mandatory dry-run testing before live changes
+- ✅ **Role Separation**: Clear distinction between admin and target users
+- ✅ **Comprehensive Logging**: All operations tracked and exportable
+
+### **Smart Password Operations**
+- ✅ **Bulk Operations**: Change passwords across multiple ESXi hosts
+- ✅ **Progress Tracking**: Real-time status with detailed operation logs
+- ✅ **Error Handling**: Graceful failure handling with detailed reporting
+- ✅ **Validation**: Pre-flight checks ensure successful operations
+
+### **User-Friendly Design**
+- ✅ **Dropdown Menus**: Easy selection of admin and target users
+- ✅ **Visual Feedback**: Progress bars and status indicators
+- ✅ **Guided Workflow**: Clear instructions and helpful error messages
+- ✅ **Self-Updating**: Built-in update mechanism for latest features
 
 ## ⚙️ Configuration
 
-### **Hosts Configuration**
+### **ESXi Hosts**
 Add your ESXi host addresses in the Configuration tab:
 ```
 192.168.1.100
 192.168.1.101
 esxi-host-01.domain.local
+esxi-host-02.domain.local
 ```
 
-### **Users Configuration**
-Add target usernames for password operations:
-```
-root
-admin
-serviceaccount
-```
+### **User Accounts**
+Configure both administrator and target users:
+- **Administrator Users**: For vCenter login (administrator, admin)
+- **Target Users**: For password changes (root, service accounts)
 
-## 🛡️ Security & Compliance
+## 🔧 System Requirements
 
-- ✅ **DoD Compliant** - Government warning banners and audit logging
-- ✅ **Safe Operations** - Dry run testing before live changes
-- ✅ **Comprehensive Logging** - All operations tracked and logged
-- ✅ **Confirmation Dialogs** - Multiple confirmations for live operations
+- **Windows** with PowerShell 5.1 or later
+- **Network Access** to vCenter and ESXi hosts
+- **Administrative Privileges** on target systems
+- **Internet Access** for initial setup (one-time requirement)
 
 ## 📋 Typical Workflow
 
-1. **Run Setup**: `.\VMware-Setup.ps1` (one time setup)
-2. **Configure**: Add your ESXi hosts and target users
-3. **Test Connection**: Verify vCenter connectivity
-4. **Dry Run**: Test password changes safely
-5. **Live Operation**: Execute actual password changes
-6. **Monitor**: Review logs for operation results
+### **Initial Setup**
+1. **Run Setup Wizard**: `.\VMware-Setup.ps1` (one-time process)
+2. **Configure Hosts**: Add ESXi host addresses
+3. **Configure Users**: Add administrator and target user accounts
 
-## 🔧 Requirements
+### **Password Operations**
+1. **Select Users**: Choose admin user (vCenter login) and target user (password change)
+2. **Test Connection**: Verify vCenter connectivity
+3. **Dry Run**: Test password changes safely
+4. **Live Operation**: Execute actual password changes
+5. **Review Results**: Check operation logs and export if needed
 
-- **Windows** with PowerShell 5.1 or later
-- **Network access** to vCenter and ESXi hosts
-- **Administrative privileges** on target systems
-- **Internet access** for initial module download (one time)
+## 🛡️ Security Features
+
+### **DoD Compliance**
+- Government system warning banners
+- Comprehensive audit logging
+- Operation confirmation requirements
+- Secure credential handling
+
+### **Safe Operations**
+- Mandatory dry-run testing
+- Multiple confirmation dialogs
+- Detailed operation logging
+- Graceful error recovery
+
+### **Enterprise Integration**
+- Local component installation (no system-wide changes)
+- Portable configuration files
+- Comprehensive logging for compliance
+- Self-contained operation
+
+## 📊 Operation Tracking
+
+The application provides detailed tracking of all operations:
+- **Real-time Progress**: Visual progress bars and status updates
+- **Detailed Logs**: Timestamped operation logs with success/failure status
+- **Export Capability**: Save logs for audit and compliance purposes
+- **Error Reporting**: Detailed error messages for troubleshooting
+
+## 🔄 Updates and Maintenance
+
+### **Automatic Updates**
+- Built-in update mechanism through GitHub Manager tab
+- Download latest setup wizard and application versions
+- No manual file management required
+
+### **Configuration Management**
+- Simple text-based configuration files
+- Easy backup and restore of settings
+- Version control friendly format
 
 ## 📞 Support
 
-- Check the **Logs tab** for detailed operation information
-- All operations are logged to `./Logs/` directory
-- Configuration files are stored as `hosts.txt` and `users.txt`
+For assistance:
+1. **Check Logs**: Review the detailed operation logs in the Logs tab
+2. **Export Logs**: Save logs for detailed analysis
+3. **Test Connectivity**: Use the built-in connection testing features
+4. **Review Configuration**: Verify hosts and users are properly configured
 
 ## 🔒 Security Notice
 
-This tool is designed for authorized personnel only. All operations are logged and monitored. Use dry run mode before executing live password changes on production systems.
+This tool is designed for authorized personnel only. All operations are logged and monitored. Always use dry-run mode before executing live password changes on production systems.
 
 ---
 
 **VMware vCenter Password Management Tool - Version 0.5 BETA**  
-*Simple setup, powerful features, enterprise ready*
+*Professional • Secure • User-Friendly • Enterprise Ready*
