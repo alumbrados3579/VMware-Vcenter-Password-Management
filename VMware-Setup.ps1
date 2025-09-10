@@ -230,8 +230,58 @@ function Update-PowerShellGet {
     Start-Sleep -Milliseconds 500
 }
 
+function Test-ExistingPowerCLI {
+    param(
+        [string]$LocalModulesPath
+    )
+    
+    Add-DetailedStatus "Checking for existing PowerCLI installations..."
+    
+    # Check if PowerCLI is already loaded in memory
+    $loadedPowerCLI = Get-Module -Name "VMware.PowerCLI" -ErrorAction SilentlyContinue
+    if ($loadedPowerCLI) {
+        Add-DetailedStatus "✅ VMware PowerCLI already loaded in current session"
+        Add-DetailedStatus "   Version: $($loadedPowerCLI.Version)"
+        Add-DetailedStatus "   Location: $($loadedPowerCLI.ModuleBase)"
+        return $true
+    }
+    
+    # Check local modules directory
+    $localPowerCLIPath = Join-Path $LocalModulesPath "VMware.PowerCLI"
+    if (Test-Path $localPowerCLIPath) {
+        Add-DetailedStatus "Found local PowerCLI directory: $localPowerCLIPath"
+        $manifestFiles = Get-ChildItem -Path $localPowerCLIPath -Filter "VMware.PowerCLI.psd1" -Recurse -ErrorAction SilentlyContinue
+        
+        if ($manifestFiles) {
+            try {
+                $manifestData = Import-PowerShellDataFile $manifestFiles[0].FullName
+                Add-DetailedStatus "✅ Valid PowerCLI installation found locally"
+                Add-DetailedStatus "   Version: $($manifestData.ModuleVersion)"
+                Add-DetailedStatus "   Location: $localPowerCLIPath"
+                return $true
+            } catch {
+                Add-DetailedStatus "⚠️ Local PowerCLI manifest is corrupted"
+            }
+        } else {
+            Add-DetailedStatus "⚠️ Local PowerCLI directory incomplete"
+        }
+    }
+    
+    # Check system-wide PowerCLI
+    $systemPowerCLI = Get-Module -Name "VMware.PowerCLI" -ListAvailable -ErrorAction SilentlyContinue
+    if ($systemPowerCLI) {
+        Add-DetailedStatus "✅ System-wide PowerCLI installation found"
+        Add-DetailedStatus "   Version: $($systemPowerCLI.Version)"
+        Add-DetailedStatus "   Location: $($systemPowerCLI.ModuleBase)"
+        return $true
+    }
+    
+    Add-DetailedStatus "⚠️ No existing PowerCLI installation found"
+    return $false
+}
+
 function Install-VMwarePowerCLI {
-    Update-Progress "Installing VMware PowerCLI" "This step may take several minutes - downloading and configuring VMware modules..."
+    Update-Progress "Installing VMware PowerCLI" "Checking existing installations and configuring VMware modules..."
     
     $scriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
     $localModulesPath = Join-Path $scriptRoot "Modules"
@@ -250,35 +300,16 @@ function Install-VMwarePowerCLI {
             Add-DetailedStatus "✅ Local Modules directory added to PowerShell module path"
         }
         
-        # Check if PowerCLI already exists locally
-        $localPowerCLIPath = Join-Path $localModulesPath "VMware.PowerCLI"
-        $powerCLIExists = $false
-        
-        if (Test-Path $localPowerCLIPath) {
-            Add-DetailedStatus "Checking existing PowerCLI installation..."
-            $manifestFiles = Get-ChildItem -Path $localPowerCLIPath -Filter "VMware.PowerCLI.psd1" -Recurse -ErrorAction SilentlyContinue
-            
-            if ($manifestFiles) {
-                try {
-                    $manifestData = Import-PowerShellDataFile $manifestFiles[0].FullName
-                    Add-DetailedStatus "✅ VMware PowerCLI found in local directory"
-                    Add-DetailedStatus "   Version: $($manifestData.ModuleVersion)"
-                    Add-DetailedStatus "   Location: $localPowerCLIPath"
-                    $powerCLIExists = $true
-                } catch {
-                    Add-DetailedStatus "⚠️ Local PowerCLI found but manifest is corrupted, will re-download"
-                }
-            } else {
-                Add-DetailedStatus "⚠️ Local PowerCLI directory exists but appears incomplete, will re-download"
-            }
-        }
+        # Check for existing PowerCLI installations
+        $powerCLIExists = Test-ExistingPowerCLI -LocalModulesPath $localModulesPath
         
         if (-not $powerCLIExists) {
-            Add-DetailedStatus "Downloading VMware PowerCLI to local directory..."
+            Add-DetailedStatus "No existing PowerCLI found - downloading to local directory..."
             Add-DetailedStatus "⏳ This may take several minutes depending on your internet connection"
             Add-DetailedStatus "   Target directory: $localModulesPath"
             
             # Remove incomplete installation if it exists
+            $localPowerCLIPath = Join-Path $localModulesPath "VMware.PowerCLI"
             if (Test-Path $localPowerCLIPath) {
                 Add-DetailedStatus "Removing incomplete PowerCLI installation..."
                 Remove-Item -Path $localPowerCLIPath -Recurse -Force -ErrorAction SilentlyContinue
@@ -288,7 +319,7 @@ function Install-VMwarePowerCLI {
             Save-Module -Name "VMware.PowerCLI" -Path $localModulesPath -Force
             Add-DetailedStatus "✅ VMware PowerCLI downloaded to local directory successfully"
         } else {
-            Add-DetailedStatus "✅ Using existing local PowerCLI installation (no download needed)"
+            Add-DetailedStatus "✅ Using existing PowerCLI installation (no download needed)"
         }
         
         # Check if PowerCLI is already loaded in current session
@@ -495,12 +526,22 @@ $script:SetupForm.Add_Shown({
     Start-SetupProcess
     
     # Check if we should launch the main application
-    if ($script:CloseButton.Text -eq "Launch Application") {
+    if ($script:CloseButton -and $script:CloseButton.Text -eq "Launch Application") {
         $script:CloseButton.Add_Click({
-            $scriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
-            $mainTool = Join-Path $scriptRoot "VMware-Password-Manager.ps1"
-            if (Test-Path $mainTool) {
-                Start-Process PowerShell -ArgumentList "-File `"$mainTool`"" -WindowStyle Normal
+            try {
+                $scriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
+                $mainTool = Join-Path $scriptRoot "VMware-Password-Manager.ps1"
+                if (Test-Path $mainTool) {
+                    Add-DetailedStatus "Launching VMware Password Manager..."
+                    Start-Process PowerShell -ArgumentList "-File `"$mainTool`"" -WindowStyle Normal
+                    Add-DetailedStatus "✅ Application launched successfully"
+                } else {
+                    Add-DetailedStatus "❌ Main application file not found: $mainTool"
+                    [System.Windows.Forms.MessageBox]::Show("Main application file not found: $mainTool", "File Not Found", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+                }
+            } catch {
+                Add-DetailedStatus "❌ Error launching application: $($_.Exception.Message)"
+                [System.Windows.Forms.MessageBox]::Show("Error launching application: $($_.Exception.Message)", "Launch Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
             }
         })
     }
