@@ -267,29 +267,29 @@ function Create-VMwareTab {
     $vcenterLabel.Size = New-Object System.Drawing.Size(100, 20)
     
     $script:VCenterTextBox = New-Object System.Windows.Forms.TextBox
-    $script:VCenterTextBox.Location = New-Object System.Drawing.Point(120, 23)
-    $script:VCenterTextBox.Size = New-Object System.Drawing.Size(200, 20)
+    $script:VCenterTextBox.Location = New-Object System.Drawing.Point(110, 23)
+    $script:VCenterTextBox.Size = New-Object System.Drawing.Size(180, 20)
     
     # Username (Administrator) - Free text entry for domain accounts
     $usernameLabel = New-Object System.Windows.Forms.Label
-    $usernameLabel.Text = "Admin Username:"
-    $usernameLabel.Location = New-Object System.Drawing.Point(340, 25)
-    $usernameLabel.Size = New-Object System.Drawing.Size(100, 20)
+    $usernameLabel.Text = "Username:"
+    $usernameLabel.Location = New-Object System.Drawing.Point(300, 25)
+    $usernameLabel.Size = New-Object System.Drawing.Size(80, 20)
     
     $script:AdminUsernameTextBox = New-Object System.Windows.Forms.TextBox
-    $script:AdminUsernameTextBox.Location = New-Object System.Drawing.Point(450, 23)
-    $script:AdminUsernameTextBox.Size = New-Object System.Drawing.Size(180, 20)
+    $script:AdminUsernameTextBox.Location = New-Object System.Drawing.Point(390, 23)
+    $script:AdminUsernameTextBox.Size = New-Object System.Drawing.Size(170, 20)
     $script:AdminUsernameTextBox.Text = "administrator@vsphere.local"
     
     # Password
     $passwordLabel = New-Object System.Windows.Forms.Label
     $passwordLabel.Text = "Password:"
-    $passwordLabel.Location = New-Object System.Drawing.Point(610, 25)
-    $passwordLabel.Size = New-Object System.Drawing.Size(70, 20)
+    $passwordLabel.Location = New-Object System.Drawing.Point(570, 25)
+    $passwordLabel.Size = New-Object System.Drawing.Size(80, 20)
     
     $script:PasswordTextBox = New-Object System.Windows.Forms.TextBox
-    $script:PasswordTextBox.Location = New-Object System.Drawing.Point(690, 23)
-    $script:PasswordTextBox.Size = New-Object System.Drawing.Size(140, 20)
+    $script:PasswordTextBox.Location = New-Object System.Drawing.Point(660, 23)
+    $script:PasswordTextBox.Size = New-Object System.Drawing.Size(170, 20)
     $script:PasswordTextBox.UseSystemPasswordChar = $true
     
     # Test Connection Button
@@ -319,13 +319,13 @@ function Create-VMwareTab {
     
     # Target User Selection (ESXi accounts from users.txt)
     $targetUserLabel = New-Object System.Windows.Forms.Label
-    $targetUserLabel.Text = "Target ESXi User:"
+    $targetUserLabel.Text = "Target User:"
     $targetUserLabel.Location = New-Object System.Drawing.Point(10, 25)
-    $targetUserLabel.Size = New-Object System.Drawing.Size(100, 20)
+    $targetUserLabel.Size = New-Object System.Drawing.Size(90, 20)
     
     $script:TargetUserComboBox = New-Object System.Windows.Forms.ComboBox
-    $script:TargetUserComboBox.Location = New-Object System.Drawing.Point(120, 23)
-    $script:TargetUserComboBox.Size = New-Object System.Drawing.Size(120, 20)
+    $script:TargetUserComboBox.Location = New-Object System.Drawing.Point(100, 23)
+    $script:TargetUserComboBox.Size = New-Object System.Drawing.Size(130, 20)
     $script:TargetUserComboBox.DropDownStyle = "DropDownList"
     
     # New Password
@@ -336,17 +336,17 @@ function Create-VMwareTab {
     
     $script:NewPasswordTextBox = New-Object System.Windows.Forms.TextBox
     $script:NewPasswordTextBox.Location = New-Object System.Drawing.Point(350, 23)
-    $script:NewPasswordTextBox.Size = New-Object System.Drawing.Size(150, 20)
+    $script:NewPasswordTextBox.Size = New-Object System.Drawing.Size(130, 20)
     $script:NewPasswordTextBox.UseSystemPasswordChar = $true
     
     # Confirm Password
     $confirmPasswordLabel = New-Object System.Windows.Forms.Label
     $confirmPasswordLabel.Text = "Confirm:"
-    $confirmPasswordLabel.Location = New-Object System.Drawing.Point(520, 25)
-    $confirmPasswordLabel.Size = New-Object System.Drawing.Size(60, 20)
+    $confirmPasswordLabel.Location = New-Object System.Drawing.Point(490, 25)
+    $confirmPasswordLabel.Size = New-Object System.Drawing.Size(70, 20)
     
     $script:ConfirmPasswordTextBox = New-Object System.Windows.Forms.TextBox
-    $script:ConfirmPasswordTextBox.Location = New-Object System.Drawing.Point(590, 23)
+    $script:ConfirmPasswordTextBox.Location = New-Object System.Drawing.Point(570, 23)
     $script:ConfirmPasswordTextBox.Size = New-Object System.Drawing.Size(150, 20)
     $script:ConfirmPasswordTextBox.UseSystemPasswordChar = $true
     
@@ -372,14 +372,14 @@ function Create-VMwareTab {
     # Add helpful labels
     $vCenterHelpLabel = New-Object System.Windows.Forms.Label
     $vCenterHelpLabel.Text = "(e.g., administrator@vsphere.local)"
-    $vCenterHelpLabel.Location = New-Object System.Drawing.Point(450, 45)
+    $vCenterHelpLabel.Location = New-Object System.Drawing.Point(390, 45)
     $vCenterHelpLabel.Size = New-Object System.Drawing.Size(180, 15)
     $vCenterHelpLabel.ForeColor = [System.Drawing.Color]::Gray
     $vCenterHelpLabel.Font = New-Object System.Drawing.Font("Arial", 8)
     
     $esxiHelpLabel = New-Object System.Windows.Forms.Label
     $esxiHelpLabel.Text = "(from users.txt: root, admin_swm, etc.)"
-    $esxiHelpLabel.Location = New-Object System.Drawing.Point(120, 45)
+    $esxiHelpLabel.Location = New-Object System.Drawing.Point(100, 45)
     $esxiHelpLabel.Size = New-Object System.Drawing.Size(200, 15)
     $esxiHelpLabel.ForeColor = [System.Drawing.Color]::Gray
     $esxiHelpLabel.Font = New-Object System.Drawing.Font("Arial", 8)
