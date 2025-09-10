@@ -215,32 +215,28 @@ function Create-TabControl {
     $tabControl.Size = New-Object System.Drawing.Size(880, 650)
     $tabControl.Location = New-Object System.Drawing.Point(10, 10)
     
-    # Password Management Tab
-    $vmwareTab = New-Object System.Windows.Forms.TabPage
-    $vmwareTab.Text = "Password Management"
-    $vmwareTab.BackColor = [System.Drawing.Color]::White
+    # Create tabs
+    $passwordTab = New-Object System.Windows.Forms.TabPage
+    $passwordTab.Text = "Password Management"
+    Create-PasswordTab $passwordTab
     
-    # Configuration Tab
     $configTab = New-Object System.Windows.Forms.TabPage
     $configTab.Text = "Configuration"
-    $configTab.BackColor = [System.Drawing.Color]::White
+    Create-ConfigTab $configTab
     
-    # GitHub Manager Tab
+    $cliTab = New-Object System.Windows.Forms.TabPage
+    $cliTab.Text = "CLI Workspace"
+    Create-CLITab $cliTab
+    
     $githubTab = New-Object System.Windows.Forms.TabPage
     $githubTab.Text = "GitHub Manager"
-    $githubTab.BackColor = [System.Drawing.Color]::White
+    Create-GitHubTab $githubTab
     
-    # Logs Tab
     $logsTab = New-Object System.Windows.Forms.TabPage
     $logsTab.Text = "Logs"
-    $logsTab.BackColor = [System.Drawing.Color]::White
+    Create-LogsTab $logsTab
     
-    $tabControl.TabPages.Add($vmwareTab)
-    $tabControl.TabPages.Add($configTab)
-    $tabControl.TabPages.Add($githubTab)
-    $tabControl.TabPages.Add($logsTab)
-    
-    $form.Controls.Add($tabControl)
+    $tabControl.TabPages.AddRange(@($passwordTab, $configTab, $cliTab, $githubTab, $logsTab))
     
     return @{
         TabControl = $tabControl
@@ -427,10 +423,155 @@ function Create-VMwareTab {
     $tab.Controls.AddRange(@($vcenterGroup, $passwordGroup, $operationStatusGroup))
 }
 
+function Create-CLITab {
+    param($tab)
+    
+    $tab.BackColor = [System.Drawing.Color]::White
+    
+    # Connection Group
+    $connectionGroup = New-Object System.Windows.Forms.GroupBox
+    $connectionGroup.Text = "vCenter Connection"
+    $connectionGroup.Size = New-Object System.Drawing.Size(840, 100)
+    $connectionGroup.Location = New-Object System.Drawing.Point(10, 10)
+    
+    # vCenter Server
+    $vcenterLabel = New-Object System.Windows.Forms.Label
+    $vcenterLabel.Text = "vCenter Server:"
+    $vcenterLabel.Location = New-Object System.Drawing.Point(10, 25)
+    $vcenterLabel.Size = New-Object System.Drawing.Size(100, 20)
+    
+    $script:CLIVCenterTextBox = New-Object System.Windows.Forms.TextBox
+    $script:CLIVCenterTextBox.Location = New-Object System.Drawing.Point(120, 23)
+    $script:CLIVCenterTextBox.Size = New-Object System.Drawing.Size(200, 20)
+    
+    # Username
+    $usernameLabel = New-Object System.Windows.Forms.Label
+    $usernameLabel.Text = "Username:"
+    $usernameLabel.Location = New-Object System.Drawing.Point(340, 25)
+    $usernameLabel.Size = New-Object System.Drawing.Size(80, 20)
+    
+    $script:CLIUsernameTextBox = New-Object System.Windows.Forms.TextBox
+    $script:CLIUsernameTextBox.Location = New-Object System.Drawing.Point(430, 23)
+    $script:CLIUsernameTextBox.Size = New-Object System.Drawing.Size(150, 20)
+    $script:CLIUsernameTextBox.Text = "administrator@vsphere.local"
+    
+    # Password
+    $passwordLabel = New-Object System.Windows.Forms.Label
+    $passwordLabel.Text = "Password:"
+    $passwordLabel.Location = New-Object System.Drawing.Point(590, 25)
+    $passwordLabel.Size = New-Object System.Drawing.Size(70, 20)
+    
+    $script:CLIPasswordTextBox = New-Object System.Windows.Forms.TextBox
+    $script:CLIPasswordTextBox.Location = New-Object System.Drawing.Point(670, 23)
+    $script:CLIPasswordTextBox.Size = New-Object System.Drawing.Size(100, 20)
+    $script:CLIPasswordTextBox.UseSystemPasswordChar = $true
+    
+    # Connect/Disconnect buttons
+    $connectButton = New-Object System.Windows.Forms.Button
+    $connectButton.Text = "Connect"
+    $connectButton.Location = New-Object System.Drawing.Point(10, 55)
+    $connectButton.Size = New-Object System.Drawing.Size(80, 30)
+    $connectButton.BackColor = [System.Drawing.Color]::LightGreen
+    $connectButton.Add_Click({
+        Connect-CLIToVCenter
+    })
+    
+    $disconnectButton = New-Object System.Windows.Forms.Button
+    $disconnectButton.Text = "Disconnect"
+    $disconnectButton.Location = New-Object System.Drawing.Point(100, 55)
+    $disconnectButton.Size = New-Object System.Drawing.Size(80, 30)
+    $disconnectButton.BackColor = [System.Drawing.Color]::LightCoral
+    $disconnectButton.Add_Click({
+        Disconnect-CLIFromVCenter
+    })
+    
+    # Connection status
+    $script:CLIConnectionStatusLabel = New-Object System.Windows.Forms.Label
+    $script:CLIConnectionStatusLabel.Text = "Status: Not Connected"
+    $script:CLIConnectionStatusLabel.Location = New-Object System.Drawing.Point(200, 65)
+    $script:CLIConnectionStatusLabel.Size = New-Object System.Drawing.Size(300, 20)
+    $script:CLIConnectionStatusLabel.ForeColor = [System.Drawing.Color]::Red
+    
+    $connectionGroup.Controls.AddRange(@($vcenterLabel, $script:CLIVCenterTextBox, $usernameLabel, $script:CLIUsernameTextBox, $passwordLabel, $script:CLIPasswordTextBox, $connectButton, $disconnectButton, $script:CLIConnectionStatusLabel))
+    
+    # CLI Workspace Group
+    $cliGroup = New-Object System.Windows.Forms.GroupBox
+    $cliGroup.Text = "PowerCLI Command Workspace"
+    $cliGroup.Size = New-Object System.Drawing.Size(840, 380)
+    $cliGroup.Location = New-Object System.Drawing.Point(10, 120)
+    
+    # Command input
+    $commandLabel = New-Object System.Windows.Forms.Label
+    $commandLabel.Text = "PowerCLI Command:"
+    $commandLabel.Location = New-Object System.Drawing.Point(10, 25)
+    $commandLabel.Size = New-Object System.Drawing.Size(120, 20)
+    
+    $script:CLICommandTextBox = New-Object System.Windows.Forms.TextBox
+    $script:CLICommandTextBox.Location = New-Object System.Drawing.Point(10, 50)
+    $script:CLICommandTextBox.Size = New-Object System.Drawing.Size(650, 20)
+    $script:CLICommandTextBox.Font = New-Object System.Drawing.Font("Consolas", 9)
+    $script:CLICommandTextBox.Add_KeyDown({
+        if ($_.KeyCode -eq "Enter") {
+            Execute-CLICommand
+        }
+    })
+    
+    # Execute button
+    $executeButton = New-Object System.Windows.Forms.Button
+    $executeButton.Text = "Execute"
+    $executeButton.Location = New-Object System.Drawing.Point(670, 48)
+    $executeButton.Size = New-Object System.Drawing.Size(80, 25)
+    $executeButton.BackColor = [System.Drawing.Color]::LightBlue
+    $executeButton.Add_Click({
+        Execute-CLICommand
+    })
+    
+    # Clear button
+    $clearButton = New-Object System.Windows.Forms.Button
+    $clearButton.Text = "Clear"
+    $clearButton.Location = New-Object System.Drawing.Point(760, 48)
+    $clearButton.Size = New-Object System.Drawing.Size(60, 25)
+    $clearButton.Add_Click({
+        $script:CLIOutputTextBox.Clear()
+    })
+    
+    # Output area
+    $outputLabel = New-Object System.Windows.Forms.Label
+    $outputLabel.Text = "Command Output:"
+    $outputLabel.Location = New-Object System.Drawing.Point(10, 85)
+    $outputLabel.Size = New-Object System.Drawing.Size(120, 20)
+    
+    $script:CLIOutputTextBox = New-Object System.Windows.Forms.TextBox
+    $script:CLIOutputTextBox.Location = New-Object System.Drawing.Point(10, 110)
+    $script:CLIOutputTextBox.Size = New-Object System.Drawing.Size(820, 260)
+    $script:CLIOutputTextBox.Multiline = $true
+    $script:CLIOutputTextBox.ScrollBars = "Vertical"
+    $script:CLIOutputTextBox.ReadOnly = $true
+    $script:CLIOutputTextBox.BackColor = [System.Drawing.Color]::Black
+    $script:CLIOutputTextBox.ForeColor = [System.Drawing.Color]::Lime
+    $script:CLIOutputTextBox.Font = New-Object System.Drawing.Font("Consolas", 9)
+    
+    # Add welcome message
+    $script:CLIOutputTextBox.Text = "PowerCLI Command Workspace - Version 0.5 BETA`r`n"
+    $script:CLIOutputTextBox.AppendText("Connect to vCenter above, then execute PowerCLI commands below.`r`n`r`n"
+    $script:CLIOutputTextBox.AppendText("Example commands:`r`n")
+    $script:CLIOutputTextBox.AppendText("  Get-VMHost`r`n")
+    $script:CLIOutputTextBox.AppendText("  Get-VM | Select Name, PowerState`r`n")
+    $script:CLIOutputTextBox.AppendText("  Get-Datastore`r`n")
+    $script:CLIOutputTextBox.AppendText("  Get-Cluster`r`n`r`n")
+    $script:CLIOutputTextBox.AppendText("Ready for commands...`r`n")
+    
+    $cliGroup.Controls.AddRange(@($commandLabel, $script:CLICommandTextBox, $executeButton, $clearButton, $outputLabel, $script:CLIOutputTextBox))
+    
+    $tab.Controls.AddRange(@($connectionGroup, $cliGroup))
+}
+
 function Create-ConfigTab {
     param($tab)
     
-    # Hosts Configuration
+    $tab.BackColor = [System.Drawing.Color]::White
+    
+    # Hosts Configuration Group
     $hostsGroup = New-Object System.Windows.Forms.GroupBox
     $hostsGroup.Text = "ESXi Hosts Configuration"
     $hostsGroup.Size = New-Object System.Drawing.Size(840, 280)
@@ -1034,6 +1175,110 @@ function Check-ModuleStatus {
     } catch {
         $script:ModuleStatusLabel.Text = "❌ Error checking module status: $($_.Exception.Message)"
         Write-Log "Failed to check module status: $($_.Exception.Message)" "ERROR"
+    }
+}
+
+# --- CLI Workspace Functions ---
+function Connect-CLIToVCenter {
+    try {
+        if ([string]::IsNullOrWhiteSpace($script:CLIVCenterTextBox.Text) -or 
+            [string]::IsNullOrWhiteSpace($script:CLIUsernameTextBox.Text) -or 
+            [string]::IsNullOrWhiteSpace($script:CLIPasswordTextBox.Text)) {
+            [System.Windows.Forms.MessageBox]::Show("Please fill in all connection fields.", "Missing Information", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning)
+            return
+        }
+        
+        $script:CLIConnectionStatusLabel.Text = "Status: Connecting..."
+        $script:CLIConnectionStatusLabel.ForeColor = [System.Drawing.Color]::Orange
+        
+        # Add connection attempt to output
+        $script:CLIOutputTextBox.AppendText("`r`n[$(Get-Date -Format 'HH:mm:ss')] Connecting to $($script:CLIVCenterTextBox.Text)...`r`n")
+        $script:CLIOutputTextBox.ScrollToCaret()
+        
+        $connection = Connect-VIServer -Server $script:CLIVCenterTextBox.Text -User $script:CLIUsernameTextBox.Text -Password $script:CLIPasswordTextBox.Text -ErrorAction Stop
+        
+        if ($connection) {
+            $script:CLIConnectionStatusLabel.Text = "Status: Connected to $($connection.Name)"
+            $script:CLIConnectionStatusLabel.ForeColor = [System.Drawing.Color]::Green
+            $script:CLIOutputTextBox.AppendText("✅ Connected successfully to $($connection.Name)`r`n")
+            $script:CLIOutputTextBox.AppendText("   Version: $($connection.Version)`r`n")
+            $script:CLIOutputTextBox.AppendText("   Build: $($connection.Build)`r`n")
+            $script:CLIOutputTextBox.AppendText("`r`nReady for PowerCLI commands...`r`n`r`n")
+            $script:CLIOutputTextBox.ScrollToCaret()
+            Write-Log "CLI workspace connected to vCenter: $($connection.Name)" "SUCCESS"
+        }
+    } catch {
+        $script:CLIConnectionStatusLabel.Text = "Status: Connection Failed"
+        $script:CLIConnectionStatusLabel.ForeColor = [System.Drawing.Color]::Red
+        $script:CLIOutputTextBox.AppendText("❌ Connection failed: $($_.Exception.Message)`r`n`r`n")
+        $script:CLIOutputTextBox.ScrollToCaret()
+        Write-Log "CLI workspace connection failed: $($_.Exception.Message)" "ERROR"
+        [System.Windows.Forms.MessageBox]::Show("Connection failed: $($_.Exception.Message)", "Connection Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+    }
+}
+
+function Disconnect-CLIFromVCenter {
+    try {
+        $connections = $global:DefaultVIServers
+        if ($connections) {
+            foreach ($connection in $connections) {
+                Disconnect-VIServer -Server $connection -Confirm:$false -ErrorAction SilentlyContinue
+            }
+            $script:CLIConnectionStatusLabel.Text = "Status: Disconnected"
+            $script:CLIConnectionStatusLabel.ForeColor = [System.Drawing.Color]::Red
+            $script:CLIOutputTextBox.AppendText("`r`n[$(Get-Date -Format 'HH:mm:ss')] Disconnected from vCenter`r`n`r`n")
+            $script:CLIOutputTextBox.ScrollToCaret()
+            Write-Log "CLI workspace disconnected from vCenter" "INFO"
+        } else {
+            $script:CLIOutputTextBox.AppendText("`r`n[$(Get-Date -Format 'HH:mm:ss')] No active connections to disconnect`r`n`r`n")
+            $script:CLIOutputTextBox.ScrollToCaret()
+        }
+    } catch {
+        Write-Log "Error disconnecting CLI workspace: $($_.Exception.Message)" "ERROR"
+    }
+}
+
+function Execute-CLICommand {
+    try {
+        $command = $script:CLICommandTextBox.Text.Trim()
+        if ([string]::IsNullOrWhiteSpace($command)) {
+            return
+        }
+        
+        # Check if connected
+        if (-not $global:DefaultVIServers) {
+            $script:CLIOutputTextBox.AppendText("`r`n❌ Not connected to vCenter. Please connect first.`r`n`r`n")
+            $script:CLIOutputTextBox.ScrollToCaret()
+            return
+        }
+        
+        # Add command to output
+        $script:CLIOutputTextBox.AppendText("`r`n[$(Get-Date -Format 'HH:mm:ss')] PS> $command`r`n")
+        $script:CLIOutputTextBox.ScrollToCaret()
+        
+        # Execute command
+        try {
+            $result = Invoke-Expression $command | Out-String
+            if ([string]::IsNullOrWhiteSpace($result)) {
+                $script:CLIOutputTextBox.AppendText("(No output)`r`n")
+            } else {
+                $script:CLIOutputTextBox.AppendText($result)
+            }
+        } catch {
+            $script:CLIOutputTextBox.AppendText("❌ Error: $($_.Exception.Message)`r`n")
+        }
+        
+        $script:CLIOutputTextBox.AppendText("`r`n")
+        $script:CLIOutputTextBox.ScrollToCaret()
+        
+        # Clear command input
+        $script:CLICommandTextBox.Clear()
+        
+        Write-Log "CLI command executed: $command" "INFO"
+    } catch {
+        $script:CLIOutputTextBox.AppendText("❌ Command execution error: $($_.Exception.Message)`r`n`r`n")
+        $script:CLIOutputTextBox.ScrollToCaret()
+        Write-Log "CLI command execution error: $($_.Exception.Message)" "ERROR"
     }
 }
 
