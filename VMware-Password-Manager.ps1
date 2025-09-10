@@ -314,7 +314,7 @@ function Create-VMwareTab {
     # Password Operations Group
     $passwordGroup = New-Object System.Windows.Forms.GroupBox
     $passwordGroup.Text = "Password Operations"
-    $passwordGroup.Size = New-Object System.Drawing.Size(840, 200)
+    $passwordGroup.Size = New-Object System.Drawing.Size(840, 120)
     $passwordGroup.Location = New-Object System.Drawing.Point(10, 140)
     
     # Target User Selection (ESXi accounts from users.txt)
@@ -353,8 +353,8 @@ function Create-VMwareTab {
     # Operation Buttons
     $dryRunButton = New-Object System.Windows.Forms.Button
     $dryRunButton.Text = "Dry Run (Test)"
-    $dryRunButton.Location = New-Object System.Drawing.Point(10, 60)
-    $dryRunButton.Size = New-Object System.Drawing.Size(120, 40)
+    $dryRunButton.Location = New-Object System.Drawing.Point(10, 70)
+    $dryRunButton.Size = New-Object System.Drawing.Size(120, 35)
     $dryRunButton.BackColor = [System.Drawing.Color]::LightGreen
     $dryRunButton.Add_Click({
         Start-PasswordOperation -DryRun $true
@@ -362,41 +362,12 @@ function Create-VMwareTab {
     
     $liveRunButton = New-Object System.Windows.Forms.Button
     $liveRunButton.Text = "LIVE Run"
-    $liveRunButton.Location = New-Object System.Drawing.Point(150, 60)
-    $liveRunButton.Size = New-Object System.Drawing.Size(120, 40)
+    $liveRunButton.Location = New-Object System.Drawing.Point(140, 70)
+    $liveRunButton.Size = New-Object System.Drawing.Size(120, 35)
     $liveRunButton.BackColor = [System.Drawing.Color]::LightCoral
     $liveRunButton.Add_Click({
         Start-PasswordOperation -DryRun $false
     })
-    
-    # Progress Bar
-    $script:ProgressBar = New-Object System.Windows.Forms.ProgressBar
-    $script:ProgressBar.Location = New-Object System.Drawing.Point(10, 120)
-    $script:ProgressBar.Size = New-Object System.Drawing.Size(820, 20)
-    $script:ProgressBar.Style = "Continuous"
-    
-    # Status Label
-    $script:StatusLabel = New-Object System.Windows.Forms.Label
-    $script:StatusLabel.Text = "Ready"
-    $script:StatusLabel.Location = New-Object System.Drawing.Point(10, 150)
-    $script:StatusLabel.Size = New-Object System.Drawing.Size(820, 40)
-    $script:StatusLabel.ForeColor = [System.Drawing.Color]::Blue
-    
-    # Operation Status Window
-    $statusWindowLabel = New-Object System.Windows.Forms.Label
-    $statusWindowLabel.Text = "Operation Status:"
-    $statusWindowLabel.Location = New-Object System.Drawing.Point(300, 70)
-    $statusWindowLabel.Size = New-Object System.Drawing.Size(100, 20)
-    
-    $script:OperationStatusTextBox = New-Object System.Windows.Forms.TextBox
-    $script:OperationStatusTextBox.Location = New-Object System.Drawing.Point(300, 95)
-    $script:OperationStatusTextBox.Size = New-Object System.Drawing.Size(530, 80)
-    $script:OperationStatusTextBox.Multiline = $true
-    $script:OperationStatusTextBox.ScrollBars = "Vertical"
-    $script:OperationStatusTextBox.ReadOnly = $true
-    $script:OperationStatusTextBox.BackColor = [System.Drawing.Color]::Black
-    $script:OperationStatusTextBox.ForeColor = [System.Drawing.Color]::Lime
-    $script:OperationStatusTextBox.Font = New-Object System.Drawing.Font("Consolas", 8)
     
     # Add helpful labels
     $vCenterHelpLabel = New-Object System.Windows.Forms.Label
@@ -414,9 +385,46 @@ function Create-VMwareTab {
     $esxiHelpLabel.Font = New-Object System.Drawing.Font("Arial", 8)
     
     $vcenterGroup.Controls.Add($vCenterHelpLabel)
-    $passwordGroup.Controls.AddRange(@($targetUserLabel, $script:TargetUserComboBox, $esxiHelpLabel, $newPasswordLabel, $script:NewPasswordTextBox, $confirmPasswordLabel, $script:ConfirmPasswordTextBox, $dryRunButton, $liveRunButton, $statusWindowLabel, $script:OperationStatusTextBox, $script:ProgressBar, $script:StatusLabel))
+    $passwordGroup.Controls.AddRange(@($targetUserLabel, $script:TargetUserComboBox, $esxiHelpLabel, $newPasswordLabel, $script:NewPasswordTextBox, $confirmPasswordLabel, $script:ConfirmPasswordTextBox, $dryRunButton, $liveRunButton))
     
-    $tab.Controls.AddRange(@($vcenterGroup, $passwordGroup))
+    # Operation Status Group (below Password Operations)
+    $operationStatusGroup = New-Object System.Windows.Forms.GroupBox
+    $operationStatusGroup.Text = "Operation Status"
+    $operationStatusGroup.Size = New-Object System.Drawing.Size(840, 180)
+    $operationStatusGroup.Location = New-Object System.Drawing.Point(10, 270)
+    
+    # Progress Bar
+    $script:ProgressBar = New-Object System.Windows.Forms.ProgressBar
+    $script:ProgressBar.Location = New-Object System.Drawing.Point(10, 25)
+    $script:ProgressBar.Size = New-Object System.Drawing.Size(820, 20)
+    $script:ProgressBar.Style = "Continuous"
+    
+    # Status Label
+    $script:StatusLabel = New-Object System.Windows.Forms.Label
+    $script:StatusLabel.Text = "Ready"
+    $script:StatusLabel.Location = New-Object System.Drawing.Point(10, 50)
+    $script:StatusLabel.Size = New-Object System.Drawing.Size(820, 20)
+    $script:StatusLabel.ForeColor = [System.Drawing.Color]::Blue
+    
+    # Operation Status Window
+    $statusWindowLabel = New-Object System.Windows.Forms.Label
+    $statusWindowLabel.Text = "Detailed Progress:"
+    $statusWindowLabel.Location = New-Object System.Drawing.Point(10, 75)
+    $statusWindowLabel.Size = New-Object System.Drawing.Size(120, 20)
+    
+    $script:OperationStatusTextBox = New-Object System.Windows.Forms.TextBox
+    $script:OperationStatusTextBox.Location = New-Object System.Drawing.Point(10, 100)
+    $script:OperationStatusTextBox.Size = New-Object System.Drawing.Size(820, 70)
+    $script:OperationStatusTextBox.Multiline = $true
+    $script:OperationStatusTextBox.ScrollBars = "Vertical"
+    $script:OperationStatusTextBox.ReadOnly = $true
+    $script:OperationStatusTextBox.BackColor = [System.Drawing.Color]::Black
+    $script:OperationStatusTextBox.ForeColor = [System.Drawing.Color]::Lime
+    $script:OperationStatusTextBox.Font = New-Object System.Drawing.Font("Consolas", 8)
+    
+    $operationStatusGroup.Controls.AddRange(@($script:ProgressBar, $script:StatusLabel, $statusWindowLabel, $script:OperationStatusTextBox))
+    
+    $tab.Controls.AddRange(@($vcenterGroup, $passwordGroup, $operationStatusGroup))
 }
 
 function Create-ConfigTab {
