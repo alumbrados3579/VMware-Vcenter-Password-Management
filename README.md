@@ -1,22 +1,22 @@
 # VMware vCenter Password Management Tool
-## GUI Edition - Version 2.1 - Local Modules Support
+## GUI Edition - Version 2.1 - Local Modules & OneDrive Safe
 
-A DoD-compliant tool for managing passwords on VMware vCenter and ESXi environments with a user-friendly Windows Forms GUI interface and local PowerCLI module support.
+A DoD-compliant tool for managing passwords on VMware vCenter and ESXi environments with a user-friendly Windows Forms GUI interface and intelligent local PowerCLI module management.
 
-## 🚀 Quick Start
+## 🚀 Quick Start Guide
 
-### **Step 1: Setup PowerShell Environment & Local Modules**
+### **Step 1: Initial Setup (One Time)**
 ```powershell
 # Download and run the setup script
 .\VMware-Setup.ps1
 ```
 
-This will:
-- ✅ Set execution policy to RemoteSigned (secure but allows local scripts)
-- ✅ Configure PowerShell Gallery and NuGet
-- ✅ Download PowerCLI modules to **local Modules directory** (avoids OneDrive issues)
-- ✅ Create configuration files (hosts.txt, users.txt)
-- ✅ **Never re-download modules if they already exist locally**
+**What this does:**
+- ✅ Sets execution policy to `RemoteSigned` (secure but allows local scripts)
+- ✅ Configures PowerShell Gallery and NuGet provider
+- ✅ Downloads PowerCLI modules to **local `./Modules/` directory** (OneDrive safe!)
+- ✅ **Smart detection** - won't re-download if modules already exist
+- ✅ Creates configuration files (`hosts.txt`, `users.txt`)
 
 ### **Step 2: Launch GUI Application**
 ```powershell
@@ -24,146 +24,196 @@ This will:
 .\VMware-Password-Manager.ps1
 ```
 
-## 🖥️ GUI Features
+## 🔧 How Local Modules Work
 
-### **Windows Forms Interface**
-- ✅ **VMware Management Tab** - vCenter connection, password operations
-- ✅ **Configuration Tab** - Edit hosts and users with built-in text editors
-- ✅ **Logs Tab** - Real-time application logging with console-style display
-- ✅ **Progress Tracking** - Visual progress bars for operations
-- ✅ **Status Updates** - Real-time status information
+### **OneDrive Safe Installation**
+- **Problem**: OneDrive sync conflicts with PowerShell modules in user profile
+- **Solution**: Modules installed to `./Modules/` in your working directory
+- **Benefit**: No sync conflicts, portable, network-restriction friendly
 
-### **VMware Management Tab**
-- ✅ vCenter connection testing with visual feedback
-- ✅ Password change operations (Dry Run and Live modes)
-- ✅ Progress tracking with detailed status updates
-- ✅ Connection status indicators
+### **Smart Module Detection**
+```
+Priority 1: Check if PowerCLI already loaded in memory ✅
+Priority 2: Check local ./Modules/ directory ✅  
+Priority 3: Check system-wide modules ✅
+Priority 4: Download to local directory if needed ✅
+```
 
-### **Configuration Tab**
-- ✅ Built-in text editors for hosts.txt and users.txt
-- ✅ Save/Load configuration with one click
-- ✅ Syntax highlighting and validation
-- ✅ Real-time configuration management
+### **No Re-downloads**
+- ✅ Validates existing modules using manifest files
+- ✅ Only downloads if missing or corrupted
+- ✅ Handles module conflicts gracefully
+- ✅ Uses existing loaded modules when available
 
-### **Logs Tab**
-- ✅ Real-time logging display
-- ✅ Console-style interface (black background, green text)
-- ✅ Automatic scrolling to latest entries
-- ✅ Clear logs functionality
+## 🖥️ GUI Interface Features
 
-## 📁 File Structure
+### **Three-Tab Interface**
+
+#### **1. VMware Management Tab**
+- **vCenter Connection**: Test connectivity with visual feedback
+- **Password Operations**: Dry Run and Live modes with progress tracking
+- **Status Display**: Real-time connection and operation status
+- **Progress Bars**: Visual feedback for long-running operations
+
+#### **2. Configuration Tab**
+- **Hosts Editor**: Built-in text editor for `hosts.txt`
+- **Users Editor**: Built-in text editor for `users.txt`
+- **Save/Load**: One-click configuration management
+- **Validation**: Real-time syntax checking
+
+#### **3. Logs Tab**
+- **Real-time Logging**: Console-style display (black/green)
+- **Auto-scroll**: Always shows latest entries
+- **Clear Function**: Reset logs when needed
+- **Detailed Tracking**: All operations logged with timestamps
+
+## 📁 Directory Structure
 
 ```
 VMware-Vcenter-Password-Management/
-├── VMware-Setup.ps1              # PowerShell environment setup with local modules
+├── VMware-Setup.ps1              # One-time setup script
 ├── VMware-Password-Manager.ps1   # Main GUI application
 ├── hosts.txt                     # ESXi hosts configuration
 ├── users.txt                     # Target users configuration
-├── Modules/                      # Local PowerCLI modules (created by setup)
+├── Modules/                      # Local PowerCLI modules (auto-created)
 │   └── VMware.PowerCLI/          # Downloaded PowerCLI modules
-├── Logs/                         # Application logs
-└── README.md                     # This file
+├── Logs/                         # Application logs (auto-created)
+│   └── vcenter_password_manager_YYYYMMDD.log
+└── README.md                     # This documentation
 ```
 
-## 🔧 Key Improvements
+## ⚙️ Configuration Files
 
-### **Local Modules Support**
-- ✅ **OneDrive Safe** - Modules stored in local directory, not user profile
-- ✅ **No Re-downloads** - Smart detection prevents unnecessary downloads
-- ✅ **Network Restriction Friendly** - Works in restricted environments
-- ✅ **Version Detection** - Validates module completeness before use
-
-### **Enhanced Module Detection**
-- ✅ Checks for PowerCLI manifest files to verify complete installation
-- ✅ Only downloads if modules are missing or corrupted
-- ✅ Prioritizes local modules over system modules
-- ✅ Clear feedback about which modules are being used
-
-### **Security & Compliance**
-- ✅ **RemoteSigned Execution Policy** - Secure but allows local scripts
-- ✅ DoD warning banners and compliance messaging
-- ✅ Comprehensive logging and audit trails
-- ✅ Operation confirmation dialogs
-
-## ⚙️ Configuration
-
-### **hosts.txt**
-```
+### **hosts.txt** - ESXi Host Addresses
+```bash
 # ESXi Hosts Configuration
 # Add your ESXi host IP addresses or FQDNs below
+# One host per line, comments start with #
+
+# Examples:
 192.168.1.100
 192.168.1.101
 esxi-host-01.domain.local
 esxi-host-02.domain.local
 ```
 
-### **users.txt**
-```
-# Target Users Configuration
+### **users.txt** - Target Usernames
+```bash
+# Target Users Configuration  
 # Add usernames for password operations
+# One username per line, comments start with #
+
+# Common ESXi users:
 root
 admin
 serviceaccount
 ```
 
-## 🛡️ Security Features
+## 🛡️ Security & Compliance
 
-### **DoD Compliance**
-- Government system warning banners
-- User acknowledgment requirements
-- Comprehensive audit logging
-- Operation authorization prompts
+### **DoD Compliance Features**
+- ✅ Government system warning banners
+- ✅ User acknowledgment requirements
+- ✅ Comprehensive audit logging
+- ✅ Operation confirmation dialogs
+- ✅ Dry run testing before live operations
 
-### **Safe Operations**
-- Dry run mode for all operations
-- Password confirmation requirements
-- Visual operation confirmations
-- Detailed operation logging
+### **Execution Policy**
+- **RemoteSigned**: Allows local scripts, requires signatures for downloaded scripts
+- **Better than Bypass**: Maintains security while allowing local development
+- **Enterprise Friendly**: Meets most corporate security requirements
 
-## 📖 Usage Examples
+## 🔄 Typical Workflow
 
-### **Basic Password Change with GUI**
-1. Run `VMware-Setup.ps1` to configure environment and download modules locally
-2. Launch `VMware-Password-Manager.ps1` for GUI interface
-3. **VMware Management Tab**: Enter vCenter credentials and test connection
-4. **Configuration Tab**: Edit hosts.txt and users.txt as needed
-5. **VMware Management Tab**: Enter new password and run Dry Run first
-6. Review results in **Logs Tab**, then run Live operation if satisfied
+### **First Time Setup**
+1. **Download Scripts**: Copy both `.ps1` files to your working directory
+2. **Run Setup**: `.\VMware-Setup.ps1` (downloads modules locally)
+3. **Configure**: Edit `hosts.txt` and `users.txt` or use GUI editors
+4. **Launch GUI**: `.\VMware-Password-Manager.ps1`
 
-### **Testing Connectivity**
-1. Open GUI application
-2. Go to **VMware Management Tab**
-3. Enter vCenter server, username, and password
-4. Click "Test Connection" for immediate feedback
-5. View connection status and host count
+### **Daily Usage**
+1. **Launch GUI**: `.\VMware-Password-Manager.ps1` (modules already available)
+2. **Test Connection**: VMware Management tab → Test vCenter connection
+3. **Dry Run**: Enter new password → Run "Dry Run (Test)" first
+4. **Live Operation**: If dry run successful → Run "LIVE Run"
+5. **Monitor**: Check Logs tab for detailed operation results
 
-## 🔄 Module Management
+## 🚨 Troubleshooting
 
-### **Local Modules Priority**
-1. **First Priority**: Local `./Modules/VMware.PowerCLI/` directory
-2. **Second Priority**: System-wide PowerShell modules
-3. **Automatic Detection**: Smart detection prevents re-downloads
-4. **OneDrive Safe**: Avoids sync conflicts and file locking issues
+### **Module Loading Issues**
+**Problem**: "Could not load from local directory, trying system modules..."
+**Cause**: PowerCLI modules already loaded in memory from previous session
+**Solution**: This is normal! The script detects existing modules and uses them
 
-### **Setup Process**
-- Setup script checks for existing local modules first
-- Only downloads if modules are missing or incomplete
-- Validates module integrity using manifest files
-- Provides clear feedback about module location and version
+**Problem**: Warnings about modules "currently in use"
+**Cause**: Trying to install over already-loaded modules
+**Solution**: Close PowerShell and restart, or the script will use existing modules
 
-## 📞 Support
+### **OneDrive Conflicts**
+**Problem**: Module installation fails with sync errors
+**Solution**: ✅ Already solved! Modules install to local `./Modules/` directory
 
-For issues or questions:
-1. Check the **Logs Tab** in the GUI for detailed error information
-2. Verify local modules: Check `./Modules/VMware.PowerCLI/` directory
-3. Test vCenter connectivity using the GUI test function
-4. Review configuration files using the built-in editors
+### **Network Restrictions**
+**Problem**: Cannot download from PowerShell Gallery
+**Solution**: 
+1. Download modules on unrestricted machine
+2. Copy entire `./Modules/` directory to restricted environment
+3. Scripts will detect and use local modules
 
-## 🔒 Security Notice
+### **Permission Issues**
+**Problem**: "Execution policy" errors
+**Solution**: Run setup script as administrator or use `-ExecutionPolicy Bypass`
 
-This tool is designed for authorized personnel only. All operations are logged and monitored. The GUI interface provides clear visual feedback for all operations and requires explicit confirmation for live changes.
+## 📊 Operation Modes
+
+### **Dry Run Mode** (Recommended First)
+- ✅ Simulates all operations without making changes
+- ✅ Validates connectivity and credentials
+- ✅ Shows what would happen in live mode
+- ✅ Safe for testing and verification
+
+### **Live Mode** (Production Changes)
+- ⚠️ Makes actual password changes on systems
+- ⚠️ Requires confirmation dialogs
+- ⚠️ All operations logged for audit
+- ⚠️ Use only after successful dry run
+
+## 🔍 Module Detection Logic
+
+```powershell
+# The script follows this logic:
+1. Is PowerCLI already loaded in memory? → Use it ✅
+2. Are local modules available in ./Modules/? → Load them ✅
+3. Are system modules available? → Load them ✅
+4. Nothing found? → Download to ./Modules/ ✅
+```
+
+## 📞 Support & Maintenance
+
+### **Log Files**
+- Location: `./Logs/vcenter_password_manager_YYYYMMDD.log`
+- Format: `[timestamp] [level] message`
+- Retention: One file per day, manual cleanup
+
+### **Module Updates**
+- Local modules don't auto-update (by design for stability)
+- To update: Delete `./Modules/VMware.PowerCLI/` and re-run setup
+- Or use PowerShell Gallery: `Update-Module VMware.PowerCLI`
+
+### **Configuration Backup**
+- Backup `hosts.txt` and `users.txt` before major changes
+- Configuration files are plain text and version-control friendly
+
+## 🎯 Key Benefits
+
+1. **OneDrive Safe**: No more sync conflicts with PowerShell modules
+2. **Network Friendly**: Works in restricted environments with local modules
+3. **No Re-downloads**: Smart detection prevents unnecessary downloads
+4. **GUI Interface**: User-friendly Windows Forms interface
+5. **DoD Compliant**: Meets government security requirements
+6. **Audit Ready**: Comprehensive logging and operation tracking
 
 ---
 
 **VMware vCenter Password Management Tool - GUI Edition**  
-*Local modules support, enhanced security, user-friendly interface*
+*Local modules, enhanced security, OneDrive safe, user-friendly interface*

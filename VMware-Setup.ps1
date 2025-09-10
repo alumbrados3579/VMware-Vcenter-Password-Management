@@ -174,21 +174,42 @@ function Install-VMwarePowerCLI {
             Write-Host "✅ Using existing local PowerCLI installation (no download needed)" -ForegroundColor Green
         }
         
-        # Try to import the module
-        Write-Host "Loading VMware PowerCLI from local directory..." -ForegroundColor Green
-        try {
-            Import-Module VMware.PowerCLI -Force -ErrorAction Stop
-            Write-Host "✅ VMware PowerCLI loaded successfully" -ForegroundColor Green
-        } catch {
-            Write-Host "⚠️ Could not load from local directory, trying system modules..." -ForegroundColor Yellow
-            
-            # Fallback: try to install system-wide if local fails
+        # Check if PowerCLI is already loaded in current session
+        $loadedPowerCLI = Get-Module -Name "VMware.PowerCLI" -ErrorAction SilentlyContinue
+        
+        if ($loadedPowerCLI) {
+            Write-Host "✅ VMware PowerCLI already loaded in current session" -ForegroundColor Green
+            Write-Host "Version: $($loadedPowerCLI.Version)" -ForegroundColor Cyan
+            Write-Host "Location: $($loadedPowerCLI.ModuleBase)" -ForegroundColor Cyan
+        } else {
+            # Try to import the module
+            Write-Host "Loading VMware PowerCLI..." -ForegroundColor Green
             try {
-                Install-Module -Name "VMware.PowerCLI" -Scope CurrentUser -Force -AllowClobber
-                Import-Module VMware.PowerCLI -Force
-                Write-Host "✅ VMware PowerCLI installed and loaded from system location" -ForegroundColor Green
+                # Try to import without forcing to avoid conflicts
+                Import-Module VMware.PowerCLI -ErrorAction Stop
+                Write-Host "✅ VMware PowerCLI loaded successfully" -ForegroundColor Green
             } catch {
-                throw "Failed to install PowerCLI both locally and system-wide: $($_.Exception.Message)"
+                Write-Host "⚠️ Could not load PowerCLI, checking for conflicts..." -ForegroundColor Yellow
+                
+                # Check if any VMware modules are already loaded
+                $vmwareModules = Get-Module | Where-Object { $_.Name -like "VMware.*" }
+                if ($vmwareModules) {
+                    Write-Host "Found existing VMware modules in memory:" -ForegroundColor Yellow
+                    foreach ($module in $vmwareModules) {
+                        Write-Host "  - $($module.Name) v$($module.Version)" -ForegroundColor Gray
+                    }
+                    Write-Host "These modules are already loaded and working. Continuing..." -ForegroundColor Green
+                } else {
+                    # Fallback: try to install system-wide if local fails
+                    try {
+                        Write-Host "Attempting system-wide installation..." -ForegroundColor Yellow
+                        Install-Module -Name "VMware.PowerCLI" -Scope CurrentUser -Force -AllowClobber
+                        Import-Module VMware.PowerCLI -Force
+                        Write-Host "✅ VMware PowerCLI installed and loaded from system location" -ForegroundColor Green
+                    } catch {
+                        throw "Failed to install PowerCLI: $($_.Exception.Message)"
+                    }
+                }
             }
         }
         

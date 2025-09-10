@@ -76,26 +76,39 @@ function Test-PowerCLIAvailability {
     Write-Log "Checking VMware PowerCLI availability..." "INFO"
     
     try {
-        # Priority 1: Check local Modules directory first
-        if (Test-Path $script:LocalModulesPath) {
-            $localPowerCLI = Get-ChildItem -Path $script:LocalModulesPath -Name "VMware.PowerCLI" -ErrorAction SilentlyContinue
-            if ($localPowerCLI) {
-                Write-Log "Found local PowerCLI modules in: $script:LocalModulesPath" "SUCCESS"
-                
-                # Add local modules to PSModulePath if not already there
-                $currentPSModulePath = $env:PSModulePath
-                if ($currentPSModulePath -notlike "*$script:LocalModulesPath*") {
-                    $env:PSModulePath = "$script:LocalModulesPath;$currentPSModulePath"
-                    Write-Log "Added local Modules directory to PowerShell module path" "INFO"
+        # Priority 1: Check if PowerCLI is already loaded in current session
+        $loadedPowerCLI = Get-Module -Name "VMware.PowerCLI" -ErrorAction SilentlyContinue
+        
+        if ($loadedPowerCLI) {
+            Write-Log "VMware PowerCLI already loaded in current session (Version: $($loadedPowerCLI.Version))" "SUCCESS"
+            Write-Log "Module location: $($loadedPowerCLI.ModuleBase)" "INFO"
+            
+            if ($loadedPowerCLI.ModuleBase -like "*$script:LocalModulesPath*") {
+                Write-Log "Using LOCAL PowerCLI modules (OneDrive-safe)" "SUCCESS"
+            } else {
+                Write-Log "Using SYSTEM PowerCLI modules" "INFO"
+            }
+        } else {
+            # Priority 2: Check local Modules directory first
+            if (Test-Path $script:LocalModulesPath) {
+                $localPowerCLI = Get-ChildItem -Path $script:LocalModulesPath -Name "VMware.PowerCLI" -ErrorAction SilentlyContinue
+                if ($localPowerCLI) {
+                    Write-Log "Found local PowerCLI modules in: $script:LocalModulesPath" "SUCCESS"
+                    
+                    # Add local modules to PSModulePath if not already there
+                    $currentPSModulePath = $env:PSModulePath
+                    if ($currentPSModulePath -notlike "*$script:LocalModulesPath*") {
+                        $env:PSModulePath = "$script:LocalModulesPath;$currentPSModulePath"
+                        Write-Log "Added local Modules directory to PowerShell module path" "INFO"
+                    }
                 }
             }
-        }
-        
-        # Priority 2: Check if PowerCLI is available (local or system)
-        $powerCLI = Get-Module -Name "VMware.PowerCLI" -ListAvailable -ErrorAction SilentlyContinue
-        if (-not $powerCLI) {
-            Write-Log "VMware PowerCLI not found in local or system modules" "ERROR"
-            $message = @"
+            
+            # Priority 3: Check if PowerCLI is available (local or system)
+            $powerCLI = Get-Module -Name "VMware.PowerCLI" -ListAvailable -ErrorAction SilentlyContinue
+            if (-not $powerCLI) {
+                Write-Log "VMware PowerCLI not found in local or system modules" "ERROR"
+                $message = @"
 VMware PowerCLI is required but not installed.
 
 Please run VMware-Setup.ps1 first to install PowerCLI to local Modules directory.
@@ -103,22 +116,32 @@ This avoids OneDrive sync issues and keeps modules in your working directory.
 
 Expected local path: $script:LocalModulesPath
 "@
-            [System.Windows.Forms.MessageBox]::Show($message, "PowerCLI Required", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
-            return $false
-        }
-        
-        # Import the module
-        Import-Module VMware.PowerCLI -Force -ErrorAction Stop
-        
-        # Determine which modules are being used
-        $loadedModule = Get-Module -Name "VMware.PowerCLI"
-        if ($loadedModule) {
-            Write-Log "VMware PowerCLI loaded successfully (Version: $($loadedModule.Version))" "SUCCESS"
+                [System.Windows.Forms.MessageBox]::Show($message, "PowerCLI Required", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+                return $false
+            }
             
-            if ($loadedModule.ModuleBase -like "*$script:LocalModulesPath*") {
-                Write-Log "Using LOCAL PowerCLI modules (OneDrive-safe)" "SUCCESS"
-            } else {
-                Write-Log "Using SYSTEM PowerCLI modules" "INFO"
+            # Try to import the module
+            try {
+                Import-Module VMware.PowerCLI -ErrorAction Stop
+                $loadedModule = Get-Module -Name "VMware.PowerCLI"
+                Write-Log "VMware PowerCLI loaded successfully (Version: $($loadedModule.Version))" "SUCCESS"
+                
+                if ($loadedModule.ModuleBase -like "*$script:LocalModulesPath*") {
+                    Write-Log "Using LOCAL PowerCLI modules (OneDrive-safe)" "SUCCESS"
+                } else {
+                    Write-Log "Using SYSTEM PowerCLI modules" "INFO"
+                }
+            } catch {
+                # Check if VMware modules are already loaded (conflict)
+                $vmwareModules = Get-Module | Where-Object { $_.Name -like "VMware.*" }
+                if ($vmwareModules) {
+                    Write-Log "VMware modules already loaded in memory, using existing modules" "INFO"
+                    foreach ($module in $vmwareModules) {
+                        Write-Log "  - $($module.Name) v$($module.Version)" "INFO"
+                    }
+                } else {
+                    throw "Failed to load PowerCLI: $($_.Exception.Message)"
+                }
             }
         }
         
