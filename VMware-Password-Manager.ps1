@@ -1082,12 +1082,12 @@ function Download-LatestSetupScript {
         $setupPath = Join-Path $script:PSScriptRoot "VMware-Setup.ps1"
         
         Invoke-WebRequest -Uri $setupUrl -OutFile $setupPath -UseBasicParsing
-        $script:GitHubStatusLabel.Text = "✅ Latest setup script downloaded successfully"
+        $script:GitHubStatusLabel.Text = "[SUCCESS] Latest setup script downloaded successfully"
         Write-Log "Downloaded latest setup script from GitHub" "SUCCESS"
         
         [System.Windows.Forms.MessageBox]::Show("Latest setup script downloaded successfully!", "Download Complete", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
     } catch {
-        $script:GitHubStatusLabel.Text = "❌ Failed to download setup script"
+        $script:GitHubStatusLabel.Text = "[ERROR] Failed to download setup script"
         Write-Log "Failed to download setup script: $($_.Exception.Message)" "ERROR"
         [System.Windows.Forms.MessageBox]::Show("Failed to download setup script: $($_.Exception.Message)", "Download Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
     }
@@ -1111,7 +1111,7 @@ function Refresh-Application {
             Start-Process PowerShell -ArgumentList "-File `"$appPath`"" -WindowStyle Normal
             [System.Environment]::Exit(0)
         } catch {
-            $script:GitHubStatusLabel.Text = "❌ Failed to refresh application"
+            $script:GitHubStatusLabel.Text = "[ERROR] Failed to refresh application"
             Write-Log "Failed to refresh application: $($_.Exception.Message)" "ERROR"
             [System.Windows.Forms.MessageBox]::Show("Failed to refresh application: $($_.Exception.Message)", "Refresh Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
         }
@@ -1122,10 +1122,10 @@ function Open-GitHubRepository {
     try {
         $repoUrl = "https://github.com/alumbrados3579/VMware-Vcenter-Password-Management"
         Start-Process $repoUrl
-        $script:GitHubStatusLabel.Text = "✅ Opened GitHub repository in browser"
+        $script:GitHubStatusLabel.Text = "[SUCCESS] Opened GitHub repository in browser"
         Write-Log "Opened GitHub repository in browser" "INFO"
     } catch {
-        $script:GitHubStatusLabel.Text = "❌ Failed to open repository"
+        $script:GitHubStatusLabel.Text = "[ERROR] Failed to open repository"
         Write-Log "Failed to open GitHub repository: $($_.Exception.Message)" "ERROR"
         [System.Windows.Forms.MessageBox]::Show("Failed to open GitHub repository: $($_.Exception.Message)", "Browser Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
     }
@@ -1137,11 +1137,11 @@ function Check-ModuleStatus {
         
         # Check local modules directory
         if (Test-Path $script:LocalModulesPath) {
-            $statusText += "✅ Local Modules directory exists: $script:LocalModulesPath`r`n"
+            $statusText += "[SUCCESS] Local Modules directory exists: $script:LocalModulesPath`r`n"
             
             $powerCLIPath = Join-Path $script:LocalModulesPath "VMware.PowerCLI"
             if (Test-Path $powerCLIPath) {
-                $statusText += "✅ VMware.PowerCLI found in local directory`r`n"
+                $statusText += "[SUCCESS] VMware.PowerCLI found in local directory`r`n"
                 
                 # Try to get version
                 try {
@@ -1154,26 +1154,26 @@ function Check-ModuleStatus {
                     $statusText += "   Version: Could not determine`r`n"
                 }
             } else {
-                $statusText += "❌ VMware.PowerCLI not found in local directory`r`n"
+                $statusText += "[ERROR] VMware.PowerCLI not found in local directory`r`n"
             }
         } else {
-            $statusText += "❌ Local Modules directory does not exist`r`n"
+            $statusText += "[ERROR] Local Modules directory does not exist`r`n"
         }
         
         # Check if modules are loaded
         $loadedPowerCLI = Get-Module -Name "VMware.PowerCLI" -ErrorAction SilentlyContinue
         if ($loadedPowerCLI) {
-            $statusText += "`r`n✅ PowerCLI currently loaded in memory`r`n"
+            $statusText += "`r`n[SUCCESS] PowerCLI currently loaded in memory`r`n"
             $statusText += "   Version: $($loadedPowerCLI.Version)`r`n"
             $statusText += "   Location: $($loadedPowerCLI.ModuleBase)`r`n"
         } else {
-            $statusText += "`r`n⚠️ PowerCLI not currently loaded in memory`r`n"
+            $statusText += "`r`n[WARNING] PowerCLI not currently loaded in memory`r`n"
         }
         
         $script:ModuleStatusLabel.Text = $statusText
         Write-Log "Module status check completed" "INFO"
     } catch {
-        $script:ModuleStatusLabel.Text = "❌ Error checking module status: $($_.Exception.Message)"
+        $script:ModuleStatusLabel.Text = "[ERROR] Error checking module status: $($_.Exception.Message)"
         Write-Log "Failed to check module status: $($_.Exception.Message)" "ERROR"
     }
 }
@@ -1200,7 +1200,7 @@ function Connect-CLIToVCenter {
         if ($connection) {
             $script:CLIConnectionStatusLabel.Text = "Status: Connected to $($connection.Name)"
             $script:CLIConnectionStatusLabel.ForeColor = [System.Drawing.Color]::Green
-            $script:CLIOutputTextBox.AppendText("✅ Connected successfully to $($connection.Name)`r`n")
+            $script:CLIOutputTextBox.AppendText("[SUCCESS] Connected successfully to $($connection.Name)`r`n")
             $script:CLIOutputTextBox.AppendText("   Version: $($connection.Version)`r`n")
             $script:CLIOutputTextBox.AppendText("   Build: $($connection.Build)`r`n")
             $script:CLIOutputTextBox.AppendText("`r`nReady for PowerCLI commands...`r`n`r`n")
@@ -1210,7 +1210,7 @@ function Connect-CLIToVCenter {
     } catch {
         $script:CLIConnectionStatusLabel.Text = "Status: Connection Failed"
         $script:CLIConnectionStatusLabel.ForeColor = [System.Drawing.Color]::Red
-        $script:CLIOutputTextBox.AppendText("❌ Connection failed: $($_.Exception.Message)`r`n`r`n")
+        $script:CLIOutputTextBox.AppendText("[ERROR] Connection failed: $($_.Exception.Message)`r`n`r`n")
         $script:CLIOutputTextBox.ScrollToCaret()
         Write-Log "CLI workspace connection failed: $($_.Exception.Message)" "ERROR"
         [System.Windows.Forms.MessageBox]::Show("Connection failed: $($_.Exception.Message)", "Connection Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
@@ -1247,7 +1247,7 @@ function Execute-CLICommand {
         
         # Check if connected
         if (-not $global:DefaultVIServers) {
-            $script:CLIOutputTextBox.AppendText("`r`n❌ Not connected to vCenter. Please connect first.`r`n`r`n")
+            $script:CLIOutputTextBox.AppendText("`r`n[ERROR] Not connected to vCenter. Please connect first.`r`n`r`n")
             $script:CLIOutputTextBox.ScrollToCaret()
             return
         }
@@ -1265,7 +1265,7 @@ function Execute-CLICommand {
                 $script:CLIOutputTextBox.AppendText($result)
             }
         } catch {
-            $script:CLIOutputTextBox.AppendText("❌ Error: $($_.Exception.Message)`r`n")
+            $script:CLIOutputTextBox.AppendText("[ERROR] $($_.Exception.Message)`r`n")
         }
         
         $script:CLIOutputTextBox.AppendText("`r`n")
@@ -1276,7 +1276,7 @@ function Execute-CLICommand {
         
         Write-Log "CLI command executed: $command" "INFO"
     } catch {
-        $script:CLIOutputTextBox.AppendText("❌ Command execution error: $($_.Exception.Message)`r`n`r`n")
+        $script:CLIOutputTextBox.AppendText("[ERROR] Command execution error: $($_.Exception.Message)`r`n`r`n")
         $script:CLIOutputTextBox.ScrollToCaret()
         Write-Log "CLI command execution error: $($_.Exception.Message)" "ERROR"
     }

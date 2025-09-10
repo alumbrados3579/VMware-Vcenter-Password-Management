@@ -84,18 +84,18 @@ function Initialize-PowerShellEnvironment {
     try {
         Write-DetailedStatus "Setting execution policy to RemoteSigned (secure but allows local scripts)..."
         Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force
-        Write-DetailedStatus "✅ Execution policy configured successfully"
+        Write-DetailedStatus "[SUCCESS] Execution policy configured successfully"
         Write-DetailedStatus "   This allows local scripts while maintaining security for downloaded scripts"
     } catch {
-        Write-DetailedStatus "⚠️ Warning: Could not set execution policy: $($_.Exception.Message)"
+        Write-DetailedStatus "[WARNING] Could not set execution policy: $($_.Exception.Message)"
     }
     
     try {
         Write-DetailedStatus "Enabling TLS 1.2 for secure downloads..."
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-        Write-DetailedStatus "✅ TLS 1.2 enabled for secure connections"
+        Write-DetailedStatus "[SUCCESS] TLS 1.2 enabled for secure connections"
     } catch {
-        Write-DetailedStatus "⚠️ Warning: Could not configure TLS: $($_.Exception.Message)"
+        Write-DetailedStatus "[WARNING] Could not configure TLS: $($_.Exception.Message)"
     }
     
     Start-Sleep -Milliseconds 500
@@ -111,12 +111,12 @@ function Install-NuGetProvider {
         if (-not $nuget) {
             Write-DetailedStatus "Installing NuGet provider (required for PowerShell Gallery)..."
             Install-PackageProvider -Name "NuGet" -MinimumVersion 2.8.5.201 -Force -Scope CurrentUser
-            Write-DetailedStatus "✅ NuGet provider installed successfully"
+            Write-DetailedStatus "[SUCCESS] NuGet provider installed successfully"
         } else {
-            Write-DetailedStatus "✅ NuGet provider already installed (Version: $($nuget.Version))"
+            Write-DetailedStatus "[SUCCESS] NuGet provider already installed (Version: $($nuget.Version))"
         }
     } catch {
-        Write-DetailedStatus "⚠️ Warning: Could not install NuGet provider: $($_.Exception.Message)"
+        Write-DetailedStatus "[WARNING] Could not install NuGet provider: $($_.Exception.Message)"
     }
     
     Start-Sleep -Milliseconds 500
@@ -138,14 +138,14 @@ function Update-PowerShellGet {
         if ($packageMgmt) {
             Write-DetailedStatus "PackageManagement v$($packageMgmt.Version) is currently loaded"
             Write-DetailedStatus "Skipping PowerShellGet update to avoid module conflicts"
-            Write-DetailedStatus "✅ Using existing PowerShellGet installation"
+            Write-DetailedStatus "[SUCCESS] Using existing PowerShellGet installation"
         } else {
             Write-DetailedStatus "Updating PowerShellGet module..."
             Install-Module -Name "PowerShellGet" -Force -Scope CurrentUser -AllowClobber
-            Write-DetailedStatus "✅ PowerShellGet module updated successfully"
+            Write-DetailedStatus "[SUCCESS] PowerShellGet module updated successfully"
         }
     } catch {
-        Write-DetailedStatus "⚠️ Warning: Could not update PowerShellGet: $($_.Exception.Message)"
+        Write-DetailedStatus "[WARNING] Could not update PowerShellGet: $($_.Exception.Message)"
         Write-DetailedStatus "This is often due to module conflicts and can be safely ignored"
     }
     
@@ -162,7 +162,7 @@ function Test-ExistingPowerCLI {
     # Check if PowerCLI is already loaded in memory
     $loadedPowerCLI = Get-Module -Name "VMware.PowerCLI" -ErrorAction SilentlyContinue
     if ($loadedPowerCLI) {
-        Write-DetailedStatus "✅ VMware PowerCLI already loaded in current session"
+        Write-DetailedStatus "[SUCCESS] VMware PowerCLI already loaded in current session"
         Write-DetailedStatus "   Version: $($loadedPowerCLI.Version)"
         Write-DetailedStatus "   Location: $($loadedPowerCLI.ModuleBase)"
         return $true
@@ -177,28 +177,28 @@ function Test-ExistingPowerCLI {
         if ($manifestFiles) {
             try {
                 $manifestData = Import-PowerShellDataFile $manifestFiles[0].FullName
-                Write-DetailedStatus "✅ Valid PowerCLI installation found locally"
+                Write-DetailedStatus "[SUCCESS] Valid PowerCLI installation found locally"
                 Write-DetailedStatus "   Version: $($manifestData.ModuleVersion)"
                 Write-DetailedStatus "   Location: $localPowerCLIPath"
                 return $true
             } catch {
-                Write-DetailedStatus "⚠️ Local PowerCLI manifest is corrupted"
+                Write-DetailedStatus "[WARNING] Local PowerCLI manifest is corrupted"
             }
         } else {
-            Write-DetailedStatus "⚠️ Local PowerCLI directory incomplete"
+            Write-DetailedStatus "[WARNING] Local PowerCLI directory incomplete"
         }
     }
     
     # Check system-wide PowerCLI
     $systemPowerCLI = Get-Module -Name "VMware.PowerCLI" -ListAvailable -ErrorAction SilentlyContinue
     if ($systemPowerCLI) {
-        Write-DetailedStatus "✅ System-wide PowerCLI installation found"
+        Write-DetailedStatus "[SUCCESS] System-wide PowerCLI installation found"
         Write-DetailedStatus "   Version: $($systemPowerCLI.Version)"
         Write-DetailedStatus "   Location: $($systemPowerCLI.ModuleBase)"
         return $true
     }
     
-    Write-DetailedStatus "⚠️ No existing PowerCLI installation found"
+    Write-DetailedStatus "[WARNING] No existing PowerCLI installation found"
     return $false
 }
 
@@ -212,14 +212,14 @@ function Install-VMwarePowerCLI {
         Write-DetailedStatus "Creating local Modules directory for enterprise-safe installation..."
         if (-not (Test-Path $localModulesPath)) {
             New-Item -Path $localModulesPath -ItemType Directory -Force | Out-Null
-            Write-DetailedStatus "✅ Local Modules directory created: $localModulesPath"
+            Write-DetailedStatus "[SUCCESS] Local Modules directory created: $localModulesPath"
         }
         
         Write-DetailedStatus "Adding local modules to PowerShell module path..."
         $currentPSModulePath = $env:PSModulePath
         if ($currentPSModulePath -notlike "*$localModulesPath*") {
             $env:PSModulePath = "$localModulesPath;$currentPSModulePath"
-            Write-DetailedStatus "✅ Local Modules directory added to PowerShell module path"
+            Write-DetailedStatus "[SUCCESS] Local Modules directory added to PowerShell module path"
         }
         
         # Check for existing PowerCLI installations
@@ -227,7 +227,7 @@ function Install-VMwarePowerCLI {
         
         if (-not $powerCLIExists) {
             Write-DetailedStatus "No existing PowerCLI found - downloading to local directory..."
-            Write-DetailedStatus "⏳ This may take several minutes depending on your internet connection"
+            Write-DetailedStatus "[INFO] This may take several minutes depending on your internet connection"
             Write-DetailedStatus "   Target directory: $localModulesPath"
             
             # Remove incomplete installation if it exists
@@ -239,35 +239,35 @@ function Install-VMwarePowerCLI {
             
             # Download PowerCLI modules to local directory
             Save-Module -Name "VMware.PowerCLI" -Path $localModulesPath -Force
-            Write-DetailedStatus "✅ VMware PowerCLI downloaded to local directory successfully"
+            Write-DetailedStatus "[SUCCESS] VMware PowerCLI downloaded to local directory successfully"
         } else {
-            Write-DetailedStatus "✅ Using existing PowerCLI installation (no download needed)"
+            Write-DetailedStatus "[SUCCESS] Using existing PowerCLI installation (no download needed)"
         }
         
         # Check if PowerCLI is already loaded in current session
         $loadedPowerCLI = Get-Module -Name "VMware.PowerCLI" -ErrorAction SilentlyContinue
         
         if ($loadedPowerCLI) {
-            Add-DetailedStatus "✅ VMware PowerCLI already loaded in current session"
+            Write-DetailedStatus "[SUCCESS] VMware PowerCLI already loaded in current session"
             Add-DetailedStatus "   Version: $($loadedPowerCLI.Version)"
             Add-DetailedStatus "   Location: $($loadedPowerCLI.ModuleBase)"
         } else {
             Add-DetailedStatus "Loading VMware PowerCLI modules..."
-            Add-DetailedStatus "⏳ This step may take 1-2 minutes - please be patient"
+            Add-DetailedStatus "[INFO] This step may take 1-2 minutes - please be patient"
             
             try {
                 Import-Module VMware.PowerCLI -ErrorAction Stop
                 $loadedModule = Get-Module -Name "VMware.PowerCLI"
-                Add-DetailedStatus "✅ VMware PowerCLI loaded successfully"
+                Add-DetailedStatus "[SUCCESS] VMware PowerCLI loaded successfully"
                 Add-DetailedStatus "   Version: $($loadedModule.Version)"
                 
                 if ($loadedModule.ModuleBase -like "*$localModulesPath*") {
-                    Add-DetailedStatus "✅ Using LOCAL modules (enterprise-safe installation)"
+                    Add-DetailedStatus "[SUCCESS] Using LOCAL modules (enterprise-safe installation)"
                 } else {
-                    Add-DetailedStatus "⚠️ Using SYSTEM modules"
+                    Add-DetailedStatus "[WARNING] Using SYSTEM modules"
                 }
             } catch {
-                Add-DetailedStatus "⚠️ Could not load PowerCLI, checking for conflicts..."
+                Add-DetailedStatus "[WARNING] Could not load PowerCLI, checking for conflicts..."
                 
                 $vmwareModules = Get-Module | Where-Object { $_.Name -like "VMware.*" }
                 if ($vmwareModules) {
@@ -275,7 +275,7 @@ function Install-VMwarePowerCLI {
                     foreach ($module in $vmwareModules) {
                         Add-DetailedStatus "  - $($module.Name) v$($module.Version)"
                     }
-                    Add-DetailedStatus "✅ These modules are already loaded and working"
+                    Add-DetailedStatus "[SUCCESS] These modules are already loaded and working"
                 } else {
                     throw "Failed to load PowerCLI: $($_.Exception.Message)"
                 }
@@ -285,11 +285,11 @@ function Install-VMwarePowerCLI {
         Add-DetailedStatus "Configuring PowerCLI settings..."
         Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false -Scope User -ErrorAction SilentlyContinue
         Set-PowerCLIConfiguration -ParticipateInCEIP $false -Confirm:$false -Scope User -ErrorAction SilentlyContinue
-        Add-DetailedStatus "✅ VMware PowerCLI configured and ready for use"
+        Add-DetailedStatus "[SUCCESS] VMware PowerCLI configured and ready for use"
         
         return $true
     } catch {
-        Add-DetailedStatus "❌ Failed to install VMware PowerCLI: $($_.Exception.Message)"
+        Add-DetailedStatus "[ERROR] Failed to install VMware PowerCLI: $($_.Exception.Message)"
         Add-DetailedStatus "Please check your internet connection and try again"
         return $false
     }
@@ -316,9 +316,9 @@ function Create-ConfigurationFiles {
 # esxi-host-02.domain.local
 "@
             $hostsContent | Set-Content -Path $hostsFile
-            Add-DetailedStatus "✅ Created hosts.txt configuration file"
+            Add-DetailedStatus "[SUCCESS] Created hosts.txt configuration file"
         } else {
-            Add-DetailedStatus "✅ hosts.txt already exists"
+            Add-DetailedStatus "[SUCCESS] hosts.txt already exists"
         }
         
         # Create users.txt
@@ -338,15 +338,15 @@ root
 # serviceaccount
 "@
             $usersContent | Set-Content -Path $usersFile
-            Add-DetailedStatus "✅ Created users.txt configuration file"
+            Add-DetailedStatus "[SUCCESS] Created users.txt configuration file"
         } else {
-            Add-DetailedStatus "✅ users.txt already exists"
+            Add-DetailedStatus "[SUCCESS] users.txt already exists"
         }
         
         Add-DetailedStatus "Configuration files are ready for customization"
         
     } catch {
-        Add-DetailedStatus "⚠️ Warning: Could not create configuration files: $($_.Exception.Message)"
+        Add-DetailedStatus "[WARNING] Could not create configuration files: $($_.Exception.Message)"
     }
     
     Start-Sleep -Milliseconds 500
@@ -362,10 +362,10 @@ function Download-MainApplication {
         Add-DetailedStatus "Downloading latest VMware Password Manager GUI..."
         $guiUrl = "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Password-Manager.ps1"
         Invoke-WebRequest -Uri $guiUrl -OutFile $mainTool -UseBasicParsing
-        Add-DetailedStatus "✅ VMware Password Manager GUI downloaded successfully"
+        Add-DetailedStatus "[SUCCESS] VMware Password Manager GUI downloaded successfully"
         Add-DetailedStatus "   Application ready to launch"
     } catch {
-        Add-DetailedStatus "⚠️ Could not download GUI application: $($_.Exception.Message)"
+        Add-DetailedStatus "[WARNING] Could not download GUI application: $($_.Exception.Message)"
         Add-DetailedStatus "You can manually download VMware-Password-Manager.ps1 from GitHub"
     }
     
@@ -382,10 +382,10 @@ function Complete-Setup {
     
     Add-DetailedStatus ""
     Add-DetailedStatus "=== SETUP COMPLETE ==="
-    Add-DetailedStatus "✅ PowerShell environment configured"
-    Add-DetailedStatus "✅ VMware PowerCLI installed and ready"
-    Add-DetailedStatus "✅ Configuration files created"
-    Add-DetailedStatus "✅ Main application downloaded"
+    Add-DetailedStatus "[SUCCESS] PowerShell environment configured"
+    Add-DetailedStatus "[SUCCESS] VMware PowerCLI installed and ready"
+    Add-DetailedStatus "[SUCCESS] Configuration files created"
+    Add-DetailedStatus "[SUCCESS] Main application downloaded"
     Add-DetailedStatus ""
     Add-DetailedStatus "Next Steps:"
     Add-DetailedStatus "1. Configure your ESXi hosts and users"
@@ -423,7 +423,7 @@ function Start-SetupProcess {
             $script:CloseButton.Enabled = $true
         }
     } catch {
-        Add-DetailedStatus "❌ Setup failed: $($_.Exception.Message)"
+        Add-DetailedStatus "[ERROR] Setup failed: $($_.Exception.Message)"
         Add-DetailedStatus "Error details: $($_.Exception.GetType().Name)"
         
         # Ensure progress bar shows some progress even on failure
@@ -464,10 +464,10 @@ function Complete-Setup {
     
     Write-Host ""
     Write-Host "=== SETUP COMPLETE ===" -ForegroundColor Green
-    Write-Host "✅ PowerShell environment configured" -ForegroundColor Green
-    Write-Host "✅ VMware PowerCLI installed and ready" -ForegroundColor Green
-    Write-Host "✅ Configuration files created" -ForegroundColor Green
-    Write-Host "✅ Main application downloaded" -ForegroundColor Green
+    Write-Host "[SUCCESS] PowerShell environment configured" -ForegroundColor Green
+    Write-Host "[SUCCESS] VMware PowerCLI installed and ready" -ForegroundColor Green
+    Write-Host "[SUCCESS] Configuration files created" -ForegroundColor Green
+    Write-Host "[SUCCESS] Main application downloaded" -ForegroundColor Green
     Write-Host ""
     Write-Host "Next Steps:" -ForegroundColor Cyan
     Write-Host "1. Configure your ESXi hosts and users" -ForegroundColor White
@@ -509,9 +509,9 @@ function Create-ConfigurationFiles {
 # esxi-host-02.domain.local
 "@
             $hostsContent | Set-Content -Path $hostsFile
-            Write-DetailedStatus "✅ Created hosts.txt configuration file"
+            Write-DetailedStatus "[SUCCESS] Created hosts.txt configuration file"
         } else {
-            Write-DetailedStatus "✅ hosts.txt already exists"
+            Write-DetailedStatus "[SUCCESS] hosts.txt already exists"
         }
         
         # Create users.txt
@@ -531,15 +531,15 @@ root
 # serviceaccount
 "@
             $usersContent | Set-Content -Path $usersFile
-            Write-DetailedStatus "✅ Created users.txt configuration file"
+            Write-DetailedStatus "[SUCCESS] Created users.txt configuration file"
         } else {
-            Write-DetailedStatus "✅ users.txt already exists"
+            Write-DetailedStatus "[SUCCESS] users.txt already exists"
         }
         
         Write-DetailedStatus "Configuration files are ready for customization"
         
     } catch {
-        Write-DetailedStatus "⚠️ Warning: Could not create configuration files: $($_.Exception.Message)"
+        Write-DetailedStatus "[WARNING] Could not create configuration files: $($_.Exception.Message)"
     }
     
     Start-Sleep -Milliseconds 500
@@ -555,10 +555,10 @@ function Download-MainApplication {
         Write-DetailedStatus "Downloading latest VMware Password Manager GUI..."
         $guiUrl = "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Password-Manager.ps1"
         Invoke-WebRequest -Uri $guiUrl -OutFile $mainTool -UseBasicParsing
-        Write-DetailedStatus "✅ VMware Password Manager GUI downloaded successfully"
+        Write-DetailedStatus "[SUCCESS] VMware Password Manager GUI downloaded successfully"
         Write-DetailedStatus "   Application ready to launch"
     } catch {
-        Write-DetailedStatus "⚠️ Could not download GUI application: $($_.Exception.Message)"
+        Write-DetailedStatus "[WARNING] Could not download GUI application: $($_.Exception.Message)"
         Write-DetailedStatus "You can manually download VMware-Password-Manager.ps1 from GitHub"
     }
     
