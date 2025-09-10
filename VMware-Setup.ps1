@@ -16,9 +16,9 @@ $script:TotalSteps = 6
 
 function Show-DoDWarning {
     Clear-Host
-    Write-Host "=" * 80 -ForegroundColor Yellow
+    Write-Host ('=' * 80) -ForegroundColor Yellow
     Write-Host "*** U.S. GOVERNMENT COMPUTER SYSTEM WARNING ***" -ForegroundColor Red
-    Write-Host "=" * 80 -ForegroundColor Yellow
+    Write-Host ('=' * 80) -ForegroundColor Yellow
     Write-Host ""
     Write-Host "You are accessing a U.S. Government (USG) Information System (IS) that is" -ForegroundColor White
     Write-Host "provided for USG-authorized use only." -ForegroundColor White
@@ -31,7 +31,7 @@ function Show-DoDWarning {
     Write-Host "- Communications using, or data stored on, this IS are not private" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "VMware vCenter Password Management Tool - Version 0.5 BETA Setup" -ForegroundColor Green
-    Write-Host "=" * 80 -ForegroundColor Yellow
+    Write-Host ('=' * 80) -ForegroundColor Yellow
     Write-Host ""
     $acknowledge = Read-Host "Type 'AGREE' to acknowledge and continue"
     if ($acknowledge -ne "AGREE") {
@@ -62,13 +62,6 @@ function Write-Progress {
     Write-Host "[$progressBar] $PercentComplete%" -ForegroundColor Green
     Write-Host "Status: $Status" -ForegroundColor White
     Write-Host ""
-}
-
-function Write-DetailedStatus {
-    param([string]$Message)
-    
-    $timestamp = Get-Date -Format "HH:mm:ss"
-    Write-Host "[$timestamp] $Message" -ForegroundColor Gray
 }
 
 function Write-DetailedStatus {
@@ -296,162 +289,6 @@ function Install-VMwarePowerCLI {
 }
 
 function Create-ConfigurationFiles {
-    Update-Progress "Creating Configuration Files" "Setting up hosts.txt and users.txt configuration files..."
-    
-    $scriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
-    
-    try {
-        # Create hosts.txt
-        $hostsFile = Join-Path $scriptRoot "hosts.txt"
-        if (-not (Test-Path $hostsFile)) {
-            $hostsContent = @"
-# ESXi Hosts Configuration
-# Add your ESXi host IP addresses or FQDNs below
-# One host per line, comments start with #
-
-# Examples:
-# 192.168.1.100
-# 192.168.1.101
-# esxi-host-01.domain.local
-# esxi-host-02.domain.local
-"@
-            $hostsContent | Set-Content -Path $hostsFile
-            Write-DetailedStatus "[SUCCESS] Created hosts.txt configuration file"
-        } else {
-            Write-DetailedStatus "[SUCCESS] hosts.txt already exists"
-        }
-        
-        # Create users.txt
-        $usersFile = Join-Path $scriptRoot "users.txt"
-        if (-not (Test-Path $usersFile)) {
-            $usersContent = @"
-# Target ESXi Users Configuration
-# Add ESXi usernames for password operations
-# One username per line, comments start with #
-# Note: vCenter admin users (like administrator@vsphere.local) are entered directly in the GUI
-
-# Common ESXi users:
-root
-# admin_swm
-# admin_kms
-# admin
-# serviceaccount
-"@
-            $usersContent | Set-Content -Path $usersFile
-            Write-DetailedStatus "[SUCCESS] Created users.txt configuration file"
-        } else {
-            Write-DetailedStatus "[SUCCESS] users.txt already exists"
-        }
-        
-        Write-DetailedStatus "Configuration files are ready for customization"
-        
-    } catch {
-        Write-DetailedStatus "[WARNING] Could not create configuration files: $($_.Exception.Message)"
-    }
-    
-    Start-Sleep -Milliseconds 500
-}
-
-function Download-MainApplication {
-    Update-Progress "Downloading Main Application" "Getting the latest GUI application from repository..."
-    
-    $scriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
-    $mainTool = Join-Path $scriptRoot "VMware-Password-Manager.ps1"
-    
-    try {
-        Write-DetailedStatus "Downloading latest VMware Password Manager GUI..."
-        $guiUrl = "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Password-Manager.ps1"
-        Invoke-WebRequest -Uri $guiUrl -OutFile $mainTool -UseBasicParsing
-        Write-DetailedStatus "[SUCCESS] VMware Password Manager GUI downloaded successfully"
-        Write-DetailedStatus "   Application ready to launch"
-    } catch {
-        Write-DetailedStatus "[WARNING] Could not download GUI application: $($_.Exception.Message)"
-        Write-DetailedStatus "You can manually download VMware-Password-Manager.ps1 from GitHub"
-    }
-    
-    Start-Sleep -Milliseconds 500
-}
-
-function Complete-Setup {
-    Write-Progress "Setup Complete!" "All components installed and configured successfully" 100
-    
-    Write-DetailedStatus ""
-    Write-DetailedStatus "=== SETUP COMPLETE ==="
-    Write-DetailedStatus "[SUCCESS] PowerShell environment configured"
-    Write-DetailedStatus "[SUCCESS] VMware PowerCLI installed and ready"
-    Write-DetailedStatus "[SUCCESS] Configuration files created"
-    Write-DetailedStatus "[SUCCESS] Main application downloaded"
-    Write-DetailedStatus ""
-    Write-DetailedStatus "Next Steps:"
-    Write-DetailedStatus "1. Configure your ESXi hosts and users"
-    Write-DetailedStatus "2. Test vCenter connectivity"
-    Write-DetailedStatus "3. Run password operations (Dry Run first!)"
-    Write-DetailedStatus ""
-    
-    $launch = Read-Host "Would you like to launch the VMware Password Manager now? (Y/N)"
-    if ($launch -eq "Y" -or $launch -eq "y") {
-        $scriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
-        $mainTool = Join-Path $scriptRoot "VMware-Password-Manager.ps1"
-        if (Test-Path $mainTool) {
-            Write-Host "Launching VMware Password Manager..." -ForegroundColor Green
-            Start-Process PowerShell -ArgumentList "-File `"$mainTool`"" -WindowStyle Normal
-        } else {
-            Write-Host "Main application file not found: $mainTool" -ForegroundColor Red
-        }
-    }
-}
-
-function Start-SetupProcess {
-    try {
-        Initialize-PowerShellEnvironment
-        Install-NuGetProvider
-        Update-PowerShellGet
-        $powerCLISuccess = Install-VMwarePowerCLI
-        Create-ConfigurationFiles
-        Download-MainApplication
-        
-        if ($powerCLISuccess) {
-            Complete-Setup
-        } else {
-            Write-Host "Setup completed with warnings. Check output for issues." -ForegroundColor Yellow
-        }
-    } catch {
-        Write-Host "Setup failed: $($_.Exception.Message)" -ForegroundColor Red
-        Read-Host "Press Enter to exit"
-        exit 1
-    }
-}
-
-function Complete-Setup {
-    Write-Progress "Setup Complete!" "All components installed and configured successfully" 100
-    
-    Write-Host ""
-    Write-Host "=== SETUP COMPLETE ===" -ForegroundColor Green
-    Write-Host "[SUCCESS] PowerShell environment configured" -ForegroundColor Green
-    Write-Host "[SUCCESS] VMware PowerCLI installed and ready" -ForegroundColor Green
-    Write-Host "[SUCCESS] Configuration files created" -ForegroundColor Green
-    Write-Host "[SUCCESS] Main application downloaded" -ForegroundColor Green
-    Write-Host ""
-    Write-Host "Next Steps:" -ForegroundColor Cyan
-    Write-Host "1. Configure your ESXi hosts and users" -ForegroundColor White
-    Write-Host "2. Test vCenter connectivity" -ForegroundColor White
-    Write-Host "3. Run password operations (Dry Run first!)" -ForegroundColor White
-    Write-Host ""
-    
-    $launch = Read-Host "Would you like to launch the VMware Password Manager now? (Y/N)"
-    if ($launch -eq "Y" -or $launch -eq "y") {
-        $scriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
-        $mainTool = Join-Path $scriptRoot "VMware-Password-Manager.ps1"
-        if (Test-Path $mainTool) {
-            Write-Host "Launching VMware Password Manager..." -ForegroundColor Green
-            Start-Process PowerShell -ArgumentList "-File `"$mainTool`"" -WindowStyle Normal
-        } else {
-            Write-Host "Main application file not found: $mainTool" -ForegroundColor Red
-        }
-    }
-}
-
-function Create-ConfigurationFiles {
     Write-Progress "Creating Configuration Files" "Setting up hosts.txt and users.txt configuration files..." 83
     
     $scriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
@@ -526,6 +363,56 @@ function Download-MainApplication {
     }
     
     Start-Sleep -Milliseconds 500
+}
+
+function Complete-Setup {
+    Write-Progress "Setup Complete!" "All components installed and configured successfully" 100
+    
+    Write-Host ""
+    Write-Host "=== SETUP COMPLETE ===" -ForegroundColor Green
+    Write-Host "[SUCCESS] PowerShell environment configured" -ForegroundColor Green
+    Write-Host "[SUCCESS] VMware PowerCLI installed and ready" -ForegroundColor Green
+    Write-Host "[SUCCESS] Configuration files created" -ForegroundColor Green
+    Write-Host "[SUCCESS] Main application downloaded" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "Next Steps:" -ForegroundColor Cyan
+    Write-Host "1. Configure your ESXi hosts and users" -ForegroundColor White
+    Write-Host "2. Test vCenter connectivity" -ForegroundColor White
+    Write-Host "3. Run password operations (Dry Run first!)" -ForegroundColor White
+    Write-Host ""
+    
+    $launch = Read-Host "Would you like to launch the VMware Password Manager now? (Y/N)"
+    if ($launch -eq "Y" -or $launch -eq "y") {
+        $scriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
+        $mainTool = Join-Path $scriptRoot "VMware-Password-Manager.ps1"
+        if (Test-Path $mainTool) {
+            Write-Host "Launching VMware Password Manager..." -ForegroundColor Green
+            Start-Process PowerShell -ArgumentList "-File `"$mainTool`"" -WindowStyle Normal
+        } else {
+            Write-Host "Main application file not found: $mainTool" -ForegroundColor Red
+        }
+    }
+}
+
+function Start-SetupProcess {
+    try {
+        Initialize-PowerShellEnvironment
+        Install-NuGetProvider
+        Update-PowerShellGet
+        $powerCLISuccess = Install-VMwarePowerCLI
+        Create-ConfigurationFiles
+        Download-MainApplication
+        
+        if ($powerCLISuccess) {
+            Complete-Setup
+        } else {
+            Write-Host "Setup completed with warnings. Check output for issues." -ForegroundColor Yellow
+        }
+    } catch {
+        Write-Host "Setup failed: $($_.Exception.Message)" -ForegroundColor Red
+        Read-Host "Press Enter to exit"
+        exit 1
+    }
 }
 
 # Main execution
