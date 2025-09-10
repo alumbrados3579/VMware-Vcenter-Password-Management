@@ -145,6 +145,7 @@ Flexible launcher with command-line options and interactive menu.
 
 Comprehensive documentation is available in the `Documents/` directory:
 
+**User Guides:**
 - `Setup-Guide.md` - Installation and configuration procedures
 - `CLI-Workspace-Guide.md` - PowerCLI terminal usage and features
 - `Configuration-Manager-Guide.md` - Configuration file management
@@ -152,7 +153,15 @@ Comprehensive documentation is available in the `Documents/` directory:
 - `Password-Management-Guide.md` - Password operations and security
 - `Modular-Architecture-Guide.md` - Architecture overview and best practices
 
-For quick reference, see `HOWTO.txt` in the root directory.
+**Development Templates:**
+- `Pseudocode-Prompt-Template.md` - Algorithm design and pseudocode generation
+- `Workflow-Flowchart-Prompt-Template.md` - Process visualization and flowcharts
+- `VMware-Tool-Recreation-Prompt.md` - Complete tool recreation guide
+
+**Quick Access:**
+- `Documents/README.md` - Complete documentation index and navigation guide
+- `HOWTO.txt` - Quick reference guide in root directory
+- `Installation.txt` - Installation instructions and troubleshooting
 
 ### Installation Troubleshooting
 
