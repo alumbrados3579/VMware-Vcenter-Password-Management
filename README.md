@@ -102,13 +102,15 @@ Complete functionality with all features in a tabbed interface.
 ```powershell
 .\Tools\CLIWorkspace.ps1        # PowerCLI Terminal (60-70% faster)
 .\Tools\Configuration.ps1       # Config Editor (70% faster)
+.\Tools\HostManager.ps1         # Host Manager (70% faster)
 ```
 Standalone tools for specific tasks with faster startup times.
 
-#### Smart Launcher
+**Smart Launcher:**
 ```powershell
 .\VMware-Password-Manager-Modular.ps1 -Tool CLI
 .\VMware-Password-Manager-Modular.ps1 -Tool Config
+.\VMware-Password-Manager-Modular.ps1 -Tool Host
 .\VMware-Password-Manager-Modular.ps1 -List
 ```
 Flexible launcher with command-line options and interactive menu.
@@ -126,6 +128,7 @@ Flexible launcher with command-line options and interactive menu.
 
 - CLI Workspace: 60-70% faster startup than full GUI
 - Configuration Manager: 70% faster startup than full GUI
+- Host Manager: 70% faster startup than full GUI
 - Reduced memory usage: 50-80% less for individual tools
 - Modular architecture allows focused tool usage
 
@@ -145,6 +148,7 @@ Comprehensive documentation is available in the `Documents/` directory:
 - `Setup-Guide.md` - Installation and configuration procedures
 - `CLI-Workspace-Guide.md` - PowerCLI terminal usage and features
 - `Configuration-Manager-Guide.md` - Configuration file management
+- `Host-Manager-Guide.md` - ESXi host management operations
 - `Password-Management-Guide.md` - Password operations and security
 - `Modular-Architecture-Guide.md` - Architecture overview and best practices
 

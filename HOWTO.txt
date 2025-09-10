@@ -44,6 +44,7 @@ QUICK START
    For Fast Individual Tools:
    > Tools\CLIWorkspace.ps1        (PowerCLI Terminal)
    > Tools\Configuration.ps1       (Config Editor)
+   > Tools\HostManager.ps1         (Host Manager)
    
    For Smart Launcher:
    > VMware-Password-Manager-Modular.ps1
@@ -66,11 +67,19 @@ SCENARIO 2: DAILY POWERCLI USAGE (FASTEST)
 
 SCENARIO 3: CONFIGURATION MANAGEMENT
 1. Run Tools\Configuration.ps1
-2. Load existing hosts.txt and users.txt files
-3. Edit configurations as needed
-4. Save and validate configurations
+2. Acknowledge DoD warning
+3. Load existing hosts.txt and users.txt files
+4. Edit configurations as needed
+5. Save and validate configurations
 
-SCENARIO 4: PASSWORD OPERATIONS
+SCENARIO 4: HOST MANAGEMENT
+1. Run Tools\HostManager.ps1
+2. Acknowledge DoD warning
+3. Connect to vCenter using admin credentials
+4. Select operation: Create Host, List Hosts, or Delete Host
+5. Execute operations with real-time progress monitoring
+
+SCENARIO 5: PASSWORD OPERATIONS
 1. Run VMware-Password-Manager.ps1
 2. Configure vCenter connection in Password Management tab
 3. Test connection to verify connectivity
@@ -145,9 +154,10 @@ Solution: Use individual tools (Tools\CLIWorkspace.ps1) for faster startup
 ADVANCED USAGE
 ================================================================================
 
-COMMAND LINE OPTIONS
-VMware-Password-Manager-Modular.ps1 -Tool CLI
-VMware-Password-Manager-Modular.ps1 -Tool Config
+   For Smart Launcher:
+   > VMware-Password-Manager-Modular.ps1 -Tool CLI
+   > VMware-Password-Manager-Modular.ps1 -Tool Config
+   > VMware-Password-Manager-Modular.ps1 -Tool Host
 VMware-Password-Manager-Modular.ps1 -List
 
 POWERCLI WORKSPACE FEATURES

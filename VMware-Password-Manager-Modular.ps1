@@ -22,6 +22,7 @@ function Show-AvailableTools {
     Write-Host "Individual Tools (Fast Startup):" -ForegroundColor Yellow
     Write-Host "  CLI        - PowerCLI Command Workspace (Interactive Terminal)" -ForegroundColor White
     Write-Host "  Config     - Configuration Manager (Hosts & Users Editor)" -ForegroundColor White
+    Write-Host "  Host       - Host Manager (Create/List/Delete Hosts)" -ForegroundColor White
     Write-Host "  Password   - Password Management Operations" -ForegroundColor White
     Write-Host "  GitHub     - GitHub Repository Manager" -ForegroundColor White
     Write-Host "  Logs       - Log Viewer and Export" -ForegroundColor White
@@ -29,12 +30,14 @@ function Show-AvailableTools {
     Write-Host "Usage Examples:" -ForegroundColor Yellow
     Write-Host "  .\VMware-Password-Manager-Modular.ps1 -Tool CLI" -ForegroundColor Gray
     Write-Host "  .\VMware-Password-Manager-Modular.ps1 -Tool Config" -ForegroundColor Gray
+    Write-Host "  .\VMware-Password-Manager-Modular.ps1 -Tool Host" -ForegroundColor Gray
     Write-Host "  .\VMware-Password-Manager-Modular.ps1 -LazyLoad" -ForegroundColor Gray
     Write-Host "  .\VMware-Password-Manager-Modular.ps1" -ForegroundColor Gray
     Write-Host ""
     Write-Host "Direct Tool Access:" -ForegroundColor Yellow
     Write-Host "  .\Tools\CLIWorkspace.ps1" -ForegroundColor Gray
     Write-Host "  .\Tools\Configuration.ps1" -ForegroundColor Gray
+    Write-Host "  .\Tools\HostManager.ps1" -ForegroundColor Gray
     Write-Host ""
 }
 
@@ -52,6 +55,10 @@ function Start-IndividualTool {
         "config" { 
             $toolPath = Join-Path $PSScriptRoot "Tools\Configuration.ps1"
             $toolDescription = "Configuration Manager"
+        }
+        "host" { 
+            $toolPath = Join-Path $PSScriptRoot "Tools\HostManager.ps1"
+            $toolDescription = "Host Manager"
         }
         "password" { 
             Write-Host "Password Management tool not yet modularized. Use full GUI for now." -ForegroundColor Yellow
@@ -119,23 +126,25 @@ try {
         Write-Host "Choose an option:" -ForegroundColor Cyan
         Write-Host "1. CLI Workspace (Fast)" -ForegroundColor White
         Write-Host "2. Configuration Manager (Fast)" -ForegroundColor White
-        Write-Host "3. Full GUI Application" -ForegroundColor White
-        Write-Host "4. List all available tools" -ForegroundColor White
-        Write-Host "5. Exit" -ForegroundColor White
+        Write-Host "3. Host Manager (Fast)" -ForegroundColor White
+        Write-Host "4. Full GUI Application" -ForegroundColor White
+        Write-Host "5. List all available tools" -ForegroundColor White
+        Write-Host "6. Exit" -ForegroundColor White
         Write-Host ""
         
         do {
-            $choice = Read-Host "Enter your choice (1-5)"
+            $choice = Read-Host "Enter your choice (1-6)"
             
             switch ($choice) {
                 "1" { Start-IndividualTool -ToolName "CLI"; break }
                 "2" { Start-IndividualTool -ToolName "Config"; break }
-                "3" { Start-FullGUI; break }
-                "4" { Show-AvailableTools; break }
-                "5" { Write-Host "Goodbye!" -ForegroundColor Green; break }
-                default { Write-Host "Invalid choice. Please enter 1-5." -ForegroundColor Red }
+                "3" { Start-IndividualTool -ToolName "Host"; break }
+                "4" { Start-FullGUI; break }
+                "5" { Show-AvailableTools; break }
+                "6" { Write-Host "Goodbye!" -ForegroundColor Green; break }
+                default { Write-Host "Invalid choice. Please enter 1-6." -ForegroundColor Red }
             }
-        } while ($choice -notin @("1", "2", "3", "4", "5"))
+        } while ($choice -notin @("1", "2", "3", "4", "5", "6"))
     }
 } catch {
     $errorMessage = "Critical error in modular launcher: $($_.Exception.Message)"
