@@ -132,7 +132,12 @@ function Update-Progress {
     )
     
     $script:CurrentStep++
-    $script:ProgressBar.Value = $script:CurrentStep
+    
+    # Ensure progress bar value is within valid range
+    if ($script:CurrentStep -le $script:ProgressBar.Maximum) {
+        $script:ProgressBar.Value = $script:CurrentStep
+    }
+    
     $script:StatusLabel.Text = "[$script:CurrentStep/$script:TotalSteps] $Status"
     
     $timestamp = Get-Date -Format "HH:mm:ss"
@@ -206,11 +211,20 @@ function Update-PowerShellGet {
             Add-DetailedStatus "Current PowerShellGet version: $($psGet.Version)"
         }
         
-        Add-DetailedStatus "Updating PowerShellGet module..."
-        Install-Module -Name "PowerShellGet" -Force -Scope CurrentUser -AllowClobber
-        Add-DetailedStatus "✅ PowerShellGet module updated successfully"
+        # Check if PackageManagement is in use and handle gracefully
+        $packageMgmt = Get-Module -Name "PackageManagement"
+        if ($packageMgmt) {
+            Add-DetailedStatus "PackageManagement v$($packageMgmt.Version) is currently loaded"
+            Add-DetailedStatus "Skipping PowerShellGet update to avoid module conflicts"
+            Add-DetailedStatus "✅ Using existing PowerShellGet installation"
+        } else {
+            Add-DetailedStatus "Updating PowerShellGet module..."
+            Install-Module -Name "PowerShellGet" -Force -Scope CurrentUser -AllowClobber
+            Add-DetailedStatus "✅ PowerShellGet module updated successfully"
+        }
     } catch {
         Add-DetailedStatus "⚠️ Warning: Could not update PowerShellGet: $($_.Exception.Message)"
+        Add-DetailedStatus "This is often due to module conflicts and can be safely ignored"
     }
     
     Start-Sleep -Milliseconds 500
@@ -406,7 +420,12 @@ function Download-MainApplication {
 }
 
 function Complete-Setup {
-    Update-Progress "Setup Complete!" "All components installed and configured successfully"
+    # Don't increment progress beyond maximum
+    if ($script:CurrentStep -lt $script:TotalSteps) {
+        Update-Progress "Setup Complete!" "All components installed and configured successfully"
+    } else {
+        Add-DetailedStatus "All components installed and configured successfully"
+    }
     
     Add-DetailedStatus ""
     Add-DetailedStatus "=== SETUP COMPLETE ==="
@@ -421,6 +440,9 @@ function Complete-Setup {
     Add-DetailedStatus "3. Run password operations (Dry Run first!)"
     Add-DetailedStatus ""
     Add-DetailedStatus "Ready to launch the VMware Password Manager!"
+    
+    # Ensure progress bar is at maximum
+    $script:ProgressBar.Value = $script:ProgressBar.Maximum
     
     $script:CloseButton.Text = "Launch Application"
     $script:CloseButton.Enabled = $true
@@ -440,6 +462,8 @@ function Start-SetupProcess {
         if ($powerCLISuccess) {
             Complete-Setup
         } else {
+            # Ensure progress bar is at maximum even with warnings
+            $script:ProgressBar.Value = $script:ProgressBar.Maximum
             $script:StatusLabel.Text = "Setup completed with warnings. Check detailed log for issues."
             $script:StatusLabel.ForeColor = [System.Drawing.Color]::Orange
             $script:CloseButton.Text = "Close"
@@ -447,6 +471,13 @@ function Start-SetupProcess {
         }
     } catch {
         Add-DetailedStatus "❌ Setup failed: $($_.Exception.Message)"
+        Add-DetailedStatus "Error details: $($_.Exception.GetType().Name)"
+        
+        # Ensure progress bar shows some progress even on failure
+        if ($script:ProgressBar.Value -eq 0) {
+            $script:ProgressBar.Value = 1
+        }
+        
         $script:StatusLabel.Text = "Setup failed. Check detailed log for errors."
         $script:StatusLabel.ForeColor = [System.Drawing.Color]::Red
         $script:CloseButton.Text = "Close"
