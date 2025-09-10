@@ -33,7 +33,10 @@ Step 3: Follow Setup Wizard
 ---------------------------
 1. Type 'AGREE' to acknowledge DoD warning
 2. Wait for PowerCLI installation (may take several minutes)
-3. Choose to launch the application when prompted
+3. Choose post-installation option:
+   - Create ZIP package for air-gapped/classified networks
+   - Launch the application immediately
+   - Exit setup to run tools manually later
 
 ================================================================================
 ALTERNATIVE: FULL REPOSITORY DOWNLOAD
@@ -68,6 +71,8 @@ Local Installation Benefits:
 - OneDrive sync conflict prevention
 - Portable installation in working directory
 - Enterprise-compliant local module storage
+- Optional ZIP packaging for air-gapped networks
+- Complete offline deployment capability
 
 ================================================================================
 POST-INSTALLATION USAGE
@@ -89,6 +94,36 @@ Full GUI Application:
 
 Quick Test Launcher:
 .\Test-Startup.ps1              # Bypass setup for testing
+
+================================================================================
+AIR-GAPPED NETWORK DEPLOYMENT
+================================================================================
+
+Deployment Package Creation:
+During setup, choose option 1 to create a ZIP package containing the complete
+tool with all dependencies for deployment to air-gapped or classified networks.
+
+Package Contents:
+- Complete VMware Password Management Tool v1.0
+- All PowerCLI modules (locally installed)
+- Documentation and user guides
+- Modular tools for fast operation
+- Configuration templates
+- No internet connection required after extraction
+
+Deployment Process:
+1. Run setup on internet-connected system
+2. Choose "Create ZIP package for air-gapped/classified networks"
+3. Transfer ZIP file to target network
+4. Extract to desired location
+5. Run VMware-Password-Manager.ps1 or individual tools
+6. No additional setup required
+
+Security Benefits:
+- Complete offline operation capability
+- No external dependencies after deployment
+- All components included and verified
+- Suitable for classified network environments
 
 ================================================================================
 SYSTEM REQUIREMENTS

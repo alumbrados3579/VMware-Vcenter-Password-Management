@@ -72,13 +72,18 @@ The automated setup script will:
 2. **Install VMware PowerCLI** - Download PowerCLI modules to local directory (OneDrive-safe)
 3. **Create Configuration Files** - Generate hosts.txt and users.txt templates
 4. **Download Application Components** - Get the latest GUI and modular tools
-5. **Verify Installation** - Test components and offer to launch the application
+5. **Verify Installation** - Test components and offer post-installation options:
+   - Create ZIP package for air-gapped/classified networks
+   - Launch the application immediately
+   - Exit setup to run tools manually
 
 **Benefits of Local Installation:**
 - No administrator privileges required
 - Prevents OneDrive sync conflicts
 - Portable installation in working directory
 - Enterprise-compliant local module storage
+- Optional ZIP packaging for air-gapped networks
+- Complete offline deployment capability
 
 ### Usage Options
 

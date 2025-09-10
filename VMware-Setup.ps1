@@ -381,16 +381,141 @@ function Complete-Setup {
     Write-Host "3. Run password operations (Dry Run first!)" -ForegroundColor White
     Write-Host ""
     
-    $launch = Read-Host "Would you like to launch the VMware Password Manager now? (Y/N)"
-    if ($launch -eq "Y" -or $launch -eq "y") {
-        $scriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
-        $mainTool = Join-Path $scriptRoot "VMware-Password-Manager.ps1"
-        if (Test-Path $mainTool) {
-            Write-Host "Launching VMware Password Manager..." -ForegroundColor Green
-            Start-Process PowerShell -ArgumentList "-File `"$mainTool`"" -WindowStyle Normal
-        } else {
-            Write-Host "Main application file not found: $mainTool" -ForegroundColor Red
+    Show-PostInstallationOptions
+}
+
+function Show-PostInstallationOptions {
+    Write-Host "=== POST-INSTALLATION OPTIONS ===" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "Choose an option:" -ForegroundColor Yellow
+    Write-Host "1. Create ZIP package for air-gapped/classified networks" -ForegroundColor White
+    Write-Host "2. Launch VMware Password Manager" -ForegroundColor White
+    Write-Host "3. Exit setup" -ForegroundColor White
+    Write-Host ""
+    
+    do {
+        $choice = Read-Host "Enter your choice (1-3)"
+        
+        switch ($choice) {
+            "1" { 
+                Create-DeploymentPackage
+                break 
+            }
+            "2" { 
+                Launch-Application
+                break 
+            }
+            "3" { 
+                Write-Host "Setup complete. You can run the tools manually when ready." -ForegroundColor Green
+                Write-Host "Use: .\VMware-Password-Manager.ps1 or .\Tools\CLIWorkspace.ps1" -ForegroundColor Gray
+                break 
+            }
+            default { 
+                Write-Host "Invalid choice. Please enter 1, 2, or 3." -ForegroundColor Red 
+            }
         }
+    } while ($choice -notin @("1", "2", "3"))
+}
+
+function Create-DeploymentPackage {
+    Write-Host ""
+    Write-Host "=== CREATING DEPLOYMENT PACKAGE ===" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "This will create a ZIP file containing the complete VMware Password Management Tool" -ForegroundColor Yellow
+    Write-Host "suitable for deployment to air-gapped or higher classification networks." -ForegroundColor Yellow
+    Write-Host ""
+    
+    $scriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
+    $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+    $zipFileName = "VMware-Password-Manager-v1.0-$timestamp.zip"
+    $zipPath = Join-Path (Split-Path $scriptRoot -Parent) $zipFileName
+    
+    try {
+        Write-Host "Creating deployment package..." -ForegroundColor Green
+        Write-Host "Source: $scriptRoot" -ForegroundColor Gray
+        Write-Host "Package: $zipPath" -ForegroundColor Gray
+        Write-Host ""
+        
+        # Create ZIP file using PowerShell 5.0+ Compress-Archive
+        if (Get-Command Compress-Archive -ErrorAction SilentlyContinue) {
+            Write-Host "Compressing files..." -ForegroundColor Green
+            Compress-Archive -Path "$scriptRoot\*" -DestinationPath $zipPath -Force
+            
+            $zipSize = (Get-Item $zipPath).Length
+            $zipSizeMB = [math]::Round($zipSize / 1MB, 2)
+            
+            Write-Host ""
+            Write-Host "[SUCCESS] Deployment package created successfully!" -ForegroundColor Green
+            Write-Host "Package: $zipFileName" -ForegroundColor White
+            Write-Host "Location: $zipPath" -ForegroundColor White
+            Write-Host "Size: $zipSizeMB MB" -ForegroundColor White
+            Write-Host ""
+            Write-Host "DEPLOYMENT INSTRUCTIONS:" -ForegroundColor Cyan
+            Write-Host "1. Transfer the ZIP file to your target network" -ForegroundColor White
+            Write-Host "2. Extract to desired location" -ForegroundColor White
+            Write-Host "3. No additional setup required - all components included" -ForegroundColor White
+            Write-Host "4. Run VMware-Password-Manager.ps1 or individual tools" -ForegroundColor White
+            Write-Host ""
+            Write-Host "PACKAGE CONTENTS:" -ForegroundColor Cyan
+            Write-Host "- Complete VMware Password Management Tool v1.0" -ForegroundColor White
+            Write-Host "- All PowerCLI modules (local installation)" -ForegroundColor White
+            Write-Host "- Documentation and guides" -ForegroundColor White
+            Write-Host "- Modular tools for fast operation" -ForegroundColor White
+            Write-Host "- Configuration templates" -ForegroundColor White
+            Write-Host ""
+            
+            $openFolder = Read-Host "Would you like to open the folder containing the ZIP file? (Y/N)"
+            if ($openFolder -eq "Y" -or $openFolder -eq "y") {
+                Start-Process "explorer.exe" -ArgumentList "/select,`"$zipPath`""
+            }
+        } else {
+            Write-Host "[ERROR] Compress-Archive not available. Using alternative method..." -ForegroundColor Yellow
+            
+            # Fallback method using .NET
+            Add-Type -AssemblyName System.IO.Compression.FileSystem
+            [System.IO.Compression.ZipFile]::CreateFromDirectory($scriptRoot, $zipPath)
+            
+            Write-Host "[SUCCESS] Deployment package created using .NET method!" -ForegroundColor Green
+            Write-Host "Package: $zipPath" -ForegroundColor White
+        }
+        
+        Write-Host ""
+        $continueChoice = Read-Host "Would you like to launch the application now? (Y/N)"
+        if ($continueChoice -eq "Y" -or $continueChoice -eq "y") {
+            Launch-Application
+        } else {
+            Write-Host "Setup complete. Package ready for deployment." -ForegroundColor Green
+        }
+        
+    } catch {
+        Write-Host "[ERROR] Failed to create deployment package: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host "You can manually ZIP the contents of: $scriptRoot" -ForegroundColor Yellow
+        Write-Host ""
+        
+        $continueChoice = Read-Host "Would you like to launch the application anyway? (Y/N)"
+        if ($continueChoice -eq "Y" -or $continueChoice -eq "y") {
+            Launch-Application
+        }
+    }
+}
+
+function Launch-Application {
+    Write-Host ""
+    Write-Host "=== LAUNCHING APPLICATION ===" -ForegroundColor Cyan
+    Write-Host ""
+    
+    $scriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
+    $mainTool = Join-Path $scriptRoot "VMware-Password-Manager.ps1"
+    
+    if (Test-Path $mainTool) {
+        Write-Host "Launching VMware Password Manager..." -ForegroundColor Green
+        Write-Host "Application: $mainTool" -ForegroundColor Gray
+        Write-Host ""
+        Start-Process PowerShell -ArgumentList "-File `"$mainTool`"" -WindowStyle Normal
+        Write-Host "Application launched successfully!" -ForegroundColor Green
+    } else {
+        Write-Host "[ERROR] Main application file not found: $mainTool" -ForegroundColor Red
+        Write-Host "Please check the installation and try again." -ForegroundColor Yellow
     }
 }
 
