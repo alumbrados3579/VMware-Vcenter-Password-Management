@@ -1,7 +1,8 @@
 # VMware vCenter Password Management Tool
 ## Version 1.0 - Professional DoD-Compliant Password Management
 
-<img width="652" height="509" alt="image" src="https://github.com/user-attachments/assets/e2e738fd-e334-4f88-814d-4004d6dd13a7" />
+
+<img width="650" height="542" alt="image" src="https://github.com/user-attachments/assets/3e730100-e65f-4ef5-900a-e15b4520b2ac" />
 
 
 ### Overview
@@ -210,8 +211,6 @@ Alternative: Use offline installation method
 - **Compliance**: DoD standards with comprehensive audit logging
 - **Platform**: Windows PowerShell with VMware PowerCLI
 - 
-<img width="650" height="542" alt="image" src="https://github.com/user-attachments/assets/3e730100-e65f-4ef5-900a-e15b4520b2ac" />
-
 ### Author and Development
 
 **Primary Author:** Stace Mitchell <stace.mitchell27@gmail.com>
