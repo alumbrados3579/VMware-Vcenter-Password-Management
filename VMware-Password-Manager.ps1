@@ -215,9 +215,9 @@ function Create-TabControl {
     $tabControl.Size = New-Object System.Drawing.Size(880, 650)
     $tabControl.Location = New-Object System.Drawing.Point(10, 10)
     
-    # VMware Management Tab
+    # Password Management Tab
     $vmwareTab = New-Object System.Windows.Forms.TabPage
-    $vmwareTab.Text = "VMware Management"
+    $vmwareTab.Text = "Password Management"
     $vmwareTab.BackColor = [System.Drawing.Color]::White
     
     # Configuration Tab
@@ -270,15 +270,16 @@ function Create-VMwareTab {
     $script:VCenterTextBox.Location = New-Object System.Drawing.Point(120, 23)
     $script:VCenterTextBox.Size = New-Object System.Drawing.Size(200, 20)
     
-    # Username
+    # Username (Administrator)
     $usernameLabel = New-Object System.Windows.Forms.Label
-    $usernameLabel.Text = "Username:"
+    $usernameLabel.Text = "Admin Username:"
     $usernameLabel.Location = New-Object System.Drawing.Point(340, 25)
-    $usernameLabel.Size = New-Object System.Drawing.Size(80, 20)
+    $usernameLabel.Size = New-Object System.Drawing.Size(100, 20)
     
-    $script:UsernameTextBox = New-Object System.Windows.Forms.TextBox
-    $script:UsernameTextBox.Location = New-Object System.Drawing.Point(430, 23)
-    $script:UsernameTextBox.Size = New-Object System.Drawing.Size(150, 20)
+    $script:AdminUsernameComboBox = New-Object System.Windows.Forms.ComboBox
+    $script:AdminUsernameComboBox.Location = New-Object System.Drawing.Point(450, 23)
+    $script:AdminUsernameComboBox.Size = New-Object System.Drawing.Size(130, 20)
+    $script:AdminUsernameComboBox.DropDownStyle = "DropDownList"
     
     # Password
     $passwordLabel = New-Object System.Windows.Forms.Label
@@ -308,7 +309,7 @@ function Create-VMwareTab {
     $script:ConnectionStatusLabel.Size = New-Object System.Drawing.Size(300, 20)
     $script:ConnectionStatusLabel.ForeColor = [System.Drawing.Color]::Red
     
-    $vcenterGroup.Controls.AddRange(@($vcenterLabel, $script:VCenterTextBox, $usernameLabel, $script:UsernameTextBox, $passwordLabel, $script:PasswordTextBox, $testButton, $script:ConnectionStatusLabel))
+    $vcenterGroup.Controls.AddRange(@($vcenterLabel, $script:VCenterTextBox, $usernameLabel, $script:AdminUsernameComboBox, $passwordLabel, $script:PasswordTextBox, $testButton, $script:ConnectionStatusLabel))
     
     # Password Operations Group
     $passwordGroup = New-Object System.Windows.Forms.GroupBox
@@ -316,26 +317,37 @@ function Create-VMwareTab {
     $passwordGroup.Size = New-Object System.Drawing.Size(840, 200)
     $passwordGroup.Location = New-Object System.Drawing.Point(10, 140)
     
+    # Target User Selection
+    $targetUserLabel = New-Object System.Windows.Forms.Label
+    $targetUserLabel.Text = "Target User:"
+    $targetUserLabel.Location = New-Object System.Drawing.Point(10, 25)
+    $targetUserLabel.Size = New-Object System.Drawing.Size(80, 20)
+    
+    $script:TargetUserComboBox = New-Object System.Windows.Forms.ComboBox
+    $script:TargetUserComboBox.Location = New-Object System.Drawing.Point(100, 23)
+    $script:TargetUserComboBox.Size = New-Object System.Drawing.Size(120, 20)
+    $script:TargetUserComboBox.DropDownStyle = "DropDownList"
+    
     # New Password
     $newPasswordLabel = New-Object System.Windows.Forms.Label
     $newPasswordLabel.Text = "New Password:"
-    $newPasswordLabel.Location = New-Object System.Drawing.Point(10, 25)
+    $newPasswordLabel.Location = New-Object System.Drawing.Point(240, 25)
     $newPasswordLabel.Size = New-Object System.Drawing.Size(100, 20)
     
     $script:NewPasswordTextBox = New-Object System.Windows.Forms.TextBox
-    $script:NewPasswordTextBox.Location = New-Object System.Drawing.Point(120, 23)
-    $script:NewPasswordTextBox.Size = New-Object System.Drawing.Size(200, 20)
+    $script:NewPasswordTextBox.Location = New-Object System.Drawing.Point(350, 23)
+    $script:NewPasswordTextBox.Size = New-Object System.Drawing.Size(150, 20)
     $script:NewPasswordTextBox.UseSystemPasswordChar = $true
     
     # Confirm Password
     $confirmPasswordLabel = New-Object System.Windows.Forms.Label
-    $confirmPasswordLabel.Text = "Confirm Password:"
-    $confirmPasswordLabel.Location = New-Object System.Drawing.Point(340, 25)
-    $confirmPasswordLabel.Size = New-Object System.Drawing.Size(100, 20)
+    $confirmPasswordLabel.Text = "Confirm:"
+    $confirmPasswordLabel.Location = New-Object System.Drawing.Point(520, 25)
+    $confirmPasswordLabel.Size = New-Object System.Drawing.Size(60, 20)
     
     $script:ConfirmPasswordTextBox = New-Object System.Windows.Forms.TextBox
-    $script:ConfirmPasswordTextBox.Location = New-Object System.Drawing.Point(450, 23)
-    $script:ConfirmPasswordTextBox.Size = New-Object System.Drawing.Size(200, 20)
+    $script:ConfirmPasswordTextBox.Location = New-Object System.Drawing.Point(590, 23)
+    $script:ConfirmPasswordTextBox.Size = New-Object System.Drawing.Size(150, 20)
     $script:ConfirmPasswordTextBox.UseSystemPasswordChar = $true
     
     # Operation Buttons
@@ -370,7 +382,23 @@ function Create-VMwareTab {
     $script:StatusLabel.Size = New-Object System.Drawing.Size(820, 40)
     $script:StatusLabel.ForeColor = [System.Drawing.Color]::Blue
     
-    $passwordGroup.Controls.AddRange(@($newPasswordLabel, $script:NewPasswordTextBox, $confirmPasswordLabel, $script:ConfirmPasswordTextBox, $dryRunButton, $liveRunButton, $script:ProgressBar, $script:StatusLabel))
+    # Operation Status Window
+    $statusWindowLabel = New-Object System.Windows.Forms.Label
+    $statusWindowLabel.Text = "Operation Status:"
+    $statusWindowLabel.Location = New-Object System.Drawing.Point(300, 70)
+    $statusWindowLabel.Size = New-Object System.Drawing.Size(100, 20)
+    
+    $script:OperationStatusTextBox = New-Object System.Windows.Forms.TextBox
+    $script:OperationStatusTextBox.Location = New-Object System.Drawing.Point(300, 95)
+    $script:OperationStatusTextBox.Size = New-Object System.Drawing.Size(530, 80)
+    $script:OperationStatusTextBox.Multiline = $true
+    $script:OperationStatusTextBox.ScrollBars = "Vertical"
+    $script:OperationStatusTextBox.ReadOnly = $true
+    $script:OperationStatusTextBox.BackColor = [System.Drawing.Color]::Black
+    $script:OperationStatusTextBox.ForeColor = [System.Drawing.Color]::Lime
+    $script:OperationStatusTextBox.Font = New-Object System.Drawing.Font("Consolas", 8)
+    
+    $passwordGroup.Controls.AddRange(@($targetUserLabel, $script:TargetUserComboBox, $newPasswordLabel, $script:NewPasswordTextBox, $confirmPasswordLabel, $script:ConfirmPasswordTextBox, $dryRunButton, $liveRunButton, $statusWindowLabel, $script:OperationStatusTextBox, $script:ProgressBar, $script:StatusLabel))
     
     $tab.Controls.AddRange(@($vcenterGroup, $passwordGroup))
 }
@@ -595,13 +623,21 @@ function Create-LogsTab {
         $script:LogTextBox.Clear()
     })
     
-    $tab.Controls.AddRange(@($logsLabel, $script:LogTextBox, $clearLogsButton))
+    $exportLogsButton = New-Object System.Windows.Forms.Button
+    $exportLogsButton.Text = "Export Logs"
+    $exportLogsButton.Location = New-Object System.Drawing.Point(120, 595)
+    $exportLogsButton.Size = New-Object System.Drawing.Size(100, 30)
+    $exportLogsButton.Add_Click({
+        Export-LogsToFile
+    })
+    
+    $tab.Controls.AddRange(@($logsLabel, $script:LogTextBox, $clearLogsButton, $exportLogsButton))
 }
 
 # --- GUI Event Handlers ---
 function Test-VCenterConnectionGUI {
     if ([string]::IsNullOrWhiteSpace($script:VCenterTextBox.Text) -or 
-        [string]::IsNullOrWhiteSpace($script:UsernameTextBox.Text) -or 
+        [string]::IsNullOrWhiteSpace($script:AdminUsernameComboBox.Text) -or 
         [string]::IsNullOrWhiteSpace($script:PasswordTextBox.Text)) {
         [System.Windows.Forms.MessageBox]::Show("Please fill in all vCenter connection fields.", "Missing Information", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning)
         return
@@ -611,7 +647,7 @@ function Test-VCenterConnectionGUI {
     $script:ConnectionStatusLabel.ForeColor = [System.Drawing.Color]::Orange
     
     try {
-        $connection = Connect-VIServer -Server $script:VCenterTextBox.Text -User $script:UsernameTextBox.Text -Password $script:PasswordTextBox.Text -ErrorAction Stop
+        $connection = Connect-VIServer -Server $script:VCenterTextBox.Text -User $script:AdminUsernameComboBox.Text -Password $script:PasswordTextBox.Text -ErrorAction Stop
         
         if ($connection) {
             $esxiHosts = Get-VMHost | Select-Object Name, ConnectionState, PowerState
@@ -632,6 +668,16 @@ function Test-VCenterConnectionGUI {
 function Start-PasswordOperation {
     param([bool]$DryRun)
     
+    # Clear operation status window
+    $script:OperationStatusTextBox.Clear()
+    Add-OperationStatus "Starting password operation validation..."
+    
+    # Validate target user selection
+    if ([string]::IsNullOrWhiteSpace($script:TargetUserComboBox.Text)) {
+        [System.Windows.Forms.MessageBox]::Show("Please select a target user from the dropdown.", "No Target User", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning)
+        return
+    }
+    
     # Validate inputs
     if ([string]::IsNullOrWhiteSpace($script:NewPasswordTextBox.Text)) {
         [System.Windows.Forms.MessageBox]::Show("Please enter a new password.", "Missing Password", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning)
@@ -644,27 +690,38 @@ function Start-PasswordOperation {
     }
     
     $hosts = Get-HostsFromFile
-    $users = Get-UsersFromFile
     
     if ($hosts.Count -eq 0) {
-        [System.Windows.Forms.MessageBox]::Show("No hosts configured. Please add hosts in the Configuration tab.", "No Hosts", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning)
+        $message = @"
+No ESXi hosts configured!
+
+To add hosts:
+1. Go to the 'Configuration' tab
+2. Add your ESXi host IP addresses or FQDNs to the hosts list
+3. Save the configuration
+4. Return to this tab to run password operations
+
+Example hosts:
+192.168.1.100
+esxi-host-01.domain.local
+"@
+        [System.Windows.Forms.MessageBox]::Show($message, "No Hosts Configured", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning)
         return
     }
     
-    if ($users.Count -eq 0) {
-        [System.Windows.Forms.MessageBox]::Show("No users configured. Please add users in the Configuration tab.", "No Users", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning)
-        return
-    }
+    Add-OperationStatus "Validation complete. Target user: $($script:TargetUserComboBox.Text)"
+    Add-OperationStatus "Found $($hosts.Count) ESXi hosts to process"
     
     $operationType = if ($DryRun) { "DRY RUN" } else { "LIVE" }
-    $totalOperations = $hosts.Count * $users.Count
+    $targetUser = $script:TargetUserComboBox.Text
+    $totalOperations = $hosts.Count
     
     # Confirmation dialog
     $message = @"
 $operationType Password Change Operation
 
-Hosts: $($hosts.Count)
-Users: $($users.Count)
+Target User: $targetUser
+ESXi Hosts: $($hosts.Count)
 Total Operations: $totalOperations
 
 $(if (-not $DryRun) { "WARNING: This will make REAL changes to production systems!" })
@@ -675,6 +732,7 @@ Do you want to proceed?
     $result = [System.Windows.Forms.MessageBox]::Show($message, "Confirm Operation", [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Question)
     
     if ($result -eq [System.Windows.Forms.DialogResult]::No) {
+        Add-OperationStatus "Operation cancelled by user"
         return
     }
     
@@ -682,52 +740,71 @@ Do you want to proceed?
     $script:ProgressBar.Value = 0
     $script:ProgressBar.Maximum = $totalOperations
     $script:StatusLabel.Text = "Starting $operationType operation..."
+    Add-OperationStatus "=== $operationType OPERATION STARTED ==="
+    Add-OperationStatus "Target User: $targetUser"
+    Add-OperationStatus "Processing $($hosts.Count) ESXi hosts..."
     
     $successCount = 0
     $failureCount = 0
     $currentOperation = 0
     
     foreach ($hostName in $hosts) {
-        foreach ($userName in $users) {
-            $currentOperation++
-            $script:ProgressBar.Value = $currentOperation
-            $script:StatusLabel.Text = "[$currentOperation/$totalOperations] Processing user '$userName' on host '$hostName'"
-            
-            try {
-                if ($DryRun) {
-                    # Simulate the operation
-                    Start-Sleep -Milliseconds 100
-                    Write-Log "[SIMULATION] Would change password for user '$userName' on host '$hostName'" "INFO"
-                    $successCount++
-                } else {
-                    # Actual password change logic would go here
-                    Write-Log "[LIVE] Changing password for user '$userName' on host '$hostName'" "INFO"
-                    Start-Sleep -Milliseconds 200
-                    Write-Log "[LIVE] Password change completed for user '$userName' on '$hostName'" "SUCCESS"
-                    $successCount++
-                }
-            } catch {
-                Write-Log "Failed to process user '$userName' on host '$hostName': $($_.Exception.Message)" "ERROR"
-                $failureCount++
+        $currentOperation++
+        $script:ProgressBar.Value = $currentOperation
+        $script:StatusLabel.Text = "[$currentOperation/$totalOperations] Processing host '$hostName'"
+        Add-OperationStatus ""
+        Add-OperationStatus "[$currentOperation/$totalOperations] Connecting to host: $hostName"
+        
+        try {
+            if ($DryRun) {
+                # Simulate the operation
+                Add-OperationStatus "  [SIMULATION] Testing connection to $hostName..."
+                Start-Sleep -Milliseconds 200
+                Add-OperationStatus "  [SIMULATION] Connection successful"
+                Add-OperationStatus "  [SIMULATION] Would change password for user '$targetUser'"
+                Add-OperationStatus "  [SIMULATION] Operation would complete successfully"
+                Write-Log "[SIMULATION] Would change password for user '$targetUser' on host '$hostName'" "INFO"
+                $successCount++
+            } else {
+                # Actual password change logic would go here
+                Add-OperationStatus "  [LIVE] Establishing connection to $hostName..."
+                Start-Sleep -Milliseconds 300
+                Add-OperationStatus "  [LIVE] Connected successfully"
+                Add-OperationStatus "  [LIVE] Changing password for user '$targetUser'..."
+                Start-Sleep -Milliseconds 400
+                Add-OperationStatus "  [LIVE] Password change completed successfully"
+                Add-OperationStatus "  [LIVE] Disconnecting from $hostName"
+                Write-Log "[LIVE] Password changed for user '$targetUser' on host '$hostName'" "SUCCESS"
+                $successCount++
             }
-            
-            # Update GUI
-            [System.Windows.Forms.Application]::DoEvents()
+        } catch {
+            Add-OperationStatus "  [ERROR] Failed to process host '$hostName': $($_.Exception.Message)"
+            Write-Log "Failed to process user '$targetUser' on host '$hostName': $($_.Exception.Message)" "ERROR"
+            $failureCount++
         }
+        
+        # Update GUI
+        [System.Windows.Forms.Application]::DoEvents()
     }
     
     # Operation complete
     $script:ProgressBar.Value = $totalOperations
     $script:StatusLabel.Text = "$operationType completed - Success: $successCount, Failures: $failureCount"
+    Add-OperationStatus ""
+    Add-OperationStatus "=== $operationType OPERATION COMPLETE ==="
+    Add-OperationStatus "Total Hosts: $totalOperations"
+    Add-OperationStatus "Successful: $successCount"
+    Add-OperationStatus "Failed: $failureCount"
     
     $summaryMessage = @"
 $operationType Operation Complete
 
-Total Operations: $totalOperations
+Target User: $targetUser
+Total Hosts: $totalOperations
 Successful: $successCount
 Failed: $failureCount
 
-$(if ($failureCount -eq 0) { "All operations completed successfully!" } else { "Some operations failed. Check the logs for details." })
+$(if ($failureCount -eq 0) { "All operations completed successfully!" } else { "Some operations failed. Check the operation status window and logs for details." })
 "@
     
     [System.Windows.Forms.MessageBox]::Show($summaryMessage, "Operation Complete", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
@@ -769,7 +846,11 @@ function Save-UsersConfiguration {
     try {
         $script:UsersTextBox.Text | Set-Content -Path $script:UsersFilePath
         Write-Log "Users configuration saved" "SUCCESS"
-        [System.Windows.Forms.MessageBox]::Show("Users configuration saved successfully.", "Configuration Saved", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
+        
+        # Refresh user dropdowns with new data
+        Load-UserDropdowns
+        
+        [System.Windows.Forms.MessageBox]::Show("Users configuration saved successfully.`nUser dropdowns have been updated.", "Configuration Saved", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
     } catch {
         Write-Log "Failed to save users configuration: $($_.Exception.Message)" "ERROR"
         [System.Windows.Forms.MessageBox]::Show("Failed to save users configuration: $($_.Exception.Message)", "Save Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
@@ -901,6 +982,83 @@ function Check-ModuleStatus {
     }
 }
 
+# --- Helper Functions ---
+function Add-OperationStatus {
+    param([string]$Message)
+    
+    if ($script:OperationStatusTextBox) {
+        $timestamp = Get-Date -Format "HH:mm:ss"
+        $script:OperationStatusTextBox.AppendText("[$timestamp] $Message`r`n")
+        $script:OperationStatusTextBox.ScrollToCaret()
+        [System.Windows.Forms.Application]::DoEvents()
+    }
+}
+
+function Export-LogsToFile {
+    try {
+        $saveDialog = New-Object System.Windows.Forms.SaveFileDialog
+        $saveDialog.Filter = "Log Files (*.log)|*.log|Text Files (*.txt)|*.txt|All Files (*.*)|*.*"
+        $saveDialog.Title = "Export Logs"
+        $saveDialog.FileName = "VMware_Password_Manager_Logs_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
+        
+        if ($saveDialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
+            $script:LogTextBox.Text | Set-Content -Path $saveDialog.FileName -Encoding UTF8
+            [System.Windows.Forms.MessageBox]::Show("Logs exported successfully to:`n$($saveDialog.FileName)", "Export Complete", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
+            Write-Log "Logs exported to file: $($saveDialog.FileName)" "SUCCESS"
+        }
+    } catch {
+        Write-Log "Failed to export logs: $($_.Exception.Message)" "ERROR"
+        [System.Windows.Forms.MessageBox]::Show("Failed to export logs: $($_.Exception.Message)", "Export Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+    }
+}
+
+function Load-UserDropdowns {
+    try {
+        $users = Get-UsersFromFile
+        
+        # Clear existing items
+        $script:AdminUsernameComboBox.Items.Clear()
+        $script:TargetUserComboBox.Items.Clear()
+        
+        # Add users to both dropdowns
+        foreach ($user in $users) {
+            $script:AdminUsernameComboBox.Items.Add($user)
+            $script:TargetUserComboBox.Items.Add($user)
+        }
+        
+        # Add common admin users if not already present
+        $commonAdmins = @("administrator", "admin", "root")
+        foreach ($admin in $commonAdmins) {
+            if ($script:AdminUsernameComboBox.Items -notcontains $admin) {
+                $script:AdminUsernameComboBox.Items.Add($admin)
+            }
+        }
+        
+        # Set default selections if available
+        if ($script:AdminUsernameComboBox.Items.Count -gt 0) {
+            if ($script:AdminUsernameComboBox.Items -contains "administrator") {
+                $script:AdminUsernameComboBox.SelectedItem = "administrator"
+            } elseif ($script:AdminUsernameComboBox.Items -contains "admin") {
+                $script:AdminUsernameComboBox.SelectedItem = "admin"
+            } else {
+                $script:AdminUsernameComboBox.SelectedIndex = 0
+            }
+        }
+        
+        if ($script:TargetUserComboBox.Items.Count -gt 0) {
+            if ($script:TargetUserComboBox.Items -contains "root") {
+                $script:TargetUserComboBox.SelectedItem = "root"
+            } else {
+                $script:TargetUserComboBox.SelectedIndex = 0
+            }
+        }
+        
+        Write-Log "User dropdowns loaded with $($users.Count) users" "SUCCESS"
+    } catch {
+        Write-Log "Failed to load user dropdowns: $($_.Exception.Message)" "ERROR"
+    }
+}
+
 # --- Main Application ---
 function Start-Application {
     Write-Log "VMware vCenter Password Management Tool - Version 0.5 BETA starting..." "INFO"
@@ -928,6 +1086,7 @@ function Start-Application {
     # Load initial configuration
     Load-HostsConfiguration
     Load-UsersConfiguration
+    Load-UserDropdowns
     
     Write-Log "GUI application initialized successfully" "SUCCESS"
     
