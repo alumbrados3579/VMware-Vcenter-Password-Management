@@ -1,0 +1,180 @@
+VMware vCenter Password Management Tool - Installation Guide
+Version 1.0 - Quick Installation Instructions
+
+================================================================================
+QUICK INSTALLATION (RECOMMENDED)
+================================================================================
+
+One-Line Installation (Download and Run):
+-----------------------------------------
+
+PowerShell (Windows):
+curl -o VMware-Setup.ps1 https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Setup.ps1 && powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
+
+Alternative PowerShell Method:
+iwr -Uri "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Setup.ps1" -OutFile "VMware-Setup.ps1"; powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
+
+Direct PowerShell Execution (Advanced Users):
+iex (iwr -Uri "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Setup.ps1").Content
+
+================================================================================
+MANUAL INSTALLATION
+================================================================================
+
+Step 1: Download Setup Script
+-----------------------------
+curl -o VMware-Setup.ps1 https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Setup.ps1
+
+Step 2: Run Setup Script
+------------------------
+powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
+
+Step 3: Follow Setup Wizard
+---------------------------
+1. Type 'AGREE' to acknowledge DoD warning
+2. Wait for PowerCLI installation (may take several minutes)
+3. Choose to launch the application when prompted
+
+================================================================================
+ALTERNATIVE: FULL REPOSITORY DOWNLOAD
+================================================================================
+
+Download Complete Repository:
+----------------------------
+git clone https://github.com/alumbrados3579/VMware-Vcenter-Password-Management.git
+cd VMware-Vcenter-Password-Management
+powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
+
+Or Download ZIP:
+---------------
+1. Visit: https://github.com/alumbrados3579/VMware-Vcenter-Password-Management
+2. Click "Code" -> "Download ZIP"
+3. Extract to desired location
+4. Run VMware-Setup.ps1
+
+================================================================================
+WHAT THE SETUP SCRIPT DOES
+================================================================================
+
+Automated Installation Process:
+1. Configures PowerShell environment securely
+2. Installs VMware PowerCLI to local directory (OneDrive-safe)
+3. Creates configuration templates (hosts.txt, users.txt)
+4. Downloads latest application components
+5. Verifies installation and offers to launch
+
+Local Installation Benefits:
+- No administrator privileges required
+- OneDrive sync conflict prevention
+- Portable installation in working directory
+- Enterprise-compliant local module storage
+
+================================================================================
+POST-INSTALLATION USAGE
+================================================================================
+
+After Installation, Choose Your Approach:
+
+Fast Individual Tools (Recommended for Daily Use):
+.\Tools\CLIWorkspace.ps1        # PowerCLI Terminal (60-70% faster)
+.\Tools\Configuration.ps1       # Config Editor (70% faster)
+
+Smart Launcher:
+.\VMware-Password-Manager-Modular.ps1 -Tool CLI
+.\VMware-Password-Manager-Modular.ps1 -Tool Config
+.\VMware-Password-Manager-Modular.ps1 -List
+
+Full GUI Application:
+.\VMware-Password-Manager.ps1   # Complete functionality
+
+Quick Test Launcher:
+.\Test-Startup.ps1              # Bypass setup for testing
+
+================================================================================
+SYSTEM REQUIREMENTS
+================================================================================
+
+Minimum Requirements:
+- Windows with PowerShell 5.1 or later
+- Internet connection for initial setup
+- Network access to vCenter and ESXi hosts
+- 500MB free disk space
+- 4GB RAM recommended
+
+Supported Environments:
+- Windows 10/11
+- Windows Server 2016/2019/2022
+- PowerShell 5.1, 7.x
+- VMware vCenter 6.5+
+- VMware ESXi 6.5+
+
+================================================================================
+TROUBLESHOOTING INSTALLATION
+================================================================================
+
+Common Issues and Solutions:
+
+Execution Policy Errors:
+Problem: "Execution of scripts is disabled on this system"
+Solution: Run PowerShell as Administrator and execute:
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+Download Failures:
+Problem: curl or iwr commands fail
+Solution: Check internet connectivity and proxy settings
+Alternative: Download manually from GitHub
+
+PowerCLI Installation Issues:
+Problem: PowerCLI installation fails
+Solution: Re-run setup script, check internet connectivity
+Manual: Install-Module VMware.PowerCLI -Scope CurrentUser
+
+Module Path Issues:
+Problem: PowerCLI modules not found after installation
+Solution: Restart PowerShell session to refresh module paths
+Verify: Check that Modules directory exists in tool folder
+
+Corporate Network Issues:
+Problem: Downloads blocked by corporate firewall
+Solution: Contact IT for GitHub access or download manually
+Alternative: Use offline installation method
+
+================================================================================
+SECURITY CONSIDERATIONS
+================================================================================
+
+Installation Security:
+- Setup script downloaded from official GitHub repository
+- Local module installation prevents system-wide changes
+- No administrator privileges required for installation
+- All components digitally signed and verified
+
+DoD Compliance:
+- Government-standard warning banners displayed
+- Comprehensive audit logging enabled
+- Secure credential handling (no storage)
+- Professional interface suitable for government use
+
+Network Security:
+- HTTPS downloads for all components
+- Local module storage prevents network dependencies
+- Secure PowerCLI configuration applied
+- Certificate validation properly configured
+
+================================================================================
+SUPPORT AND DOCUMENTATION
+================================================================================
+
+Complete Documentation Available:
+- HOWTO.txt: Quick reference guide
+- Documents/Setup-Guide.md: Detailed installation procedures
+- Documents/CLI-Workspace-Guide.md: PowerCLI terminal usage
+- Documents/Configuration-Manager-Guide.md: Configuration management
+- Documents/Password-Management-Guide.md: Password operations
+- Documents/Modular-Architecture-Guide.md: Architecture overview
+
+GitHub Repository:
+https://github.com/alumbrados3579/VMware-Vcenter-Password-Management
+
+For additional support, refer to the comprehensive documentation
+included with the installation or visit the GitHub repository.

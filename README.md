@@ -16,23 +16,69 @@ A professional, DoD-compliant solution for managing passwords across VMware vCen
 - Professional interface without decorative elements
 - Enterprise-grade security and audit capabilities
 
-### Quick Start
+### Quick Installation
 
-#### Initial Setup
+#### One-Line Installation (Recommended)
 
-1. Run the automated setup wizard:
+**PowerShell (Download and Run):**
+```powershell
+curl -o VMware-Setup.ps1 https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Setup.ps1 && powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
+```
+
+**Alternative PowerShell Method:**
+```powershell
+iwr -Uri "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Setup.ps1" -OutFile "VMware-Setup.ps1"; powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
+```
+
+**Direct Execution (Advanced Users):**
+```powershell
+iex (iwr -Uri "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Setup.ps1").Content
+```
+
+#### Manual Installation
+
+1. Download the setup script:
    ```powershell
-   .\VMware-Setup.ps1
+   curl -o VMware-Setup.ps1 https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Setup.ps1
    ```
 
-2. Configure your environment:
+2. Run the automated setup wizard:
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
+   ```
+
+3. Configure your environment:
    - Edit `hosts.txt` with your ESXi host addresses
    - Edit `users.txt` with target user accounts
 
-3. Launch the application:
+4. Launch the application:
    ```powershell
    .\VMware-Password-Manager.ps1
    ```
+
+#### Alternative: Full Repository
+
+```bash
+git clone https://github.com/alumbrados3579/VMware-Vcenter-Password-Management.git
+cd VMware-Vcenter-Password-Management
+powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
+```
+
+### What the Setup Script Does
+
+The automated setup script will:
+
+1. **Configure PowerShell Environment** - Set secure execution policies and enable TLS 1.2
+2. **Install VMware PowerCLI** - Download PowerCLI modules to local directory (OneDrive-safe)
+3. **Create Configuration Files** - Generate hosts.txt and users.txt templates
+4. **Download Application Components** - Get the latest GUI and modular tools
+5. **Verify Installation** - Test components and offer to launch the application
+
+**Benefits of Local Installation:**
+- No administrator privileges required
+- Prevents OneDrive sync conflicts
+- Portable installation in working directory
+- Enterprise-compliant local module storage
 
 ### Usage Options
 
@@ -93,6 +139,38 @@ Comprehensive documentation is available in the `Documents/` directory:
 - `Modular-Architecture-Guide.md` - Architecture overview and best practices
 
 For quick reference, see `HOWTO.txt` in the root directory.
+
+### Installation Troubleshooting
+
+#### Common Issues and Solutions
+
+**Execution Policy Errors:**
+```
+Problem: "Execution of scripts is disabled on this system"
+Solution: Run PowerShell as Administrator and execute:
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+**Download Failures:**
+```
+Problem: curl or iwr commands fail
+Solution: Check internet connectivity and proxy settings
+Alternative: Download manually from GitHub releases
+```
+
+**PowerCLI Installation Issues:**
+```
+Problem: PowerCLI installation fails during setup
+Solution: Re-run setup script, check internet connectivity
+Manual: Install-Module VMware.PowerCLI -Scope CurrentUser
+```
+
+**Corporate Network Issues:**
+```
+Problem: Downloads blocked by corporate firewall
+Solution: Contact IT for GitHub access or download manually
+Alternative: Use offline installation method
+```
 
 ### Version Information
 
