@@ -38,8 +38,8 @@ function Write-Log {
         $logEntry = "[$timestamp] [$Level] $Message"
         $logEntry | Add-Content -Path $script:LogFilePath -ErrorAction SilentlyContinue
         
-        # Also write to GUI log if available
-        if ($script:LogTextBox) {
+        # Also write to GUI log if available and handle is created
+        if ($script:LogTextBox -and $script:LogTextBox.IsHandleCreated) {
             $script:LogTextBox.AppendText("$logEntry`r`n")
             $script:LogTextBox.ScrollToCaret()
         }
@@ -660,10 +660,25 @@ function Create-LogsTab {
 
 # --- GUI Event Handlers ---
 function Test-VCenterConnectionGUI {
-    if ([string]::IsNullOrWhiteSpace($script:VCenterTextBox.Text) -or 
-        [string]::IsNullOrWhiteSpace($script:AdminUsernameTextBox.Text) -or 
-        [string]::IsNullOrWhiteSpace($script:PasswordTextBox.Text)) {
-        [System.Windows.Forms.MessageBox]::Show("Please fill in all vCenter connection fields.", "Missing Information", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning)
+    try {
+        # Validate that all GUI controls exist and have handles
+        if (-not $script:VCenterTextBox -or -not $script:VCenterTextBox.IsHandleCreated -or
+            -not $script:AdminUsernameTextBox -or -not $script:AdminUsernameTextBox.IsHandleCreated -or
+            -not $script:PasswordTextBox -or -not $script:PasswordTextBox.IsHandleCreated) {
+            Write-Log "GUI controls not properly initialized" "ERROR"
+            [System.Windows.Forms.MessageBox]::Show("GUI controls not properly initialized. Please restart the application.", "GUI Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+            return
+        }
+        
+        if ([string]::IsNullOrWhiteSpace($script:VCenterTextBox.Text) -or 
+            [string]::IsNullOrWhiteSpace($script:AdminUsernameTextBox.Text) -or 
+            [string]::IsNullOrWhiteSpace($script:PasswordTextBox.Text)) {
+            [System.Windows.Forms.MessageBox]::Show("Please fill in all vCenter connection fields.", "Missing Information", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning)
+            return
+        }
+    } catch {
+        Write-Log "Error in Test-VCenterConnectionGUI validation: $($_.Exception.Message)" "ERROR"
+        [System.Windows.Forms.MessageBox]::Show("Error accessing GUI controls: $($_.Exception.Message)", "GUI Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
         return
     }
     
@@ -692,13 +707,29 @@ function Test-VCenterConnectionGUI {
 function Start-PasswordOperation {
     param([bool]$DryRun)
     
-    # Clear operation status window
-    $script:OperationStatusTextBox.Clear()
-    Add-OperationStatus "Starting password operation validation..."
-    
-    # Validate target user selection
-    if ([string]::IsNullOrWhiteSpace($script:TargetUserComboBox.Text)) {
-        [System.Windows.Forms.MessageBox]::Show("Please select a target user from the dropdown.", "No Target User", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning)
+    try {
+        # Validate that all GUI controls exist and have handles
+        if (-not $script:OperationStatusTextBox -or -not $script:OperationStatusTextBox.IsHandleCreated -or
+            -not $script:TargetUserComboBox -or -not $script:TargetUserComboBox.IsHandleCreated -or
+            -not $script:NewPasswordTextBox -or -not $script:NewPasswordTextBox.IsHandleCreated -or
+            -not $script:ConfirmPasswordTextBox -or -not $script:ConfirmPasswordTextBox.IsHandleCreated) {
+            Write-Log "GUI controls not properly initialized for password operation" "ERROR"
+            [System.Windows.Forms.MessageBox]::Show("GUI controls not properly initialized. Please restart the application.", "GUI Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+            return
+        }
+        
+        # Clear operation status window
+        $script:OperationStatusTextBox.Clear()
+        Add-OperationStatus "Starting password operation validation..."
+        
+        # Validate target user selection
+        if ([string]::IsNullOrWhiteSpace($script:TargetUserComboBox.Text)) {
+            [System.Windows.Forms.MessageBox]::Show("Please select a target user from the dropdown.", "No Target User", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning)
+            return
+        }
+    } catch {
+        Write-Log "Error in Start-PasswordOperation initialization: $($_.Exception.Message)" "ERROR"
+        [System.Windows.Forms.MessageBox]::Show("Error accessing GUI controls: $($_.Exception.Message)", "GUI Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
         return
     }
     
@@ -1010,11 +1041,16 @@ function Check-ModuleStatus {
 function Add-OperationStatus {
     param([string]$Message)
     
-    if ($script:OperationStatusTextBox) {
-        $timestamp = Get-Date -Format "HH:mm:ss"
-        $script:OperationStatusTextBox.AppendText("[$timestamp] $Message`r`n")
-        $script:OperationStatusTextBox.ScrollToCaret()
-        [System.Windows.Forms.Application]::DoEvents()
+    try {
+        if ($script:OperationStatusTextBox -and $script:OperationStatusTextBox.IsHandleCreated) {
+            $timestamp = Get-Date -Format "HH:mm:ss"
+            $script:OperationStatusTextBox.AppendText("[$timestamp] $Message`r`n")
+            $script:OperationStatusTextBox.ScrollToCaret()
+            [System.Windows.Forms.Application]::DoEvents()
+        }
+    } catch {
+        # Silently handle any GUI update errors
+        Write-Log "GUI update error in Add-OperationStatus: $($_.Exception.Message)" "WARN"
     }
 }
 
@@ -1112,5 +1148,27 @@ function Start-Application {
     $form.ShowDialog()
 }
 
-# Start the GUI application
-Start-Application
+# Start the GUI application with error handling
+try {
+    Start-Application
+} catch {
+    $errorMessage = "Critical error starting application: $($_.Exception.Message)"
+    Write-Host $errorMessage -ForegroundColor Red
+    
+    # Try to show error dialog if Windows Forms is available
+    try {
+        [System.Windows.Forms.MessageBox]::Show($errorMessage, "Application Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+    } catch {
+        Write-Host "Could not display error dialog: $($_.Exception.Message)" -ForegroundColor Red
+    }
+    
+    # Log the error if possible
+    try {
+        $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+        "[$timestamp] [CRITICAL] $errorMessage" | Add-Content -Path "error_log.txt" -ErrorAction SilentlyContinue
+    } catch {
+        # Silent fail for logging
+    }
+    
+    exit 1
+}
