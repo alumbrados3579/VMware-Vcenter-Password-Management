@@ -1,6 +1,8 @@
 # VMware vCenter Password Management Tool
 ## Version 1.0 - Professional DoD-Compliant Password Management
 
+<img width="656" height="513" alt="Config_Window" src="https://github.com/user-attachments/assets/c934a418-fb02-4e46-a6d4-deb346b00548" />
+
 ### Overview
 
 A professional, DoD-compliant solution for managing passwords across VMware vCenter and ESXi environments. This tool provides both a comprehensive GUI interface and fast standalone components for specific tasks.
@@ -81,13 +83,15 @@ The automated setup script will:
    - Create ZIP package for air-gapped/classified networks
    - Launch the application immediately
    - Exit setup to run tools manually
+   - 
+<img width="652" height="509" alt="Github_tab" src="https://github.com/user-attachments/assets/dc3ec34f-cbda-4286-8810-f0883f6e5add" />
 
 **Benefits of Local Installation:**
 - No administrator privileges required
 - Prevents OneDrive sync conflicts
 - Portable installation in working directory
 - Enterprise-compliant local module storage
-- Optional ZIP packaging for air-gapped networks
+- Optional ZIP packaging for air-gapped or secure networks
 - Complete offline deployment capability
 
 ### Usage Options
@@ -105,6 +109,7 @@ Complete functionality with all features in a tabbed interface.
 .\Tools\HostManager.ps1         # Host Manager (70% faster)
 ```
 Standalone tools for specific tasks with faster startup times.
+<img width="653" height="512" alt="Password_Mgmt" src="https://github.com/user-attachments/assets/6743a7f1-ae7f-476c-a088-2f03168b29eb" />
 
 **Smart Launcher:**
 ```powershell
@@ -164,13 +169,14 @@ Comprehensive documentation is available in the `Documents/` directory:
 - `Installation.txt` - Installation instructions and troubleshooting
 
 ### Installation Troubleshooting
+<img width="656" height="509" alt="Workspace" src="https://github.com/user-attachments/assets/54d988b5-6e09-4312-bd68-2a09f34ba3f0" />
 
 #### Common Issues and Solutions
 
 **Execution Policy Errors:**
 ```
 Problem: "Execution of scripts is disabled on this system"
-Solution: Run PowerShell as Administrator and execute:
+Solution: Run PowerShell as regular user and execute:
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
@@ -202,6 +208,8 @@ Alternative: Use offline installation method
 - **Architecture**: Modular with backward compatibility
 - **Compliance**: DoD standards with comprehensive audit logging
 - **Platform**: Windows PowerShell with VMware PowerCLI
+- 
+<img width="1318" height="1031" alt="image" src="https://github.com/user-attachments/assets/3e730100-e65f-4ef5-900a-e15b4520b2ac" />
 
 ### Author and Development
 
