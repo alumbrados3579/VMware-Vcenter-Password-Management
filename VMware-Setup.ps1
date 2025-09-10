@@ -358,14 +358,16 @@ function Create-ConfigurationFiles {
         $usersFile = Join-Path $scriptRoot "users.txt"
         if (-not (Test-Path $usersFile)) {
             $usersContent = @"
-# Target Users Configuration
-# Add usernames for password operations
+# Target ESXi Users Configuration
+# Add ESXi usernames for password operations
 # One username per line, comments start with #
+# Note: vCenter admin users (like administrator@vsphere.local) are entered directly in the GUI
 
 # Common ESXi users:
 root
+# admin_swm
+# admin_kms
 # admin
-# administrator
 # serviceaccount
 "@
             $usersContent | Set-Content -Path $usersFile

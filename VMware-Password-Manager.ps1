@@ -270,16 +270,16 @@ function Create-VMwareTab {
     $script:VCenterTextBox.Location = New-Object System.Drawing.Point(120, 23)
     $script:VCenterTextBox.Size = New-Object System.Drawing.Size(200, 20)
     
-    # Username (Administrator)
+    # Username (Administrator) - Free text entry for domain accounts
     $usernameLabel = New-Object System.Windows.Forms.Label
     $usernameLabel.Text = "Admin Username:"
     $usernameLabel.Location = New-Object System.Drawing.Point(340, 25)
     $usernameLabel.Size = New-Object System.Drawing.Size(100, 20)
     
-    $script:AdminUsernameComboBox = New-Object System.Windows.Forms.ComboBox
-    $script:AdminUsernameComboBox.Location = New-Object System.Drawing.Point(450, 23)
-    $script:AdminUsernameComboBox.Size = New-Object System.Drawing.Size(130, 20)
-    $script:AdminUsernameComboBox.DropDownStyle = "DropDownList"
+    $script:AdminUsernameTextBox = New-Object System.Windows.Forms.TextBox
+    $script:AdminUsernameTextBox.Location = New-Object System.Drawing.Point(450, 23)
+    $script:AdminUsernameTextBox.Size = New-Object System.Drawing.Size(180, 20)
+    $script:AdminUsernameTextBox.Text = "administrator@vsphere.local"
     
     # Password
     $passwordLabel = New-Object System.Windows.Forms.Label
@@ -309,7 +309,7 @@ function Create-VMwareTab {
     $script:ConnectionStatusLabel.Size = New-Object System.Drawing.Size(300, 20)
     $script:ConnectionStatusLabel.ForeColor = [System.Drawing.Color]::Red
     
-    $vcenterGroup.Controls.AddRange(@($vcenterLabel, $script:VCenterTextBox, $usernameLabel, $script:AdminUsernameComboBox, $passwordLabel, $script:PasswordTextBox, $testButton, $script:ConnectionStatusLabel))
+    $vcenterGroup.Controls.AddRange(@($vcenterLabel, $script:VCenterTextBox, $usernameLabel, $script:AdminUsernameTextBox, $passwordLabel, $script:PasswordTextBox, $testButton, $script:ConnectionStatusLabel))
     
     # Password Operations Group
     $passwordGroup = New-Object System.Windows.Forms.GroupBox
@@ -317,14 +317,14 @@ function Create-VMwareTab {
     $passwordGroup.Size = New-Object System.Drawing.Size(840, 200)
     $passwordGroup.Location = New-Object System.Drawing.Point(10, 140)
     
-    # Target User Selection
+    # Target User Selection (ESXi accounts from users.txt)
     $targetUserLabel = New-Object System.Windows.Forms.Label
-    $targetUserLabel.Text = "Target User:"
+    $targetUserLabel.Text = "Target ESXi User:"
     $targetUserLabel.Location = New-Object System.Drawing.Point(10, 25)
-    $targetUserLabel.Size = New-Object System.Drawing.Size(80, 20)
+    $targetUserLabel.Size = New-Object System.Drawing.Size(100, 20)
     
     $script:TargetUserComboBox = New-Object System.Windows.Forms.ComboBox
-    $script:TargetUserComboBox.Location = New-Object System.Drawing.Point(100, 23)
+    $script:TargetUserComboBox.Location = New-Object System.Drawing.Point(120, 23)
     $script:TargetUserComboBox.Size = New-Object System.Drawing.Size(120, 20)
     $script:TargetUserComboBox.DropDownStyle = "DropDownList"
     
@@ -398,7 +398,23 @@ function Create-VMwareTab {
     $script:OperationStatusTextBox.ForeColor = [System.Drawing.Color]::Lime
     $script:OperationStatusTextBox.Font = New-Object System.Drawing.Font("Consolas", 8)
     
-    $passwordGroup.Controls.AddRange(@($targetUserLabel, $script:TargetUserComboBox, $newPasswordLabel, $script:NewPasswordTextBox, $confirmPasswordLabel, $script:ConfirmPasswordTextBox, $dryRunButton, $liveRunButton, $statusWindowLabel, $script:OperationStatusTextBox, $script:ProgressBar, $script:StatusLabel))
+    # Add helpful labels
+    $vCenterHelpLabel = New-Object System.Windows.Forms.Label
+    $vCenterHelpLabel.Text = "(e.g., administrator@vsphere.local)"
+    $vCenterHelpLabel.Location = New-Object System.Drawing.Point(450, 45)
+    $vCenterHelpLabel.Size = New-Object System.Drawing.Size(180, 15)
+    $vCenterHelpLabel.ForeColor = [System.Drawing.Color]::Gray
+    $vCenterHelpLabel.Font = New-Object System.Drawing.Font("Arial", 8)
+    
+    $esxiHelpLabel = New-Object System.Windows.Forms.Label
+    $esxiHelpLabel.Text = "(from users.txt: root, admin_swm, etc.)"
+    $esxiHelpLabel.Location = New-Object System.Drawing.Point(120, 45)
+    $esxiHelpLabel.Size = New-Object System.Drawing.Size(200, 15)
+    $esxiHelpLabel.ForeColor = [System.Drawing.Color]::Gray
+    $esxiHelpLabel.Font = New-Object System.Drawing.Font("Arial", 8)
+    
+    $vcenterGroup.Controls.Add($vCenterHelpLabel)
+    $passwordGroup.Controls.AddRange(@($targetUserLabel, $script:TargetUserComboBox, $esxiHelpLabel, $newPasswordLabel, $script:NewPasswordTextBox, $confirmPasswordLabel, $script:ConfirmPasswordTextBox, $dryRunButton, $liveRunButton, $statusWindowLabel, $script:OperationStatusTextBox, $script:ProgressBar, $script:StatusLabel))
     
     $tab.Controls.AddRange(@($vcenterGroup, $passwordGroup))
 }
@@ -637,7 +653,7 @@ function Create-LogsTab {
 # --- GUI Event Handlers ---
 function Test-VCenterConnectionGUI {
     if ([string]::IsNullOrWhiteSpace($script:VCenterTextBox.Text) -or 
-        [string]::IsNullOrWhiteSpace($script:AdminUsernameComboBox.Text) -or 
+        [string]::IsNullOrWhiteSpace($script:AdminUsernameTextBox.Text) -or 
         [string]::IsNullOrWhiteSpace($script:PasswordTextBox.Text)) {
         [System.Windows.Forms.MessageBox]::Show("Please fill in all vCenter connection fields.", "Missing Information", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning)
         return
@@ -647,7 +663,7 @@ function Test-VCenterConnectionGUI {
     $script:ConnectionStatusLabel.ForeColor = [System.Drawing.Color]::Orange
     
     try {
-        $connection = Connect-VIServer -Server $script:VCenterTextBox.Text -User $script:AdminUsernameComboBox.Text -Password $script:PasswordTextBox.Text -ErrorAction Stop
+        $connection = Connect-VIServer -Server $script:VCenterTextBox.Text -User $script:AdminUsernameTextBox.Text -Password $script:PasswordTextBox.Text -ErrorAction Stop
         
         if ($connection) {
             $esxiHosts = Get-VMHost | Select-Object Name, ConnectionState, PowerState
@@ -870,7 +886,7 @@ function Load-UsersConfiguration {
             }
             Write-Log "Users configuration loaded" "SUCCESS"
         } else {
-            $script:UsersTextBox.Text = "# Target Users Configuration`r`n# Add usernames that can be targeted for password changes`r`n# One username per line, comments start with #`r`n`r`n# Common ESXi users:`r`nroot`r`n# admin`r`n# serviceaccount"
+            $script:UsersTextBox.Text = "# Target ESXi Users Configuration`r`n# Add ESXi usernames for password operations`r`n# One username per line, comments start with #`r`n# Note: vCenter admin users (like administrator@vsphere.local) are entered directly in the GUI`r`n`r`n# Common ESXi users:`r`nroot`r`n# admin_swm`r`n# admin_kms`r`n# admin`r`n# serviceaccount"
         }
     } catch {
         Write-Log "Failed to load users configuration: $($_.Exception.Message)" "ERROR"
@@ -1016,44 +1032,37 @@ function Load-UserDropdowns {
     try {
         $users = Get-UsersFromFile
         
-        # Clear existing items
-        $script:AdminUsernameComboBox.Items.Clear()
+        # Clear existing items in Target User dropdown only
         $script:TargetUserComboBox.Items.Clear()
         
-        # Add users to both dropdowns
+        # Add users to Target User dropdown (ESXi accounts)
         foreach ($user in $users) {
-            $script:AdminUsernameComboBox.Items.Add($user)
             $script:TargetUserComboBox.Items.Add($user)
         }
         
-        # Add common admin users if not already present
-        $commonAdmins = @("administrator", "admin", "root")
-        foreach ($admin in $commonAdmins) {
-            if ($script:AdminUsernameComboBox.Items -notcontains $admin) {
-                $script:AdminUsernameComboBox.Items.Add($admin)
+        # Add common ESXi users if not already present
+        $commonESXiUsers = @("root", "admin_swm", "admin_kms", "admin")
+        foreach ($esxiUser in $commonESXiUsers) {
+            if ($script:TargetUserComboBox.Items -notcontains $esxiUser) {
+                $script:TargetUserComboBox.Items.Add($esxiUser)
             }
         }
         
-        # Set default selections if available
-        if ($script:AdminUsernameComboBox.Items.Count -gt 0) {
-            if ($script:AdminUsernameComboBox.Items -contains "administrator") {
-                $script:AdminUsernameComboBox.SelectedItem = "administrator"
-            } elseif ($script:AdminUsernameComboBox.Items -contains "admin") {
-                $script:AdminUsernameComboBox.SelectedItem = "admin"
-            } else {
-                $script:AdminUsernameComboBox.SelectedIndex = 0
-            }
-        }
-        
+        # Set default selection for Target User (prefer root for ESXi)
         if ($script:TargetUserComboBox.Items.Count -gt 0) {
             if ($script:TargetUserComboBox.Items -contains "root") {
                 $script:TargetUserComboBox.SelectedItem = "root"
+            } elseif ($script:TargetUserComboBox.Items -contains "admin_swm") {
+                $script:TargetUserComboBox.SelectedItem = "admin_swm"
             } else {
                 $script:TargetUserComboBox.SelectedIndex = 0
             }
         }
         
-        Write-Log "User dropdowns loaded with $($users.Count) users" "SUCCESS"
+        # Admin Username is now a free text field with default value already set
+        # No need to populate it from users.txt
+        
+        Write-Log "Target user dropdown loaded with $($users.Count) users plus common ESXi accounts" "SUCCESS"
     } catch {
         Write-Log "Failed to load user dropdowns: $($_.Exception.Message)" "ERROR"
     }

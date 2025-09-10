@@ -1,3 +1,11 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:44409f87e970cddca5fca3625c40863d19fbe87eaf6cfbaccb39413293a43282
-size 284
+# Target ESXi Users Configuration
+# Add ESXi usernames for password operations
+# One username per line, comments start with #
+# Note: vCenter admin users (like administrator@vsphere.local) are entered directly in the GUI
+
+# Common ESXi users:
+root
+# admin_swm
+# admin_kms
+# admin
+# serviceaccount
