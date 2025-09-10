@@ -348,21 +348,100 @@ root
     Start-Sleep -Milliseconds 500
 }
 
-function Download-MainApplication {
-    Write-Progress "Downloading Main Application" "Getting the latest GUI application from repository..." 100
+function Download-CompleteToolSuite {
+    Write-Progress "Downloading Complete Tool Suite" "Getting the latest complete application suite from repository..." 100
     
     $scriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
-    $mainTool = Join-Path $scriptRoot "VMware-Password-Manager.ps1"
     
     try {
-        Write-DetailedStatus "Downloading latest VMware Password Manager GUI..."
-        $guiUrl = "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Password-Manager.ps1"
-        Invoke-WebRequest -Uri $guiUrl -OutFile $mainTool -UseBasicParsing
-        Write-DetailedStatus "[SUCCESS] VMware Password Manager GUI downloaded successfully"
-        Write-DetailedStatus "   Application ready to launch"
+        Write-DetailedStatus "Downloading complete VMware Password Management Tool suite..."
+        Write-DetailedStatus "[INFO] This includes all tools, documentation, and components"
+        
+        # Define all files to download
+        $filesToDownload = @(
+            @{ Path = "VMware-Password-Manager.ps1"; Description = "Main GUI application" },
+            @{ Path = "VMware-Password-Manager-Modular.ps1"; Description = "Smart modular launcher" },
+            @{ Path = "VMware-Host-Manager.ps1"; Description = "Standalone host manager" },
+            @{ Path = "README.md"; Description = "Project overview and documentation" },
+            @{ Path = "HOWTO.txt"; Description = "Quick reference guide" },
+            @{ Path = "Installation.txt"; Description = "Installation instructions" },
+            @{ Path = "AUTHORS.txt"; Description = "Author and copyright information" },
+            @{ Path = "LICENSE"; Description = "License information" },
+            @{ Path = "Tools/Common.ps1"; Description = "Shared utilities library" },
+            @{ Path = "Tools/CLIWorkspace.ps1"; Description = "PowerCLI terminal tool" },
+            @{ Path = "Tools/Configuration.ps1"; Description = "Configuration editor tool" },
+            @{ Path = "Tools/HostManager.ps1"; Description = "Host management tool" },
+            @{ Path = "Documents/README.md"; Description = "Documentation index" },
+            @{ Path = "Documents/Setup-Guide.md"; Description = "Setup and installation guide" },
+            @{ Path = "Documents/CLI-Workspace-Guide.md"; Description = "CLI workspace guide" },
+            @{ Path = "Documents/Configuration-Manager-Guide.md"; Description = "Configuration manager guide" },
+            @{ Path = "Documents/Host-Manager-Guide.md"; Description = "Host manager guide" },
+            @{ Path = "Documents/Password-Management-Guide.md"; Description = "Password management guide" },
+            @{ Path = "Documents/Modular-Architecture-Guide.md"; Description = "Architecture guide" },
+            @{ Path = "Documents/Pseudocode-Prompt-Template.md"; Description = "Pseudocode template" },
+            @{ Path = "Documents/Workflow-Flowchart-Prompt-Template.md"; Description = "Workflow template" },
+            @{ Path = "Documents/VMware-Tool-Recreation-Prompt.md"; Description = "Tool recreation guide" }
+        )
+        
+        $baseUrl = "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main"
+        $downloadedCount = 0
+        $totalFiles = $filesToDownload.Count
+        
+        foreach ($file in $filesToDownload) {
+            $downloadedCount++
+            $progressPercent = [math]::Round(($downloadedCount / $totalFiles) * 100)
+            
+            Write-DetailedStatus "[$downloadedCount/$totalFiles] Downloading $($file.Description)..."
+            
+            $localPath = Join-Path $scriptRoot $file.Path
+            $localDir = Split-Path $localPath -Parent
+            
+            # Create directory if it doesn't exist
+            if (-not (Test-Path $localDir)) {
+                New-Item -Path $localDir -ItemType Directory -Force | Out-Null
+                Write-DetailedStatus "   Created directory: $localDir"
+            }
+            
+            try {
+                $downloadUrl = "$baseUrl/$($file.Path)"
+                Invoke-WebRequest -Uri $downloadUrl -OutFile $localPath -UseBasicParsing
+                Write-DetailedStatus "   [SUCCESS] $($file.Path)"
+            } catch {
+                Write-DetailedStatus "   [WARNING] Failed to download $($file.Path): $($_.Exception.Message)"
+            }
+        }
+        
+        Write-DetailedStatus "[SUCCESS] Complete tool suite download completed"
+        Write-DetailedStatus "   All components are now available for use"
+        
+        # Verify critical files
+        $criticalFiles = @(
+            "VMware-Password-Manager.ps1",
+            "VMware-Password-Manager-Modular.ps1",
+            "Tools/Common.ps1",
+            "Tools/CLIWorkspace.ps1",
+            "README.md"
+        )
+        
+        $missingFiles = @()
+        foreach ($file in $criticalFiles) {
+            $filePath = Join-Path $scriptRoot $file
+            if (-not (Test-Path $filePath)) {
+                $missingFiles += $file
+            }
+        }
+        
+        if ($missingFiles.Count -eq 0) {
+            Write-DetailedStatus "[SUCCESS] All critical components verified and ready"
+        } else {
+            Write-DetailedStatus "[WARNING] Some critical files are missing: $($missingFiles -join ', ')"
+            Write-DetailedStatus "You may need to download these manually from GitHub"
+        }
+        
     } catch {
-        Write-DetailedStatus "[WARNING] Could not download GUI application: $($_.Exception.Message)"
-        Write-DetailedStatus "You can manually download VMware-Password-Manager.ps1 from GitHub"
+        Write-DetailedStatus "[WARNING] Could not download complete tool suite: $($_.Exception.Message)"
+        Write-DetailedStatus "You can manually download the complete repository from GitHub"
+        Write-DetailedStatus "Repository: https://github.com/alumbrados3579/VMware-Vcenter-Password-Management"
     }
     
     Start-Sleep -Milliseconds 500
@@ -376,7 +455,7 @@ function Complete-Setup {
     Write-Host "[SUCCESS] PowerShell environment configured" -ForegroundColor Green
     Write-Host "[SUCCESS] VMware PowerCLI installed and ready" -ForegroundColor Green
     Write-Host "[SUCCESS] Configuration files created" -ForegroundColor Green
-    Write-Host "[SUCCESS] Main application downloaded" -ForegroundColor Green
+    Write-Host "[SUCCESS] Complete tool suite downloaded" -ForegroundColor Green
     Write-Host ""
     Write-Host "Next Steps:" -ForegroundColor Cyan
     Write-Host "1. Configure your ESXi hosts and users" -ForegroundColor White
@@ -509,16 +588,54 @@ function Launch-Application {
     
     $scriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
     $mainTool = Join-Path $scriptRoot "VMware-Password-Manager.ps1"
+    $modularTool = Join-Path $scriptRoot "VMware-Password-Manager-Modular.ps1"
     
+    # Check which tools are available and offer options
+    $availableTools = @()
     if (Test-Path $mainTool) {
-        Write-Host "Launching VMware Password Manager..." -ForegroundColor Green
-        Write-Host "Application: $mainTool" -ForegroundColor Gray
+        $availableTools += @{ Name = "Full GUI Application"; Path = $mainTool; Description = "Complete functionality" }
+    }
+    if (Test-Path $modularTool) {
+        $availableTools += @{ Name = "Modular Launcher"; Path = $modularTool; Description = "Smart tool selection" }
+    }
+    
+    if ($availableTools.Count -eq 0) {
+        Write-Host "[ERROR] No application files found" -ForegroundColor Red
+        Write-Host "Expected files:" -ForegroundColor Yellow
+        Write-Host "  - $mainTool" -ForegroundColor Gray
+        Write-Host "  - $modularTool" -ForegroundColor Gray
+        Write-Host "Please check the installation and try again." -ForegroundColor Yellow
+        return
+    }
+    
+    if ($availableTools.Count -eq 1) {
+        # Only one tool available, launch it
+        $tool = $availableTools[0]
+        Write-Host "Launching $($tool.Name)..." -ForegroundColor Green
+        Write-Host "Application: $($tool.Path)" -ForegroundColor Gray
         Write-Host ""
-        Start-Process PowerShell -ArgumentList "-File `"$mainTool`"" -WindowStyle Normal
+        Start-Process PowerShell -ArgumentList "-File `"$($tool.Path)`"" -WindowStyle Normal
         Write-Host "Application launched successfully!" -ForegroundColor Green
     } else {
-        Write-Host "[ERROR] Main application file not found: $mainTool" -ForegroundColor Red
-        Write-Host "Please check the installation and try again." -ForegroundColor Yellow
+        # Multiple tools available, let user choose
+        Write-Host "Multiple applications available:" -ForegroundColor Yellow
+        for ($i = 0; $i -lt $availableTools.Count; $i++) {
+            $tool = $availableTools[$i]
+            Write-Host "$($i + 1). $($tool.Name) - $($tool.Description)" -ForegroundColor White
+        }
+        Write-Host ""
+        
+        do {
+            $choice = Read-Host "Select application to launch (1-$($availableTools.Count))"
+            $choiceIndex = [int]$choice - 1
+        } while ($choiceIndex -lt 0 -or $choiceIndex -ge $availableTools.Count)
+        
+        $selectedTool = $availableTools[$choiceIndex]
+        Write-Host "Launching $($selectedTool.Name)..." -ForegroundColor Green
+        Write-Host "Application: $($selectedTool.Path)" -ForegroundColor Gray
+        Write-Host ""
+        Start-Process PowerShell -ArgumentList "-File `"$($selectedTool.Path)`"" -WindowStyle Normal
+        Write-Host "Application launched successfully!" -ForegroundColor Green
     }
 }
 
@@ -529,7 +646,7 @@ function Start-SetupProcess {
         Update-PowerShellGet
         $powerCLISuccess = Install-VMwarePowerCLI
         Create-ConfigurationFiles
-        Download-MainApplication
+        Download-CompleteToolSuite
         
         if ($powerCLISuccess) {
             Complete-Setup
