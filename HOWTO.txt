@@ -222,7 +222,7 @@ AUTHOR AND CONTACT
 
 Primary Author: Stace Mitchell
 Email: stace.mitchell27@gmail.com
-GitHub: https://github.com/alumbrados3579/VMware-Vcenter-Password-Management
+Forgejo: https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management
 
 Development Assistance: Qodo AI
 - Code optimization and best practices
@@ -231,6 +231,6 @@ Development Assistance: Qodo AI
 
 For questions, issues, or contributions:
 - Email: stace.mitchell27@gmail.com
-- GitHub Issues: https://github.com/alumbrados3579/VMware-Vcenter-Password-Management/issues
+- Forgejo Issues: https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management/issues
 
 Copyright (c) 2025 Stace Mitchell. All rights reserved.

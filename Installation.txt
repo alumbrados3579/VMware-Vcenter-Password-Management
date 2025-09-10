@@ -13,16 +13,16 @@ One-Line Installation (Download and Run):
 -----------------------------------------
 
 PowerShell (Recommended):
-iwr -Uri "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Setup.ps1" -OutFile "VMware-Setup.ps1"; powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
+iwr -Uri "https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management/raw/branch/main/VMware-Setup.ps1" -OutFile "VMware-Setup.ps1"; powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
 
 Command Prompt (cmd):
-curl -o VMware-Setup.ps1 https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Setup.ps1 & powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
+curl -o VMware-Setup.ps1 https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management/raw/branch/main/VMware-Setup.ps1 & powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
 
 Direct PowerShell Execution (Advanced Users):
-iex (iwr -Uri "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Setup.ps1").Content
+iex (iwr -Uri "https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management/raw/branch/main/VMware-Setup.ps1").Content
 
 Create Directory and Install:
-mkdir VMware-Password-Manager; cd VMware-Password-Manager; iwr -Uri "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Setup.ps1" -OutFile "VMware-Setup.ps1"; powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
+mkdir VMware-Password-Manager; cd VMware-Password-Manager; iwr -Uri "https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management/raw/branch/main/VMware-Setup.ps1" -OutFile "VMware-Setup.ps1"; powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
 
 ================================================================================
 MANUAL INSTALLATION
@@ -31,10 +31,10 @@ MANUAL INSTALLATION
 Step 1: Download Setup Script
 -----------------------------
 PowerShell:
-iwr -Uri "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Setup.ps1" -OutFile "VMware-Setup.ps1"
+iwr -Uri "https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management/raw/branch/main/VMware-Setup.ps1" -OutFile "VMware-Setup.ps1"
 
 Command Prompt:
-curl -o VMware-Setup.ps1 https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Setup.ps1
+curl -o VMware-Setup.ps1 https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management/raw/branch/main/VMware-Setup.ps1
 
 Step 2: Run Setup Script
 ------------------------
@@ -55,13 +55,13 @@ ALTERNATIVE: FULL REPOSITORY DOWNLOAD
 
 Download Complete Repository:
 ----------------------------
-git clone https://github.com/alumbrados3579/VMware-Vcenter-Password-Management.git
+git clone https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management.git
 cd VMware-Vcenter-Password-Management
 powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
 
 Or Download ZIP:
 ---------------
-1. Visit: https://github.com/alumbrados3579/VMware-Vcenter-Password-Management
+1. Visit: https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management
 2. Click "Code" -> "Download ZIP"
 3. Extract to desired location
 4. Run VMware-Setup.ps1
@@ -221,7 +221,7 @@ Complete Documentation Available:
 - Documents/Modular-Architecture-Guide.md: Architecture overview
 
 GitHub Repository:
-https://github.com/alumbrados3579/VMware-Vcenter-Password-Management
+https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management
 
 For additional support, refer to the comprehensive documentation
 included with the installation or visit the GitHub repository.
@@ -232,7 +232,7 @@ AUTHOR AND CONTACT
 
 Primary Author: Stace Mitchell
 Email: stace.mitchell27@gmail.com
-GitHub: https://github.com/alumbrados3579/VMware-Vcenter-Password-Management
+Forgejo: https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management
 
 Development Assistance: Qodo AI
 - Code optimization and best practices
@@ -241,6 +241,6 @@ Development Assistance: Qodo AI
 
 For questions, issues, or contributions:
 - Email: stace.mitchell27@gmail.com
-- GitHub Issues: https://github.com/alumbrados3579/VMware-Vcenter-Password-Management/issues
+- Forgejo Issues: https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management/issues
 
 Copyright (c) 2025 Stace Mitchell. All rights reserved.

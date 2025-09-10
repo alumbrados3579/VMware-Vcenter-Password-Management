@@ -31,7 +31,7 @@ Project: VMware vCenter Password Management Tool
 Version: 1.0
 Release Date: September 2025
 License: See LICENSE file
-Repository: https://github.com/alumbrados3579/VMware-Vcenter-Password-Management
+Repository: https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management
 
 ================================================================================
 ACKNOWLEDGMENTS
@@ -49,8 +49,8 @@ CONTACT
 
 For questions, issues, or contributions:
 - Email: stace.mitchell27@gmail.com
-- GitHub: https://github.com/alumbrados3579/VMware-Vcenter-Password-Management
-- Issues: https://github.com/alumbrados3579/VMware-Vcenter-Password-Management/issues
+- Forgejo: https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management
+- Issues: https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management/issues
 
 ================================================================================
 COPYRIGHT

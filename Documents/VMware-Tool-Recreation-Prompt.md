@@ -203,13 +203,13 @@ Click OK to acknowledge and continue...
 **Installation Methods:**
 ```powershell
 # PowerShell (Recommended):
-iwr -Uri "https://raw.githubusercontent.com/[repo]/main/VMware-Setup.ps1" -OutFile "VMware-Setup.ps1"; powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
+iwr -Uri "https://v12.next.forgejo.org/[repo]/raw/branch/main/VMware-Setup.ps1" -OutFile "VMware-Setup.ps1"; powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
 
 # Command Prompt:
-curl -o VMware-Setup.ps1 https://raw.githubusercontent.com/[repo]/main/VMware-Setup.ps1 & powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
+curl -o VMware-Setup.ps1 https://v12.next.forgejo.org/[repo]/raw/branch/main/VMware-Setup.ps1 & powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
 
 # Create Directory and Install:
-mkdir VMware-Password-Manager; cd VMware-Password-Manager; iwr -Uri "https://raw.githubusercontent.com/[repo]/main/VMware-Setup.ps1" -OutFile "VMware-Setup.ps1"; powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
+mkdir VMware-Password-Manager; cd VMware-Password-Manager; iwr -Uri "https://v12.next.forgejo.org/[repo]/raw/branch/main/VMware-Setup.ps1" -OutFile "VMware-Setup.ps1"; powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
 ```
 
 **Air-Gapped Deployment:**

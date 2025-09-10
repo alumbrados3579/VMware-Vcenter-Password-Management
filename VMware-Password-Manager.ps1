@@ -695,7 +695,7 @@ function Create-GitHubTab {
     $repoGroup.Location = New-Object System.Drawing.Point(10, 10)
     
     $repoLabel = New-Object System.Windows.Forms.Label
-    $repoLabel.Text = "Repository: https://github.com/alumbrados3579/VMware-Vcenter-Password-Management"
+    $repoLabel.Text = "Repository: https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management"
     $repoLabel.Location = New-Object System.Drawing.Point(10, 25)
     $repoLabel.Size = New-Object System.Drawing.Size(800, 20)
     $repoLabel.ForeColor = [System.Drawing.Color]::Blue
@@ -1121,7 +1121,7 @@ function Load-UsersConfiguration {
 function Download-LatestSetupScript {
     try {
         $script:GitHubStatusLabel.Text = "Downloading latest setup script..."
-        $setupUrl = "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Setup.ps1"
+        $setupUrl = "https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management/raw/branch/main/VMware-Setup.ps1"
         $setupPath = Join-Path $script:PSScriptRoot "VMware-Setup.ps1"
         
         Invoke-WebRequest -Uri $setupUrl -OutFile $setupPath -UseBasicParsing
@@ -1142,7 +1142,7 @@ function Refresh-Application {
     if ($result -eq [System.Windows.Forms.DialogResult]::Yes) {
         try {
             $script:GitHubStatusLabel.Text = "Downloading latest application..."
-            $appUrl = "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Password-Manager.ps1"
+            $appUrl = "https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management/raw/branch/main/VMware-Password-Manager.ps1"
             $appPath = Join-Path $script:PSScriptRoot "VMware-Password-Manager.ps1"
             
             Invoke-WebRequest -Uri $appUrl -OutFile $appPath -UseBasicParsing
@@ -1163,7 +1163,7 @@ function Refresh-Application {
 
 function Open-GitHubRepository {
     try {
-        $repoUrl = "https://github.com/alumbrados3579/VMware-Vcenter-Password-Management"
+        $repoUrl = "https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management"
         Start-Process $repoUrl
         $script:GitHubStatusLabel.Text = "[SUCCESS] Opened GitHub repository in browser"
         Write-Log "Opened GitHub repository in browser" "INFO"

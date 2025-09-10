@@ -1,6 +1,16 @@
 # VMware vCenter Password Management Tool
 ## Version 1.0 - Professional DoD-Compliant Password Management
 
+🔒 **SECURE REPOSITORY** - Now hosted on Forgejo for enhanced security and privacy
+
+### 🛡️ Repository Security Notice
+
+This project has migrated to **Forgejo** for enhanced security:
+- **Primary Repository:** https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management
+- **Security Features:** No AI training, no tracking, open source platform
+- **Privacy Protection:** European-style privacy standards
+- **File Integrity:** All code verified with SHA-256 and MD5 checksums
+
 ### Overview
 
 A professional, DoD-compliant solution for managing passwords across VMware vCenter and ESXi environments. This tool provides both a comprehensive GUI interface and fast standalone components for specific tasks.
@@ -16,35 +26,35 @@ A professional, DoD-compliant solution for managing passwords across VMware vCen
 - Professional interface without decorative elements
 - Enterprise-grade security and audit capabilities
 
-### Quick Installation
+### 🔐 Secure Installation
 
 #### One-Line Installation (Recommended)
 
 **PowerShell (Recommended):**
 ```powershell
-iwr -Uri "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Setup.ps1" -OutFile "VMware-Setup.ps1"; powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
+iwr -Uri "https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management/raw/branch/main/VMware-Setup.ps1" -OutFile "VMware-Setup.ps1"; powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
 ```
 
 **Command Prompt (cmd):**
 ```cmd
-curl -o VMware-Setup.ps1 https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Setup.ps1 & powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
+curl -o VMware-Setup.ps1 https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management/raw/branch/main/VMware-Setup.ps1 & powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
 ```
 
 **Create Directory and Install:**
 ```powershell
-mkdir VMware-Password-Manager; cd VMware-Password-Manager; iwr -Uri "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Setup.ps1" -OutFile "VMware-Setup.ps1"; powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
+mkdir VMware-Password-Manager; cd VMware-Password-Manager; iwr -Uri "https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management/raw/branch/main/VMware-Setup.ps1" -OutFile "VMware-Setup.ps1"; powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
 ```
 
 **Direct Execution (Advanced Users):**
 ```powershell
-iex (iwr -Uri "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Setup.ps1").Content
+iex (iwr -Uri "https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management/raw/branch/main/VMware-Setup.ps1").Content
 ```
 
 #### Manual Installation
 
 1. Download the setup script:
    ```powershell
-   iwr -Uri "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Setup.ps1" -OutFile "VMware-Setup.ps1"
+   iwr -Uri "https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management/raw/branch/main/VMware-Setup.ps1" -OutFile "VMware-Setup.ps1"
    ```
 
 2. Run the automated setup wizard:
@@ -64,10 +74,32 @@ iex (iwr -Uri "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-P
 #### Alternative: Full Repository
 
 ```bash
-git clone https://github.com/alumbrados3579/VMware-Vcenter-Password-Management.git
+git clone https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management.git
 cd VMware-Vcenter-Password-Management
 powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
 ```
+
+### 🔍 File Integrity Verification
+
+This repository includes a comprehensive file integrity verification system:
+
+```powershell
+# Verify all critical files
+.\Verify-FileIntegrity.ps1 -Action Verify
+
+# Generate new checksums
+.\Verify-FileIntegrity.ps1 -Action Generate
+
+# Full verification and generation
+.\Verify-FileIntegrity.ps1 -Action Both
+```
+
+**Security Features:**
+- **Dual-hash verification** using SHA-256 and MD5
+- **12 critical files** monitored for unauthorized changes
+- **Tamper detection** and alerting
+- **Professional security reporting**
+- **Air-gapped deployment** support
 
 ### What the Setup Script Does
 
@@ -123,6 +155,8 @@ Flexible launcher with command-line options and interactive menu.
 - Secure credential handling with no storage
 - Role-based access separation
 - Professional interface suitable for government and enterprise environments
+- **File integrity verification** system with dual-hash protection
+- **Secure repository hosting** on privacy-focused platform
 
 ### Performance Benefits
 
@@ -170,7 +204,7 @@ Comprehensive documentation is available in the `Documents/` directory:
 **Execution Policy Errors:**
 ```
 Problem: "Execution of scripts is disabled on this system"
-Solution: Run PowerShell as Administrator and execute:
+Solution: Run PowerShell as regular user and execute:
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
@@ -178,7 +212,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 Problem: curl or iwr commands fail
 Solution: Check internet connectivity and proxy settings
-Alternative: Download manually from GitHub releases
+Alternative: Download manually from Forgejo repository
 ```
 
 **PowerCLI Installation Issues:**
@@ -191,9 +225,26 @@ Manual: Install-Module VMware.PowerCLI -Scope CurrentUser
 **Corporate Network Issues:**
 ```
 Problem: Downloads blocked by corporate firewall
-Solution: Contact IT for GitHub access or download manually
+Solution: Contact IT for Forgejo access or download manually
 Alternative: Use offline installation method
 ```
+
+### 🔒 Security Recommendations
+
+1. **Repository Security:**
+   - Use the Forgejo repository for enhanced privacy
+   - Verify file integrity before deployment
+   - Enable signed commits for additional security
+
+2. **File Integrity Monitoring:**
+   - Run `.\Verify-FileIntegrity.ps1` before each deployment
+   - Store checksums in a secure location
+   - Verify integrity after any collaboration
+
+3. **Air-Gapped Deployment:**
+   - Use the ZIP package feature for secure networks
+   - Verify checksums before deployment
+   - Maintain offline backup of verified code
 
 ### Version Information
 
@@ -202,6 +253,7 @@ Alternative: Use offline installation method
 - **Architecture**: Modular with backward compatibility
 - **Compliance**: DoD standards with comprehensive audit logging
 - **Platform**: Windows PowerShell with VMware PowerCLI
+- **Security**: Enhanced with file integrity verification and secure hosting
 
 ### Author and Development
 
@@ -214,6 +266,7 @@ Alternative: Use offline installation method
 - Code optimization and best practices
 - Documentation enhancement
 - Architecture guidance and implementation support
+- Security enhancement and file integrity systems
 
 ### Support and Maintenance
 
@@ -221,8 +274,17 @@ Alternative: Use offline installation method
 - Export capabilities for audit reporting
 - Modular design for easy maintenance and updates
 - Professional interface suitable for enterprise environments
+- File integrity verification for secure deployments
 
 **Contact:**
 - Email: stace.mitchell27@gmail.com
-- GitHub Issues: [Report Issues](https://github.com/alumbrados3579/VMware-Vcenter-Password-Management/issues)
-- Repository: [GitHub Repository](https://github.com/alumbrados3579/VMware-Vcenter-Password-Management)
+- Forgejo Issues: [Report Issues](https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management/issues)
+- Primary Repository: [Forgejo Repository](https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management)
+
+### 🛡️ Migration from GitHub
+
+This project has been migrated from GitHub to Forgejo for enhanced security:
+- **Reason**: Unauthorized modifications detected on GitHub
+- **Solution**: Secure hosting on privacy-focused Forgejo platform
+- **Verification**: All files verified with integrity checking system
+- **Benefits**: No AI training, no tracking, enhanced privacy protection
