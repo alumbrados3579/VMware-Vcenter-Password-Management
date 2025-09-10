@@ -383,7 +383,7 @@ function Download-CompleteToolSuite {
             @{ Path = "Documents/VMware-Tool-Recreation-Prompt.md"; Description = "Tool recreation guide" }
         )
         
-        $baseUrl = "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main"
+        $baseUrl = "https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management/raw/branch/main"
         $downloadedCount = 0
         $totalFiles = $filesToDownload.Count
         
@@ -441,7 +441,7 @@ function Download-CompleteToolSuite {
     } catch {
         Write-DetailedStatus "[WARNING] Could not download complete tool suite: $($_.Exception.Message)"
         Write-DetailedStatus "You can manually download the complete repository from GitHub"
-        Write-DetailedStatus "Repository: https://github.com/alumbrados3579/VMware-Vcenter-Password-Management"
+        Write-DetailedStatus "Repository: https://v12.next.forgejo.org/alumbrados3579/VMware-Vcenter-Password-Management"
     }
     
     Start-Sleep -Milliseconds 500
