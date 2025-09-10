@@ -225,6 +225,11 @@ function Create-TabControl {
     $configTab.Text = "Configuration"
     $configTab.BackColor = [System.Drawing.Color]::White
     
+    # GitHub Manager Tab
+    $githubTab = New-Object System.Windows.Forms.TabPage
+    $githubTab.Text = "GitHub Manager"
+    $githubTab.BackColor = [System.Drawing.Color]::White
+    
     # Logs Tab
     $logsTab = New-Object System.Windows.Forms.TabPage
     $logsTab.Text = "Logs"
@@ -232,6 +237,7 @@ function Create-TabControl {
     
     $tabControl.TabPages.Add($vmwareTab)
     $tabControl.TabPages.Add($configTab)
+    $tabControl.TabPages.Add($githubTab)
     $tabControl.TabPages.Add($logsTab)
     
     $form.Controls.Add($tabControl)
@@ -240,6 +246,7 @@ function Create-TabControl {
         TabControl = $tabControl
         VMwareTab = $vmwareTab
         ConfigTab = $configTab
+        GitHubTab = $githubTab
         LogsTab = $logsTab
     }
 }
@@ -444,6 +451,124 @@ function Create-ConfigTab {
     $tab.Controls.AddRange(@($hostsGroup, $usersGroup))
 }
 
+function Create-GitHubTab {
+    param($tab)
+    
+    # Repository Information Group
+    $repoGroup = New-Object System.Windows.Forms.GroupBox
+    $repoGroup.Text = "Repository Information"
+    $repoGroup.Size = New-Object System.Drawing.Size(840, 120)
+    $repoGroup.Location = New-Object System.Drawing.Point(10, 10)
+    
+    $repoLabel = New-Object System.Windows.Forms.Label
+    $repoLabel.Text = "Repository: https://github.com/alumbrados3579/VMware-Vcenter-Password-Management"
+    $repoLabel.Location = New-Object System.Drawing.Point(10, 25)
+    $repoLabel.Size = New-Object System.Drawing.Size(800, 20)
+    $repoLabel.ForeColor = [System.Drawing.Color]::Blue
+    
+    $versionLabel = New-Object System.Windows.Forms.Label
+    $versionLabel.Text = "Version: 0.5 BETA - Enterprise Password Management Suite"
+    $versionLabel.Location = New-Object System.Drawing.Point(10, 50)
+    $versionLabel.Size = New-Object System.Drawing.Size(800, 20)
+    
+    $updateLabel = New-Object System.Windows.Forms.Label
+    $updateLabel.Text = "To update: Re-run VMware-Setup.ps1 to download the latest version"
+    $updateLabel.Location = New-Object System.Drawing.Point(10, 75)
+    $updateLabel.Size = New-Object System.Drawing.Size(800, 20)
+    $updateLabel.ForeColor = [System.Drawing.Color]::Green
+    
+    $repoGroup.Controls.AddRange(@($repoLabel, $versionLabel, $updateLabel))
+    
+    # File Management Group
+    $fileGroup = New-Object System.Windows.Forms.GroupBox
+    $fileGroup.Text = "File Management"
+    $fileGroup.Size = New-Object System.Drawing.Size(840, 200)
+    $fileGroup.Location = New-Object System.Drawing.Point(10, 140)
+    
+    $downloadButton = New-Object System.Windows.Forms.Button
+    $downloadButton.Text = "Download Latest Setup Script"
+    $downloadButton.Location = New-Object System.Drawing.Point(10, 30)
+    $downloadButton.Size = New-Object System.Drawing.Size(200, 30)
+    $downloadButton.BackColor = [System.Drawing.Color]::LightBlue
+    $downloadButton.Add_Click({
+        Download-LatestSetupScript
+    })
+    
+    $refreshButton = New-Object System.Windows.Forms.Button
+    $refreshButton.Text = "Refresh This Application"
+    $refreshButton.Location = New-Object System.Drawing.Point(220, 30)
+    $refreshButton.Size = New-Object System.Drawing.Size(200, 30)
+    $refreshButton.BackColor = [System.Drawing.Color]::LightGreen
+    $refreshButton.Add_Click({
+        Refresh-Application
+    })
+    
+    $openRepoButton = New-Object System.Windows.Forms.Button
+    $openRepoButton.Text = "Open GitHub Repository"
+    $openRepoButton.Location = New-Object System.Drawing.Point(430, 30)
+    $openRepoButton.Size = New-Object System.Drawing.Size(200, 30)
+    $openRepoButton.BackColor = [System.Drawing.Color]::LightCoral
+    $openRepoButton.Add_Click({
+        Open-GitHubRepository
+    })
+    
+    # Status display
+    $script:GitHubStatusLabel = New-Object System.Windows.Forms.Label
+    $script:GitHubStatusLabel.Text = "Ready"
+    $script:GitHubStatusLabel.Location = New-Object System.Drawing.Point(10, 80)
+    $script:GitHubStatusLabel.Size = New-Object System.Drawing.Size(820, 40)
+    $script:GitHubStatusLabel.ForeColor = [System.Drawing.Color]::Blue
+    
+    # Instructions
+    $instructionsLabel = New-Object System.Windows.Forms.Label
+    $instructionsLabel.Text = @"
+Instructions:
+• Download Latest Setup Script: Gets the newest VMware-Setup.ps1 from GitHub
+• Refresh This Application: Downloads and replaces this GUI with the latest version
+• Open GitHub Repository: Opens the repository in your default web browser
+"@
+    $instructionsLabel.Location = New-Object System.Drawing.Point(10, 120)
+    $instructionsLabel.Size = New-Object System.Drawing.Size(820, 70)
+    $instructionsLabel.ForeColor = [System.Drawing.Color]::DarkGreen
+    
+    $fileGroup.Controls.AddRange(@($downloadButton, $refreshButton, $openRepoButton, $script:GitHubStatusLabel, $instructionsLabel))
+    
+    # Module Information Group
+    $moduleGroup = New-Object System.Windows.Forms.GroupBox
+    $moduleGroup.Text = "Local Modules Information"
+    $moduleGroup.Size = New-Object System.Drawing.Size(840, 200)
+    $moduleGroup.Location = New-Object System.Drawing.Point(10, 350)
+    
+    $moduleInfoLabel = New-Object System.Windows.Forms.Label
+    $moduleInfoLabel.Text = "PowerCLI modules are stored locally in the ./Modules/ directory to avoid OneDrive sync conflicts."
+    $moduleInfoLabel.Location = New-Object System.Drawing.Point(10, 25)
+    $moduleInfoLabel.Size = New-Object System.Drawing.Size(820, 20)
+    
+    $modulePathLabel = New-Object System.Windows.Forms.Label
+    $modulePathLabel.Text = "Module Path: $script:LocalModulesPath"
+    $modulePathLabel.Location = New-Object System.Drawing.Point(10, 50)
+    $modulePathLabel.Size = New-Object System.Drawing.Size(820, 20)
+    $modulePathLabel.ForeColor = [System.Drawing.Color]::Gray
+    
+    $checkModulesButton = New-Object System.Windows.Forms.Button
+    $checkModulesButton.Text = "Check Module Status"
+    $checkModulesButton.Location = New-Object System.Drawing.Point(10, 80)
+    $checkModulesButton.Size = New-Object System.Drawing.Size(150, 30)
+    $checkModulesButton.Add_Click({
+        Check-ModuleStatus
+    })
+    
+    $script:ModuleStatusLabel = New-Object System.Windows.Forms.Label
+    $script:ModuleStatusLabel.Text = "Click 'Check Module Status' to verify PowerCLI modules"
+    $script:ModuleStatusLabel.Location = New-Object System.Drawing.Point(10, 120)
+    $script:ModuleStatusLabel.Size = New-Object System.Drawing.Size(820, 60)
+    $script:ModuleStatusLabel.ForeColor = [System.Drawing.Color]::DarkBlue
+    
+    $moduleGroup.Controls.AddRange(@($moduleInfoLabel, $modulePathLabel, $checkModulesButton, $script:ModuleStatusLabel))
+    
+    $tab.Controls.AddRange(@($repoGroup, $fileGroup, $moduleGroup))
+}
+
 function Create-LogsTab {
     param($tab)
     
@@ -622,10 +747,17 @@ function Save-HostsConfiguration {
 function Load-HostsConfiguration {
     try {
         if (Test-Path $script:HostsFilePath) {
-            $script:HostsTextBox.Text = Get-Content $script:HostsFilePath -Raw
+            # Read file content preserving line endings
+            $content = Get-Content $script:HostsFilePath -Raw
+            if ($content) {
+                $script:HostsTextBox.Text = $content
+            } else {
+                # File exists but is empty
+                $script:HostsTextBox.Text = Get-Content $script:HostsFilePath | Out-String
+            }
             Write-Log "Hosts configuration loaded" "SUCCESS"
         } else {
-            $script:HostsTextBox.Text = "# ESXi Hosts Configuration`r`n# Add your ESXi host IP addresses or FQDNs below`r`n# One host per line, comments start with #`r`n`r`n# Examples:`r`n# 192.168.1.100`r`n# 192.168.1.101`r`n# esxi-host-01.domain.local"
+            $script:HostsTextBox.Text = "# ESXi Hosts Configuration`r`n# Add your ESXi host IP addresses or FQDNs below`r`n# One host per line, comments start with #`r`n`r`n# Examples:`r`n# 192.168.1.100`r`n# 192.168.1.101`r`n# esxi-host-01.domain.local`r`n# esxi-host-02.domain.local"
         }
     } catch {
         Write-Log "Failed to load hosts configuration: $($_.Exception.Message)" "ERROR"
@@ -647,7 +779,14 @@ function Save-UsersConfiguration {
 function Load-UsersConfiguration {
     try {
         if (Test-Path $script:UsersFilePath) {
-            $script:UsersTextBox.Text = Get-Content $script:UsersFilePath -Raw
+            # Read file content preserving line endings
+            $content = Get-Content $script:UsersFilePath -Raw
+            if ($content) {
+                $script:UsersTextBox.Text = $content
+            } else {
+                # File exists but is empty
+                $script:UsersTextBox.Text = Get-Content $script:UsersFilePath | Out-String
+            }
             Write-Log "Users configuration loaded" "SUCCESS"
         } else {
             $script:UsersTextBox.Text = "# Target Users Configuration`r`n# Add usernames that can be targeted for password changes`r`n# One username per line, comments start with #`r`n`r`n# Common ESXi users:`r`nroot`r`n# admin`r`n# serviceaccount"
@@ -655,6 +794,110 @@ function Load-UsersConfiguration {
     } catch {
         Write-Log "Failed to load users configuration: $($_.Exception.Message)" "ERROR"
         [System.Windows.Forms.MessageBox]::Show("Failed to load users configuration: $($_.Exception.Message)", "Load Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+    }
+}
+
+# --- GitHub Manager Functions ---
+function Download-LatestSetupScript {
+    try {
+        $script:GitHubStatusLabel.Text = "Downloading latest setup script..."
+        $setupUrl = "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Setup.ps1"
+        $setupPath = Join-Path $script:PSScriptRoot "VMware-Setup.ps1"
+        
+        Invoke-WebRequest -Uri $setupUrl -OutFile $setupPath -UseBasicParsing
+        $script:GitHubStatusLabel.Text = "✅ Latest setup script downloaded successfully"
+        Write-Log "Downloaded latest setup script from GitHub" "SUCCESS"
+        
+        [System.Windows.Forms.MessageBox]::Show("Latest setup script downloaded successfully!", "Download Complete", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
+    } catch {
+        $script:GitHubStatusLabel.Text = "❌ Failed to download setup script"
+        Write-Log "Failed to download setup script: $($_.Exception.Message)" "ERROR"
+        [System.Windows.Forms.MessageBox]::Show("Failed to download setup script: $($_.Exception.Message)", "Download Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+    }
+}
+
+function Refresh-Application {
+    $result = [System.Windows.Forms.MessageBox]::Show("This will download the latest version of this application and restart it. Continue?", "Refresh Application", [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Question)
+    
+    if ($result -eq [System.Windows.Forms.DialogResult]::Yes) {
+        try {
+            $script:GitHubStatusLabel.Text = "Downloading latest application..."
+            $appUrl = "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Password-Manager.ps1"
+            $appPath = Join-Path $script:PSScriptRoot "VMware-Password-Manager.ps1"
+            
+            Invoke-WebRequest -Uri $appUrl -OutFile $appPath -UseBasicParsing
+            Write-Log "Downloaded latest application from GitHub" "SUCCESS"
+            
+            [System.Windows.Forms.MessageBox]::Show("Latest application downloaded. The application will now restart.", "Refresh Complete", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
+            
+            # Restart the application
+            Start-Process PowerShell -ArgumentList "-File `"$appPath`"" -WindowStyle Normal
+            [System.Environment]::Exit(0)
+        } catch {
+            $script:GitHubStatusLabel.Text = "❌ Failed to refresh application"
+            Write-Log "Failed to refresh application: $($_.Exception.Message)" "ERROR"
+            [System.Windows.Forms.MessageBox]::Show("Failed to refresh application: $($_.Exception.Message)", "Refresh Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+        }
+    }
+}
+
+function Open-GitHubRepository {
+    try {
+        $repoUrl = "https://github.com/alumbrados3579/VMware-Vcenter-Password-Management"
+        Start-Process $repoUrl
+        $script:GitHubStatusLabel.Text = "✅ Opened GitHub repository in browser"
+        Write-Log "Opened GitHub repository in browser" "INFO"
+    } catch {
+        $script:GitHubStatusLabel.Text = "❌ Failed to open repository"
+        Write-Log "Failed to open GitHub repository: $($_.Exception.Message)" "ERROR"
+        [System.Windows.Forms.MessageBox]::Show("Failed to open GitHub repository: $($_.Exception.Message)", "Browser Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+    }
+}
+
+function Check-ModuleStatus {
+    try {
+        $statusText = "Module Status Check:`r`n`r`n"
+        
+        # Check local modules directory
+        if (Test-Path $script:LocalModulesPath) {
+            $statusText += "✅ Local Modules directory exists: $script:LocalModulesPath`r`n"
+            
+            $powerCLIPath = Join-Path $script:LocalModulesPath "VMware.PowerCLI"
+            if (Test-Path $powerCLIPath) {
+                $statusText += "✅ VMware.PowerCLI found in local directory`r`n"
+                
+                # Try to get version
+                try {
+                    $manifestFiles = Get-ChildItem -Path $powerCLIPath -Filter "VMware.PowerCLI.psd1" -Recurse -ErrorAction SilentlyContinue
+                    if ($manifestFiles) {
+                        $manifestData = Import-PowerShellDataFile $manifestFiles[0].FullName
+                        $statusText += "   Version: $($manifestData.ModuleVersion)`r`n"
+                    }
+                } catch {
+                    $statusText += "   Version: Could not determine`r`n"
+                }
+            } else {
+                $statusText += "❌ VMware.PowerCLI not found in local directory`r`n"
+            }
+        } else {
+            $statusText += "❌ Local Modules directory does not exist`r`n"
+        }
+        
+        # Check if modules are loaded
+        $loadedPowerCLI = Get-Module -Name "VMware.PowerCLI" -ErrorAction SilentlyContinue
+        if ($loadedPowerCLI) {
+            $statusText += "`r`n✅ PowerCLI currently loaded in memory`r`n"
+            $statusText += "   Version: $($loadedPowerCLI.Version)`r`n"
+            $statusText += "   Location: $($loadedPowerCLI.ModuleBase)`r`n"
+        } else {
+            $statusText += "`r`n⚠️ PowerCLI not currently loaded in memory`r`n"
+        }
+        
+        $script:ModuleStatusLabel.Text = $statusText
+        Write-Log "Module status check completed" "INFO"
+    } catch {
+        $script:ModuleStatusLabel.Text = "❌ Error checking module status: $($_.Exception.Message)"
+        Write-Log "Failed to check module status: $($_.Exception.Message)" "ERROR"
     }
 }
 
@@ -679,6 +922,7 @@ function Start-Application {
     # Setup tabs
     Create-VMwareTab -tab $tabs.VMwareTab
     Create-ConfigTab -tab $tabs.ConfigTab
+    Create-GitHubTab -tab $tabs.GitHubTab
     Create-LogsTab -tab $tabs.LogsTab
     
     # Load initial configuration
