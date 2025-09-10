@@ -218,7 +218,7 @@ function Create-TabControl {
     # Create tabs
     $passwordTab = New-Object System.Windows.Forms.TabPage
     $passwordTab.Text = "Password Management"
-    Create-PasswordTab $passwordTab
+    Create-VMwareTab $passwordTab
     
     $configTab = New-Object System.Windows.Forms.TabPage
     $configTab.Text = "Configuration"
@@ -238,10 +238,13 @@ function Create-TabControl {
     
     $tabControl.TabPages.AddRange(@($passwordTab, $configTab, $cliTab, $githubTab, $logsTab))
     
+    $form.Controls.Add($tabControl)
+    
     return @{
         TabControl = $tabControl
-        VMwareTab = $vmwareTab
+        PasswordTab = $passwordTab
         ConfigTab = $configTab
+        CLITab = $cliTab
         GitHubTab = $githubTab
         LogsTab = $logsTab
     }
@@ -553,7 +556,7 @@ function Create-CLITab {
     
     # Add welcome message
     $script:CLIOutputTextBox.Text = "PowerCLI Command Workspace - Version 0.5 BETA`r`n"
-    $script:CLIOutputTextBox.AppendText("Connect to vCenter above, then execute PowerCLI commands below.`r`n`r`n"
+    $script:CLIOutputTextBox.AppendText("Connect to vCenter above, then execute PowerCLI commands below.`r`n`r`n")
     $script:CLIOutputTextBox.AppendText("Example commands:`r`n")
     $script:CLIOutputTextBox.AppendText("  Get-VMHost`r`n")
     $script:CLIOutputTextBox.AppendText("  Get-VM | Select Name, PowerState`r`n")
@@ -1374,12 +1377,6 @@ function Start-Application {
     
     # Create tab control and tabs
     $tabs = Create-TabControl -form $form
-    
-    # Setup tabs
-    Create-VMwareTab -tab $tabs.VMwareTab
-    Create-ConfigTab -tab $tabs.ConfigTab
-    Create-GitHubTab -tab $tabs.GitHubTab
-    Create-LogsTab -tab $tabs.LogsTab
     
     # Load initial configuration
     Load-HostsConfiguration
