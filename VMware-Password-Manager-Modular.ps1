@@ -1,6 +1,9 @@
 # VMware vCenter Password Management Tool - Modular Launcher
-# Version 0.5 BETA - Modular Architecture Edition
+# Version 1.0 - Professional DoD-Compliant Edition
+# Author: Stace Mitchell <stace.mitchell27@gmail.com>
+# Developed with assistance from Qodo AI
 # Purpose: Launch individual tools or full GUI with lazy loading
+# Copyright (c) 2025 Stace Mitchell. All rights reserved.
 
 param(
     [string]$Tool,           # Launch specific tool: CLI, Config, Password, GitHub, Logs

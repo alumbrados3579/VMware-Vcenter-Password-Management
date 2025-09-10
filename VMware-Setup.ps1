@@ -1,6 +1,9 @@
 # VMware vCenter Password Management Tool - Setup Script
-# Version 0.5 BETA - CLI Setup Edition
+# Version 1.0 - Professional DoD-Compliant Edition
+# Author: Stace Mitchell <stace.mitchell27@gmail.com>
+# Developed with assistance from Qodo AI
 # Purpose: Complete automated setup and launch of the password management tool
+# Copyright (c) 2025 Stace Mitchell. All rights reserved.
 
 # Global error handling
 $ErrorActionPreference = "Continue"

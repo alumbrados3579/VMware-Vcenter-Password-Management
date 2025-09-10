@@ -1,6 +1,10 @@
 VMware vCenter Password Management Tool - Version 1.0
 HOWTO Guide - Complete Usage Instructions
 
+Author: Stace Mitchell <stace.mitchell27@gmail.com>
+Developed with assistance from Qodo AI
+Copyright (c) 2025 Stace Mitchell. All rights reserved.
+
 ================================================================================
 OVERVIEW
 ================================================================================
@@ -201,3 +205,22 @@ Platform: Windows PowerShell with VMware PowerCLI
 
 For additional support and documentation, refer to the Documents directory
 for detailed guides on each component and tool.
+
+================================================================================
+AUTHOR AND CONTACT
+================================================================================
+
+Primary Author: Stace Mitchell
+Email: stace.mitchell27@gmail.com
+GitHub: https://github.com/alumbrados3579/VMware-Vcenter-Password-Management
+
+Development Assistance: Qodo AI
+- Code optimization and best practices
+- Documentation enhancement
+- Architecture guidance
+
+For questions, issues, or contributions:
+- Email: stace.mitchell27@gmail.com
+- GitHub Issues: https://github.com/alumbrados3579/VMware-Vcenter-Password-Management/issues
+
+Copyright (c) 2025 Stace Mitchell. All rights reserved.

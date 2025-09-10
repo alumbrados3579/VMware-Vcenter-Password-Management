@@ -1,6 +1,9 @@
-# VMware vCenter Password Management Tool - Test Startup Script
-# Version 0.5 BETA - Quick Test Launch
-# Purpose: Quick test launch without full setup for development/testing
+# VMware vCenter Password Management Tool - Quick Test Launcher
+# Version 1.0 - Professional DoD-Compliant Edition
+# Author: Stace Mitchell <stace.mitchell27@gmail.com>
+# Developed with assistance from Qodo AI
+# Purpose: Quick launch for testing without full setup process
+# Copyright (c) 2025 Stace Mitchell. All rights reserved.
 
 # Global error handling
 $ErrorActionPreference = "Continue"

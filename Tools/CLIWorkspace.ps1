@@ -1,6 +1,9 @@
 # VMware vCenter Password Management Tool - CLI Workspace
-# Version 0.5 BETA - Standalone PowerCLI Terminal
+# Version 1.0 - Professional DoD-Compliant Edition
+# Author: Stace Mitchell <stace.mitchell27@gmail.com>
+# Developed with assistance from Qodo AI
 # Purpose: Interactive PowerCLI command workspace with vCenter connectivity
+# Copyright (c) 2025 Stace Mitchell. All rights reserved.
 
 # Import common functions
 . "$PSScriptRoot\Common.ps1"

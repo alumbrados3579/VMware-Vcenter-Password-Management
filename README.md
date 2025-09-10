@@ -185,9 +185,26 @@ Alternative: Use offline installation method
 - **Compliance**: DoD standards with comprehensive audit logging
 - **Platform**: Windows PowerShell with VMware PowerCLI
 
+### Author and Development
+
+**Primary Author:** Stace Mitchell <stace.mitchell27@gmail.com>
+- Project Creator and Lead Developer
+- Architecture Design and Implementation
+- DoD Compliance and Security Features
+
+**Development Assistance:** Qodo AI
+- Code optimization and best practices
+- Documentation enhancement
+- Architecture guidance and implementation support
+
 ### Support and Maintenance
 
 - All operations logged for compliance and troubleshooting
 - Export capabilities for audit reporting
 - Modular design for easy maintenance and updates
 - Professional interface suitable for enterprise environments
+
+**Contact:**
+- Email: stace.mitchell27@gmail.com
+- GitHub Issues: [Report Issues](https://github.com/alumbrados3579/VMware-Vcenter-Password-Management/issues)
+- Repository: [GitHub Repository](https://github.com/alumbrados3579/VMware-Vcenter-Password-Management)

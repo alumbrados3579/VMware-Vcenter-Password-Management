@@ -1,6 +1,9 @@
 # VMware vCenter Password Management Tool - Common Library
-# Version 0.5 BETA - Shared Functions and Utilities
+# Version 1.0 - Professional DoD-Compliant Edition
+# Author: Stace Mitchell <stace.mitchell27@gmail.com>
+# Developed with assistance from Qodo AI
 # Purpose: Common functions used across all modular tools
+# Copyright (c) 2025 Stace Mitchell. All rights reserved.
 
 # Global error handling
 $ErrorActionPreference = "Continue"

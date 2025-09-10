@@ -1,0 +1,64 @@
+VMware vCenter Password Management Tool - Authors
+Version 1.0 - September 2025
+
+================================================================================
+PRIMARY AUTHOR
+================================================================================
+
+Stace Mitchell <stace.mitchell27@gmail.com>
+- Project Creator and Lead Developer
+- Architecture Design and Implementation
+- DoD Compliance and Security Features
+- Modular Architecture Development
+- Documentation and User Experience
+
+================================================================================
+DEVELOPMENT ASSISTANCE
+================================================================================
+
+Qodo AI Assistant
+- Code optimization and best practices
+- Documentation enhancement
+- Architecture guidance and implementation support
+- Testing and validation assistance
+- Performance optimization recommendations
+
+================================================================================
+PROJECT INFORMATION
+================================================================================
+
+Project: VMware vCenter Password Management Tool
+Version: 1.0
+Release Date: September 2025
+License: See LICENSE file
+Repository: https://github.com/alumbrados3579/VMware-Vcenter-Password-Management
+
+================================================================================
+ACKNOWLEDGMENTS
+================================================================================
+
+Special thanks to:
+- VMware for PowerCLI framework
+- PowerShell community for best practices
+- DoD security standards for compliance guidance
+- Open source community for inspiration and tools
+
+================================================================================
+CONTACT
+================================================================================
+
+For questions, issues, or contributions:
+- Email: stace.mitchell27@gmail.com
+- GitHub: https://github.com/alumbrados3579/VMware-Vcenter-Password-Management
+- Issues: https://github.com/alumbrados3579/VMware-Vcenter-Password-Management/issues
+
+================================================================================
+COPYRIGHT
+================================================================================
+
+Copyright (c) 2025 Stace Mitchell
+
+This project is the intellectual property of Stace Mitchell, developed with
+assistance from Qodo AI for code optimization and best practices implementation.
+
+All rights reserved. See LICENSE file for usage terms and conditions.

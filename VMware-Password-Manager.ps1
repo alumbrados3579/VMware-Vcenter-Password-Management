@@ -1,6 +1,9 @@
-# VMware vCenter Password Management Tool - GUI Edition
-# Version 0.5 BETA - Enterprise Password Management Suite
-# Features: vCenter/ESXi password management with intuitive GUI interface
+# VMware vCenter Password Management Tool - Main Application
+# Version 1.0 - Professional DoD-Compliant Edition
+# Author: Stace Mitchell <stace.mitchell27@gmail.com>
+# Developed with assistance from Qodo AI
+# Purpose: Professional DoD-compliant password management for VMware environments
+# Copyright (c) 2025 Stace Mitchell. All rights reserved.
 
 # Global error handling
 $ErrorActionPreference = "Continue"
