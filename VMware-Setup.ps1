@@ -249,48 +249,48 @@ function Install-VMwarePowerCLI {
         
         if ($loadedPowerCLI) {
             Write-DetailedStatus "[SUCCESS] VMware PowerCLI already loaded in current session"
-            Add-DetailedStatus "   Version: $($loadedPowerCLI.Version)"
-            Add-DetailedStatus "   Location: $($loadedPowerCLI.ModuleBase)"
+            Write-DetailedStatus "   Version: $($loadedPowerCLI.Version)"
+            Write-DetailedStatus "   Location: $($loadedPowerCLI.ModuleBase)"
         } else {
-            Add-DetailedStatus "Loading VMware PowerCLI modules..."
-            Add-DetailedStatus "[INFO] This step may take 1-2 minutes - please be patient"
+            Write-DetailedStatus "Loading VMware PowerCLI modules..."
+            Write-DetailedStatus "[INFO] This step may take 1-2 minutes - please be patient"
             
             try {
                 Import-Module VMware.PowerCLI -ErrorAction Stop
                 $loadedModule = Get-Module -Name "VMware.PowerCLI"
-                Add-DetailedStatus "[SUCCESS] VMware PowerCLI loaded successfully"
-                Add-DetailedStatus "   Version: $($loadedModule.Version)"
+                Write-DetailedStatus "[SUCCESS] VMware PowerCLI loaded successfully"
+                Write-DetailedStatus "   Version: $($loadedModule.Version)"
                 
                 if ($loadedModule.ModuleBase -like "*$localModulesPath*") {
-                    Add-DetailedStatus "[SUCCESS] Using LOCAL modules (enterprise-safe installation)"
+                    Write-DetailedStatus "[SUCCESS] Using LOCAL modules (enterprise-safe installation)"
                 } else {
-                    Add-DetailedStatus "[WARNING] Using SYSTEM modules"
+                    Write-DetailedStatus "[WARNING] Using SYSTEM modules"
                 }
             } catch {
-                Add-DetailedStatus "[WARNING] Could not load PowerCLI, checking for conflicts..."
+                Write-DetailedStatus "[WARNING] Could not load PowerCLI, checking for conflicts..."
                 
                 $vmwareModules = Get-Module | Where-Object { $_.Name -like "VMware.*" }
                 if ($vmwareModules) {
-                    Add-DetailedStatus "Found existing VMware modules in memory:"
+                    Write-DetailedStatus "Found existing VMware modules in memory:"
                     foreach ($module in $vmwareModules) {
-                        Add-DetailedStatus "  - $($module.Name) v$($module.Version)"
+                        Write-DetailedStatus "  - $($module.Name) v$($module.Version)"
                     }
-                    Add-DetailedStatus "[SUCCESS] These modules are already loaded and working"
+                    Write-DetailedStatus "[SUCCESS] These modules are already loaded and working"
                 } else {
                     throw "Failed to load PowerCLI: $($_.Exception.Message)"
                 }
             }
         }
         
-        Add-DetailedStatus "Configuring PowerCLI settings..."
+        Write-DetailedStatus "Configuring PowerCLI settings..."
         Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false -Scope User -ErrorAction SilentlyContinue
         Set-PowerCLIConfiguration -ParticipateInCEIP $false -Confirm:$false -Scope User -ErrorAction SilentlyContinue
-        Add-DetailedStatus "[SUCCESS] VMware PowerCLI configured and ready for use"
+        Write-DetailedStatus "[SUCCESS] VMware PowerCLI configured and ready for use"
         
         return $true
     } catch {
-        Add-DetailedStatus "[ERROR] Failed to install VMware PowerCLI: $($_.Exception.Message)"
-        Add-DetailedStatus "Please check your internet connection and try again"
+        Write-DetailedStatus "[ERROR] Failed to install VMware PowerCLI: $($_.Exception.Message)"
+        Write-DetailedStatus "Please check your internet connection and try again"
         return $false
     }
 }
@@ -316,9 +316,9 @@ function Create-ConfigurationFiles {
 # esxi-host-02.domain.local
 "@
             $hostsContent | Set-Content -Path $hostsFile
-            Add-DetailedStatus "[SUCCESS] Created hosts.txt configuration file"
+            Write-DetailedStatus "[SUCCESS] Created hosts.txt configuration file"
         } else {
-            Add-DetailedStatus "[SUCCESS] hosts.txt already exists"
+            Write-DetailedStatus "[SUCCESS] hosts.txt already exists"
         }
         
         # Create users.txt
@@ -338,15 +338,15 @@ root
 # serviceaccount
 "@
             $usersContent | Set-Content -Path $usersFile
-            Add-DetailedStatus "[SUCCESS] Created users.txt configuration file"
+            Write-DetailedStatus "[SUCCESS] Created users.txt configuration file"
         } else {
-            Add-DetailedStatus "[SUCCESS] users.txt already exists"
+            Write-DetailedStatus "[SUCCESS] users.txt already exists"
         }
         
-        Add-DetailedStatus "Configuration files are ready for customization"
+        Write-DetailedStatus "Configuration files are ready for customization"
         
     } catch {
-        Add-DetailedStatus "[WARNING] Could not create configuration files: $($_.Exception.Message)"
+        Write-DetailedStatus "[WARNING] Could not create configuration files: $($_.Exception.Message)"
     }
     
     Start-Sleep -Milliseconds 500
@@ -359,82 +359,45 @@ function Download-MainApplication {
     $mainTool = Join-Path $scriptRoot "VMware-Password-Manager.ps1"
     
     try {
-        Add-DetailedStatus "Downloading latest VMware Password Manager GUI..."
+        Write-DetailedStatus "Downloading latest VMware Password Manager GUI..."
         $guiUrl = "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Password-Manager.ps1"
         Invoke-WebRequest -Uri $guiUrl -OutFile $mainTool -UseBasicParsing
-        Add-DetailedStatus "[SUCCESS] VMware Password Manager GUI downloaded successfully"
-        Add-DetailedStatus "   Application ready to launch"
+        Write-DetailedStatus "[SUCCESS] VMware Password Manager GUI downloaded successfully"
+        Write-DetailedStatus "   Application ready to launch"
     } catch {
-        Add-DetailedStatus "[WARNING] Could not download GUI application: $($_.Exception.Message)"
-        Add-DetailedStatus "You can manually download VMware-Password-Manager.ps1 from GitHub"
+        Write-DetailedStatus "[WARNING] Could not download GUI application: $($_.Exception.Message)"
+        Write-DetailedStatus "You can manually download VMware-Password-Manager.ps1 from GitHub"
     }
     
     Start-Sleep -Milliseconds 500
 }
 
 function Complete-Setup {
-    # Don't increment progress beyond maximum
-    if ($script:CurrentStep -lt $script:TotalSteps) {
-        Update-Progress "Setup Complete!" "All components installed and configured successfully"
-    } else {
-        Add-DetailedStatus "All components installed and configured successfully"
-    }
+    Write-Progress "Setup Complete!" "All components installed and configured successfully" 100
     
-    Add-DetailedStatus ""
-    Add-DetailedStatus "=== SETUP COMPLETE ==="
-    Add-DetailedStatus "[SUCCESS] PowerShell environment configured"
-    Add-DetailedStatus "[SUCCESS] VMware PowerCLI installed and ready"
-    Add-DetailedStatus "[SUCCESS] Configuration files created"
-    Add-DetailedStatus "[SUCCESS] Main application downloaded"
-    Add-DetailedStatus ""
-    Add-DetailedStatus "Next Steps:"
-    Add-DetailedStatus "1. Configure your ESXi hosts and users"
-    Add-DetailedStatus "2. Test vCenter connectivity"
-    Add-DetailedStatus "3. Run password operations (Dry Run first!)"
-    Add-DetailedStatus ""
-    Add-DetailedStatus "Ready to launch the VMware Password Manager!"
+    Write-DetailedStatus ""
+    Write-DetailedStatus "=== SETUP COMPLETE ==="
+    Write-DetailedStatus "[SUCCESS] PowerShell environment configured"
+    Write-DetailedStatus "[SUCCESS] VMware PowerCLI installed and ready"
+    Write-DetailedStatus "[SUCCESS] Configuration files created"
+    Write-DetailedStatus "[SUCCESS] Main application downloaded"
+    Write-DetailedStatus ""
+    Write-DetailedStatus "Next Steps:"
+    Write-DetailedStatus "1. Configure your ESXi hosts and users"
+    Write-DetailedStatus "2. Test vCenter connectivity"
+    Write-DetailedStatus "3. Run password operations (Dry Run first!)"
+    Write-DetailedStatus ""
     
-    # Ensure progress bar is at maximum
-    $script:ProgressBar.Value = $script:ProgressBar.Maximum
-    
-    $script:CloseButton.Text = "Launch Application"
-    $script:CloseButton.Enabled = $true
-    $script:StatusLabel.Text = "Setup completed successfully! Click 'Launch Application' to continue."
-    $script:StatusLabel.ForeColor = [System.Drawing.Color]::Green
-}
-
-function Start-SetupProcess {
-    try {
-        Initialize-PowerShellEnvironment
-        Install-NuGetProvider
-        Update-PowerShellGet
-        $powerCLISuccess = Install-VMwarePowerCLI
-        Create-ConfigurationFiles
-        Download-MainApplication
-        
-        if ($powerCLISuccess) {
-            Complete-Setup
+    $launch = Read-Host "Would you like to launch the VMware Password Manager now? (Y/N)"
+    if ($launch -eq "Y" -or $launch -eq "y") {
+        $scriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
+        $mainTool = Join-Path $scriptRoot "VMware-Password-Manager.ps1"
+        if (Test-Path $mainTool) {
+            Write-Host "Launching VMware Password Manager..." -ForegroundColor Green
+            Start-Process PowerShell -ArgumentList "-File `"$mainTool`"" -WindowStyle Normal
         } else {
-            # Ensure progress bar is at maximum even with warnings
-            $script:ProgressBar.Value = $script:ProgressBar.Maximum
-            $script:StatusLabel.Text = "Setup completed with warnings. Check detailed log for issues."
-            $script:StatusLabel.ForeColor = [System.Drawing.Color]::Orange
-            $script:CloseButton.Text = "Close"
-            $script:CloseButton.Enabled = $true
+            Write-Host "Main application file not found: $mainTool" -ForegroundColor Red
         }
-    } catch {
-        Add-DetailedStatus "[ERROR] Setup failed: $($_.Exception.Message)"
-        Add-DetailedStatus "Error details: $($_.Exception.GetType().Name)"
-        
-        # Ensure progress bar shows some progress even on failure
-        if ($script:ProgressBar.Value -eq 0) {
-            $script:ProgressBar.Value = 1
-        }
-        
-        $script:StatusLabel.Text = "Setup failed. Check detailed log for errors."
-        $script:StatusLabel.ForeColor = [System.Drawing.Color]::Red
-        $script:CloseButton.Text = "Close"
-        $script:CloseButton.Enabled = $true
     }
 }
 
