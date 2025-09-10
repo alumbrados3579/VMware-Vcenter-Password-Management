@@ -12,14 +12,17 @@ QUICK INSTALLATION (RECOMMENDED)
 One-Line Installation (Download and Run):
 -----------------------------------------
 
-PowerShell (Windows):
-curl -o VMware-Setup.ps1 https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Setup.ps1 && powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
-
-Alternative PowerShell Method:
+PowerShell (Recommended):
 iwr -Uri "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Setup.ps1" -OutFile "VMware-Setup.ps1"; powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
+
+Command Prompt (cmd):
+curl -o VMware-Setup.ps1 https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Setup.ps1 & powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
 
 Direct PowerShell Execution (Advanced Users):
 iex (iwr -Uri "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Setup.ps1").Content
+
+Create Directory and Install:
+mkdir VMware-Password-Manager; cd VMware-Password-Manager; iwr -Uri "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Setup.ps1" -OutFile "VMware-Setup.ps1"; powershell -ExecutionPolicy Bypass -File VMware-Setup.ps1
 
 ================================================================================
 MANUAL INSTALLATION
@@ -27,6 +30,10 @@ MANUAL INSTALLATION
 
 Step 1: Download Setup Script
 -----------------------------
+PowerShell:
+iwr -Uri "https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Setup.ps1" -OutFile "VMware-Setup.ps1"
+
+Command Prompt:
 curl -o VMware-Setup.ps1 https://raw.githubusercontent.com/alumbrados3579/VMware-Vcenter-Password-Management/main/VMware-Setup.ps1
 
 Step 2: Run Setup Script

@@ -9,8 +9,13 @@
 $ErrorActionPreference = "Continue"
 
 # --- Global Variables ---
-if (-not $script:PSScriptRoot) {
-    $script:PSScriptRoot = if ($PSScriptRoot) { Split-Path -Parent $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Definition }
+# Determine the root directory (parent of Tools directory)
+if ($PSScriptRoot) {
+    # Running from Tools directory, go up one level to root
+    $script:PSScriptRoot = Split-Path -Parent $PSScriptRoot
+} else {
+    # Fallback method
+    $script:PSScriptRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Definition)
 }
 $script:LogsPath = Join-Path $script:PSScriptRoot "Logs"
 $script:LogFilePath = Join-Path $script:LogsPath "vcenter_password_manager_$(Get-Date -Format 'yyyyMMdd').log"
