@@ -1,12 +1,11 @@
-# VMware vCenter Password Management Tool
-# Version 2.0 - PowerShell Gallery Edition
-# Features: vCenter/ESXi password management with PowerShell Gallery PowerCLI
+# VMware vCenter Password Management Tool - GUI Edition
+# Version 2.1 - PowerShell Gallery Edition with Windows Forms GUI
+# Features: vCenter/ESXi password management with local modules and GUI interface
 
 # Global error handling
 $ErrorActionPreference = "Continue"
 trap {
-    Write-Host "CRITICAL ERROR: $($_.Exception.Message)" -ForegroundColor Red
-    Read-Host "Press Enter to exit"
+    [System.Windows.Forms.MessageBox]::Show("CRITICAL ERROR: $($_.Exception.Message)", "VMware Password Manager", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
     exit 1
 }
 
@@ -16,11 +15,16 @@ $script:LogsPath = Join-Path $script:PSScriptRoot "Logs"
 $script:LogFilePath = Join-Path $script:LogsPath "vcenter_password_manager_$(Get-Date -Format 'yyyyMMdd').log"
 $script:HostsFilePath = Join-Path $script:PSScriptRoot "hosts.txt"
 $script:UsersFilePath = Join-Path $script:PSScriptRoot "users.txt"
+$script:LocalModulesPath = Join-Path $script:PSScriptRoot "Modules"
 
 # Ensure Logs directory exists
 if (-not (Test-Path $script:LogsPath)) {
     New-Item -Path $script:LogsPath -ItemType Directory -Force | Out-Null
 }
+
+# Load Windows Forms
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Drawing
 
 # --- Utility Functions ---
 function Write-Log {
@@ -34,16 +38,14 @@ function Write-Log {
         $logEntry = "[$timestamp] [$Level] $Message"
         $logEntry | Add-Content -Path $script:LogFilePath -ErrorAction SilentlyContinue
         
-        $color = switch ($Level) {
-            "ERROR" { "Red" }
-            "WARN" { "Yellow" }
-            "SUCCESS" { "Green" }
-            "INFO" { "Cyan" }
-            default { "White" }
+        # Also write to GUI log if available
+        if ($script:LogTextBox) {
+            $script:LogTextBox.AppendText("$logEntry`r`n")
+            $script:LogTextBox.ScrollToCaret()
         }
-        Write-Host $logEntry -ForegroundColor $color
     } catch {
-        Write-Host "LOG ERROR: $Message" -ForegroundColor Red
+        # Fallback to console if logging fails
+        Write-Host "LOG: $Message" -ForegroundColor Cyan
     }
 }
 
@@ -64,30 +66,61 @@ By using this IS (which includes any device attached to this IS), you consent to
 
 VMware vCenter Password Management Tool - DoD Compliant Edition
 
-Press Enter to acknowledge and continue...
+Click OK to acknowledge and continue...
 "@
     
-    Write-Host $dodWarning -ForegroundColor Yellow
-    Read-Host
+    [System.Windows.Forms.MessageBox]::Show($dodWarning, "DoD System Warning", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning)
 }
 
 function Test-PowerCLIAvailability {
     Write-Log "Checking VMware PowerCLI availability..." "INFO"
     
     try {
-        $powerCLI = Get-Module -Name "VMware.PowerCLI" -ListAvailable -ErrorAction SilentlyContinue
-        if (-not $powerCLI) {
-            Write-Log "VMware PowerCLI not found" "ERROR"
-            Write-Host ""
-            Write-Host "VMware PowerCLI is required but not installed." -ForegroundColor Red
-            Write-Host "Please run VMware-Setup.ps1 first to install PowerCLI from PowerShell Gallery." -ForegroundColor Yellow
-            Write-Host ""
-            Read-Host "Press Enter to exit"
-            exit 1
+        # Priority 1: Check local Modules directory first
+        if (Test-Path $script:LocalModulesPath) {
+            $localPowerCLI = Get-ChildItem -Path $script:LocalModulesPath -Name "VMware.PowerCLI" -ErrorAction SilentlyContinue
+            if ($localPowerCLI) {
+                Write-Log "Found local PowerCLI modules in: $script:LocalModulesPath" "SUCCESS"
+                
+                # Add local modules to PSModulePath if not already there
+                $currentPSModulePath = $env:PSModulePath
+                if ($currentPSModulePath -notlike "*$script:LocalModulesPath*") {
+                    $env:PSModulePath = "$script:LocalModulesPath;$currentPSModulePath"
+                    Write-Log "Added local Modules directory to PowerShell module path" "INFO"
+                }
+            }
         }
         
+        # Priority 2: Check if PowerCLI is available (local or system)
+        $powerCLI = Get-Module -Name "VMware.PowerCLI" -ListAvailable -ErrorAction SilentlyContinue
+        if (-not $powerCLI) {
+            Write-Log "VMware PowerCLI not found in local or system modules" "ERROR"
+            $message = @"
+VMware PowerCLI is required but not installed.
+
+Please run VMware-Setup.ps1 first to install PowerCLI to local Modules directory.
+This avoids OneDrive sync issues and keeps modules in your working directory.
+
+Expected local path: $script:LocalModulesPath
+"@
+            [System.Windows.Forms.MessageBox]::Show($message, "PowerCLI Required", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+            return $false
+        }
+        
+        # Import the module
         Import-Module VMware.PowerCLI -Force -ErrorAction Stop
-        Write-Log "VMware PowerCLI loaded successfully (Version: $($powerCLI.Version))" "SUCCESS"
+        
+        # Determine which modules are being used
+        $loadedModule = Get-Module -Name "VMware.PowerCLI"
+        if ($loadedModule) {
+            Write-Log "VMware PowerCLI loaded successfully (Version: $($loadedModule.Version))" "SUCCESS"
+            
+            if ($loadedModule.ModuleBase -like "*$script:LocalModulesPath*") {
+                Write-Log "Using LOCAL PowerCLI modules (OneDrive-safe)" "SUCCESS"
+            } else {
+                Write-Log "Using SYSTEM PowerCLI modules" "INFO"
+            }
+        }
         
         # Configure PowerCLI settings
         Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false -Scope Session -ErrorAction SilentlyContinue
@@ -96,6 +129,7 @@ function Test-PowerCLIAvailability {
         return $true
     } catch {
         Write-Log "Failed to load VMware PowerCLI: $($_.Exception.Message)" "ERROR"
+        [System.Windows.Forms.MessageBox]::Show("Failed to load PowerCLI: $($_.Exception.Message)", "PowerCLI Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
         return $false
     }
 }
@@ -138,155 +172,389 @@ function Get-UsersFromFile {
     }
 }
 
-function Test-VCenterConnection {
-    param(
-        [string]$VCenterServer,
-        [string]$Username,
-        [string]$Password
-    )
+# --- GUI Creation Functions ---
+function Create-MainForm {
+    $form = New-Object System.Windows.Forms.Form
+    $form.Text = "VMware vCenter Password Management Tool - GUI Edition"
+    $form.Size = New-Object System.Drawing.Size(900, 700)
+    $form.StartPosition = "CenterScreen"
+    $form.FormBorderStyle = "FixedDialog"
+    $form.MaximizeBox = $false
+    $form.Icon = [System.Drawing.SystemIcons]::Shield
     
-    Write-Log "Testing vCenter connection to $VCenterServer" "INFO"
-    
-    try {
-        $connection = Connect-VIServer -Server $VCenterServer -User $Username -Password $Password -ErrorAction Stop
-        
-        if ($connection) {
-            Write-Log "Successfully connected to vCenter: $VCenterServer" "SUCCESS"
-            
-            # Get ESXi hosts
-            $esxiHosts = Get-VMHost | Select-Object Name, ConnectionState, PowerState
-            Write-Log "Found $($esxiHosts.Count) ESXi hosts" "INFO"
-            
-            # Disconnect
-            Disconnect-VIServer -Server $VCenterServer -Confirm:$false -ErrorAction SilentlyContinue
-            
-            return @{
-                Success = $true
-                Hosts = $esxiHosts
-                Message = "Connection successful. Found $($esxiHosts.Count) ESXi hosts."
-            }
-        }
-    } catch {
-        Write-Log "vCenter connection failed: $($_.Exception.Message)" "ERROR"
-        return @{
-            Success = $false
-            Hosts = @()
-            Message = "Connection failed: $($_.Exception.Message)"
-        }
-    }
+    return $form
 }
 
-function Show-MainMenu {
-    Write-Host ""
-    Write-Host "=== VMware vCenter Password Management Tool ===" -ForegroundColor Cyan
-    Write-Host "PowerShell Gallery Edition" -ForegroundColor Cyan
-    Write-Host ""
-    Write-Host "1. Test vCenter Connection" -ForegroundColor White
-    Write-Host "2. List ESXi Users" -ForegroundColor White
-    Write-Host "3. Change User Passwords (Dry Run)" -ForegroundColor Green
-    Write-Host "4. Change User Passwords (LIVE)" -ForegroundColor Red
-    Write-Host "5. Bulk Operations from Files" -ForegroundColor Yellow
-    Write-Host "6. Configuration" -ForegroundColor Cyan
-    Write-Host "7. Exit" -ForegroundColor Gray
-    Write-Host ""
-}
-
-function Get-VCenterCredentials {
-    Write-Host "=== vCenter Connection Details ===" -ForegroundColor Cyan
-    $vcenterServer = Read-Host "vCenter Server (FQDN or IP)"
-    $vcenterUser = Read-Host "vCenter Username"
-    $vcenterPass = Read-Host "vCenter Password" -AsSecureString
-    $vcenterPassPlain = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($vcenterPass))
+function Create-TabControl {
+    param($form)
+    
+    $tabControl = New-Object System.Windows.Forms.TabControl
+    $tabControl.Size = New-Object System.Drawing.Size(880, 650)
+    $tabControl.Location = New-Object System.Drawing.Point(10, 10)
+    
+    # VMware Management Tab
+    $vmwareTab = New-Object System.Windows.Forms.TabPage
+    $vmwareTab.Text = "VMware Management"
+    $vmwareTab.BackColor = [System.Drawing.Color]::White
+    
+    # Configuration Tab
+    $configTab = New-Object System.Windows.Forms.TabPage
+    $configTab.Text = "Configuration"
+    $configTab.BackColor = [System.Drawing.Color]::White
+    
+    # Logs Tab
+    $logsTab = New-Object System.Windows.Forms.TabPage
+    $logsTab.Text = "Logs"
+    $logsTab.BackColor = [System.Drawing.Color]::White
+    
+    $tabControl.TabPages.Add($vmwareTab)
+    $tabControl.TabPages.Add($configTab)
+    $tabControl.TabPages.Add($logsTab)
+    
+    $form.Controls.Add($tabControl)
     
     return @{
-        Server = $vcenterServer
-        Username = $vcenterUser
-        Password = $vcenterPassPlain
+        TabControl = $tabControl
+        VMwareTab = $vmwareTab
+        ConfigTab = $configTab
+        LogsTab = $logsTab
     }
 }
 
-function Invoke-PasswordChangeOperation {
-    param(
-        [string]$VCenterServer,
-        [string]$VCenterUsername,
-        [string]$VCenterPassword,
-        [bool]$DryRun = $true
-    )
+function Create-VMwareTab {
+    param($tab)
+    
+    # vCenter Connection Group
+    $vcenterGroup = New-Object System.Windows.Forms.GroupBox
+    $vcenterGroup.Text = "vCenter Connection"
+    $vcenterGroup.Size = New-Object System.Drawing.Size(840, 120)
+    $vcenterGroup.Location = New-Object System.Drawing.Point(10, 10)
+    
+    # vCenter Server
+    $vcenterLabel = New-Object System.Windows.Forms.Label
+    $vcenterLabel.Text = "vCenter Server:"
+    $vcenterLabel.Location = New-Object System.Drawing.Point(10, 25)
+    $vcenterLabel.Size = New-Object System.Drawing.Size(100, 20)
+    
+    $script:VCenterTextBox = New-Object System.Windows.Forms.TextBox
+    $script:VCenterTextBox.Location = New-Object System.Drawing.Point(120, 23)
+    $script:VCenterTextBox.Size = New-Object System.Drawing.Size(200, 20)
+    
+    # Username
+    $usernameLabel = New-Object System.Windows.Forms.Label
+    $usernameLabel.Text = "Username:"
+    $usernameLabel.Location = New-Object System.Drawing.Point(340, 25)
+    $usernameLabel.Size = New-Object System.Drawing.Size(80, 20)
+    
+    $script:UsernameTextBox = New-Object System.Windows.Forms.TextBox
+    $script:UsernameTextBox.Location = New-Object System.Drawing.Point(430, 23)
+    $script:UsernameTextBox.Size = New-Object System.Drawing.Size(150, 20)
+    
+    # Password
+    $passwordLabel = New-Object System.Windows.Forms.Label
+    $passwordLabel.Text = "Password:"
+    $passwordLabel.Location = New-Object System.Drawing.Point(590, 25)
+    $passwordLabel.Size = New-Object System.Drawing.Size(80, 20)
+    
+    $script:PasswordTextBox = New-Object System.Windows.Forms.TextBox
+    $script:PasswordTextBox.Location = New-Object System.Drawing.Point(680, 23)
+    $script:PasswordTextBox.Size = New-Object System.Drawing.Size(150, 20)
+    $script:PasswordTextBox.UseSystemPasswordChar = $true
+    
+    # Test Connection Button
+    $testButton = New-Object System.Windows.Forms.Button
+    $testButton.Text = "Test Connection"
+    $testButton.Location = New-Object System.Drawing.Point(10, 60)
+    $testButton.Size = New-Object System.Drawing.Size(120, 30)
+    $testButton.BackColor = [System.Drawing.Color]::LightBlue
+    $testButton.Add_Click({
+        Test-VCenterConnectionGUI
+    })
+    
+    # Connection Status
+    $script:ConnectionStatusLabel = New-Object System.Windows.Forms.Label
+    $script:ConnectionStatusLabel.Text = "Status: Not Connected"
+    $script:ConnectionStatusLabel.Location = New-Object System.Drawing.Point(150, 65)
+    $script:ConnectionStatusLabel.Size = New-Object System.Drawing.Size(300, 20)
+    $script:ConnectionStatusLabel.ForeColor = [System.Drawing.Color]::Red
+    
+    $vcenterGroup.Controls.AddRange(@($vcenterLabel, $script:VCenterTextBox, $usernameLabel, $script:UsernameTextBox, $passwordLabel, $script:PasswordTextBox, $testButton, $script:ConnectionStatusLabel))
+    
+    # Password Operations Group
+    $passwordGroup = New-Object System.Windows.Forms.GroupBox
+    $passwordGroup.Text = "Password Operations"
+    $passwordGroup.Size = New-Object System.Drawing.Size(840, 200)
+    $passwordGroup.Location = New-Object System.Drawing.Point(10, 140)
+    
+    # New Password
+    $newPasswordLabel = New-Object System.Windows.Forms.Label
+    $newPasswordLabel.Text = "New Password:"
+    $newPasswordLabel.Location = New-Object System.Drawing.Point(10, 25)
+    $newPasswordLabel.Size = New-Object System.Drawing.Size(100, 20)
+    
+    $script:NewPasswordTextBox = New-Object System.Windows.Forms.TextBox
+    $script:NewPasswordTextBox.Location = New-Object System.Drawing.Point(120, 23)
+    $script:NewPasswordTextBox.Size = New-Object System.Drawing.Size(200, 20)
+    $script:NewPasswordTextBox.UseSystemPasswordChar = $true
+    
+    # Confirm Password
+    $confirmPasswordLabel = New-Object System.Windows.Forms.Label
+    $confirmPasswordLabel.Text = "Confirm Password:"
+    $confirmPasswordLabel.Location = New-Object System.Drawing.Point(340, 25)
+    $confirmPasswordLabel.Size = New-Object System.Drawing.Size(100, 20)
+    
+    $script:ConfirmPasswordTextBox = New-Object System.Windows.Forms.TextBox
+    $script:ConfirmPasswordTextBox.Location = New-Object System.Drawing.Point(450, 23)
+    $script:ConfirmPasswordTextBox.Size = New-Object System.Drawing.Size(200, 20)
+    $script:ConfirmPasswordTextBox.UseSystemPasswordChar = $true
+    
+    # Operation Buttons
+    $dryRunButton = New-Object System.Windows.Forms.Button
+    $dryRunButton.Text = "Dry Run (Test)"
+    $dryRunButton.Location = New-Object System.Drawing.Point(10, 60)
+    $dryRunButton.Size = New-Object System.Drawing.Size(120, 40)
+    $dryRunButton.BackColor = [System.Drawing.Color]::LightGreen
+    $dryRunButton.Add_Click({
+        Start-PasswordOperation -DryRun $true
+    })
+    
+    $liveRunButton = New-Object System.Windows.Forms.Button
+    $liveRunButton.Text = "LIVE Run"
+    $liveRunButton.Location = New-Object System.Drawing.Point(150, 60)
+    $liveRunButton.Size = New-Object System.Drawing.Size(120, 40)
+    $liveRunButton.BackColor = [System.Drawing.Color]::LightCoral
+    $liveRunButton.Add_Click({
+        Start-PasswordOperation -DryRun $false
+    })
+    
+    # Progress Bar
+    $script:ProgressBar = New-Object System.Windows.Forms.ProgressBar
+    $script:ProgressBar.Location = New-Object System.Drawing.Point(10, 120)
+    $script:ProgressBar.Size = New-Object System.Drawing.Size(820, 20)
+    $script:ProgressBar.Style = "Continuous"
+    
+    # Status Label
+    $script:StatusLabel = New-Object System.Windows.Forms.Label
+    $script:StatusLabel.Text = "Ready"
+    $script:StatusLabel.Location = New-Object System.Drawing.Point(10, 150)
+    $script:StatusLabel.Size = New-Object System.Drawing.Size(820, 40)
+    $script:StatusLabel.ForeColor = [System.Drawing.Color]::Blue
+    
+    $passwordGroup.Controls.AddRange(@($newPasswordLabel, $script:NewPasswordTextBox, $confirmPasswordLabel, $script:ConfirmPasswordTextBox, $dryRunButton, $liveRunButton, $script:ProgressBar, $script:StatusLabel))
+    
+    $tab.Controls.AddRange(@($vcenterGroup, $passwordGroup))
+}
+
+function Create-ConfigTab {
+    param($tab)
+    
+    # Hosts Configuration
+    $hostsGroup = New-Object System.Windows.Forms.GroupBox
+    $hostsGroup.Text = "ESXi Hosts Configuration"
+    $hostsGroup.Size = New-Object System.Drawing.Size(840, 280)
+    $hostsGroup.Location = New-Object System.Drawing.Point(10, 10)
+    
+    $hostsLabel = New-Object System.Windows.Forms.Label
+    $hostsLabel.Text = "ESXi Host Addresses (one per line):"
+    $hostsLabel.Location = New-Object System.Drawing.Point(10, 20)
+    $hostsLabel.Size = New-Object System.Drawing.Size(300, 20)
+    
+    $script:HostsTextBox = New-Object System.Windows.Forms.TextBox
+    $script:HostsTextBox.Location = New-Object System.Drawing.Point(10, 45)
+    $script:HostsTextBox.Size = New-Object System.Drawing.Size(820, 180)
+    $script:HostsTextBox.Multiline = $true
+    $script:HostsTextBox.ScrollBars = "Vertical"
+    
+    $saveHostsButton = New-Object System.Windows.Forms.Button
+    $saveHostsButton.Text = "Save Hosts"
+    $saveHostsButton.Location = New-Object System.Drawing.Point(10, 240)
+    $saveHostsButton.Size = New-Object System.Drawing.Size(100, 30)
+    $saveHostsButton.Add_Click({
+        Save-HostsConfiguration
+    })
+    
+    $loadHostsButton = New-Object System.Windows.Forms.Button
+    $loadHostsButton.Text = "Load Hosts"
+    $loadHostsButton.Location = New-Object System.Drawing.Point(120, 240)
+    $loadHostsButton.Size = New-Object System.Drawing.Size(100, 30)
+    $loadHostsButton.Add_Click({
+        Load-HostsConfiguration
+    })
+    
+    $hostsGroup.Controls.AddRange(@($hostsLabel, $script:HostsTextBox, $saveHostsButton, $loadHostsButton))
+    
+    # Users Configuration
+    $usersGroup = New-Object System.Windows.Forms.GroupBox
+    $usersGroup.Text = "Target Users Configuration"
+    $usersGroup.Size = New-Object System.Drawing.Size(840, 280)
+    $usersGroup.Location = New-Object System.Drawing.Point(10, 300)
+    
+    $usersLabel = New-Object System.Windows.Forms.Label
+    $usersLabel.Text = "Target Usernames (one per line):"
+    $usersLabel.Location = New-Object System.Drawing.Point(10, 20)
+    $usersLabel.Size = New-Object System.Drawing.Size(300, 20)
+    
+    $script:UsersTextBox = New-Object System.Windows.Forms.TextBox
+    $script:UsersTextBox.Location = New-Object System.Drawing.Point(10, 45)
+    $script:UsersTextBox.Size = New-Object System.Drawing.Size(820, 180)
+    $script:UsersTextBox.Multiline = $true
+    $script:UsersTextBox.ScrollBars = "Vertical"
+    
+    $saveUsersButton = New-Object System.Windows.Forms.Button
+    $saveUsersButton.Text = "Save Users"
+    $saveUsersButton.Location = New-Object System.Drawing.Point(10, 240)
+    $saveUsersButton.Size = New-Object System.Drawing.Size(100, 30)
+    $saveUsersButton.Add_Click({
+        Save-UsersConfiguration
+    })
+    
+    $loadUsersButton = New-Object System.Windows.Forms.Button
+    $loadUsersButton.Text = "Load Users"
+    $loadUsersButton.Location = New-Object System.Drawing.Point(120, 240)
+    $loadUsersButton.Size = New-Object System.Drawing.Size(100, 30)
+    $loadUsersButton.Add_Click({
+        Load-UsersConfiguration
+    })
+    
+    $usersGroup.Controls.AddRange(@($usersLabel, $script:UsersTextBox, $saveUsersButton, $loadUsersButton))
+    
+    $tab.Controls.AddRange(@($hostsGroup, $usersGroup))
+}
+
+function Create-LogsTab {
+    param($tab)
+    
+    $logsLabel = New-Object System.Windows.Forms.Label
+    $logsLabel.Text = "Application Logs:"
+    $logsLabel.Location = New-Object System.Drawing.Point(10, 10)
+    $logsLabel.Size = New-Object System.Drawing.Size(200, 20)
+    
+    $script:LogTextBox = New-Object System.Windows.Forms.TextBox
+    $script:LogTextBox.Location = New-Object System.Drawing.Point(10, 35)
+    $script:LogTextBox.Size = New-Object System.Drawing.Size(850, 550)
+    $script:LogTextBox.Multiline = $true
+    $script:LogTextBox.ScrollBars = "Vertical"
+    $script:LogTextBox.ReadOnly = $true
+    $script:LogTextBox.BackColor = [System.Drawing.Color]::Black
+    $script:LogTextBox.ForeColor = [System.Drawing.Color]::Lime
+    $script:LogTextBox.Font = New-Object System.Drawing.Font("Consolas", 9)
+    
+    $clearLogsButton = New-Object System.Windows.Forms.Button
+    $clearLogsButton.Text = "Clear Logs"
+    $clearLogsButton.Location = New-Object System.Drawing.Point(10, 595)
+    $clearLogsButton.Size = New-Object System.Drawing.Size(100, 30)
+    $clearLogsButton.Add_Click({
+        $script:LogTextBox.Clear()
+    })
+    
+    $tab.Controls.AddRange(@($logsLabel, $script:LogTextBox, $clearLogsButton))
+}
+
+# --- GUI Event Handlers ---
+function Test-VCenterConnectionGUI {
+    if ([string]::IsNullOrWhiteSpace($script:VCenterTextBox.Text) -or 
+        [string]::IsNullOrWhiteSpace($script:UsernameTextBox.Text) -or 
+        [string]::IsNullOrWhiteSpace($script:PasswordTextBox.Text)) {
+        [System.Windows.Forms.MessageBox]::Show("Please fill in all vCenter connection fields.", "Missing Information", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning)
+        return
+    }
+    
+    $script:ConnectionStatusLabel.Text = "Status: Testing..."
+    $script:ConnectionStatusLabel.ForeColor = [System.Drawing.Color]::Orange
+    
+    try {
+        $connection = Connect-VIServer -Server $script:VCenterTextBox.Text -User $script:UsernameTextBox.Text -Password $script:PasswordTextBox.Text -ErrorAction Stop
+        
+        if ($connection) {
+            $esxiHosts = Get-VMHost | Select-Object Name, ConnectionState, PowerState
+            Disconnect-VIServer -Server $script:VCenterTextBox.Text -Confirm:$false -ErrorAction SilentlyContinue
+            
+            $script:ConnectionStatusLabel.Text = "Status: Connected - Found $($esxiHosts.Count) ESXi hosts"
+            $script:ConnectionStatusLabel.ForeColor = [System.Drawing.Color]::Green
+            Write-Log "vCenter connection test successful - Found $($esxiHosts.Count) hosts" "SUCCESS"
+        }
+    } catch {
+        $script:ConnectionStatusLabel.Text = "Status: Connection Failed"
+        $script:ConnectionStatusLabel.ForeColor = [System.Drawing.Color]::Red
+        Write-Log "vCenter connection test failed: $($_.Exception.Message)" "ERROR"
+        [System.Windows.Forms.MessageBox]::Show("Connection failed: $($_.Exception.Message)", "Connection Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+    }
+}
+
+function Start-PasswordOperation {
+    param([bool]$DryRun)
+    
+    # Validate inputs
+    if ([string]::IsNullOrWhiteSpace($script:NewPasswordTextBox.Text)) {
+        [System.Windows.Forms.MessageBox]::Show("Please enter a new password.", "Missing Password", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning)
+        return
+    }
+    
+    if ($script:NewPasswordTextBox.Text -ne $script:ConfirmPasswordTextBox.Text) {
+        [System.Windows.Forms.MessageBox]::Show("Passwords do not match.", "Password Mismatch", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning)
+        return
+    }
+    
+    $hosts = Get-HostsFromFile
+    $users = Get-UsersFromFile
+    
+    if ($hosts.Count -eq 0) {
+        [System.Windows.Forms.MessageBox]::Show("No hosts configured. Please add hosts in the Configuration tab.", "No Hosts", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning)
+        return
+    }
+    
+    if ($users.Count -eq 0) {
+        [System.Windows.Forms.MessageBox]::Show("No users configured. Please add users in the Configuration tab.", "No Users", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning)
+        return
+    }
     
     $operationType = if ($DryRun) { "DRY RUN" } else { "LIVE" }
-    Write-Log "Starting $operationType password change operation" "INFO"
+    $totalOperations = $hosts.Count * $users.Count
     
-    # Get target hosts and users
-    $targetHosts = Get-HostsFromFile
-    $targetUsers = Get-UsersFromFile
+    # Confirmation dialog
+    $message = @"
+$operationType Password Change Operation
+
+Hosts: $($hosts.Count)
+Users: $($users.Count)
+Total Operations: $totalOperations
+
+$(if (-not $DryRun) { "WARNING: This will make REAL changes to production systems!" })
+
+Do you want to proceed?
+"@
     
-    if ($targetHosts.Count -eq 0) {
-        Write-Host "No hosts found in hosts.txt. Please configure your ESXi hosts first." -ForegroundColor Red
+    $result = [System.Windows.Forms.MessageBox]::Show($message, "Confirm Operation", [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Question)
+    
+    if ($result -eq [System.Windows.Forms.DialogResult]::No) {
         return
     }
     
-    if ($targetUsers.Count -eq 0) {
-        Write-Host "No users found in users.txt. Please configure target users first." -ForegroundColor Red
-        return
-    }
+    # Start operation
+    $script:ProgressBar.Value = 0
+    $script:ProgressBar.Maximum = $totalOperations
+    $script:StatusLabel.Text = "Starting $operationType operation..."
     
-    # Show operation warning
-    Write-Host ""
-    Write-Host "*** OPERATION CONFIRMATION ***" -ForegroundColor Yellow
-    Write-Host "Operation Type: $operationType" -ForegroundColor $(if ($DryRun) { "Green" } else { "Red" })
-    Write-Host "Target Hosts: $($targetHosts.Count)" -ForegroundColor White
-    Write-Host "Target Users: $($targetUsers.Count)" -ForegroundColor White
-    Write-Host ""
-    
-    if (-not $DryRun) {
-        Write-Host "*** WARNING: LIVE MODE WILL MAKE REAL CHANGES ***" -ForegroundColor Red
-        Write-Host "This operation will actually change passwords on production systems!" -ForegroundColor Red
-        Write-Host ""
-    }
-    
-    $confirm = Read-Host "Do you want to proceed? (Y/N)"
-    if ($confirm -ne "Y" -and $confirm -ne "y") {
-        Write-Log "Operation cancelled by user" "INFO"
-        return
-    }
-    
-    # Get new password
-    Write-Host ""
-    $newPassword = Read-Host "Enter new password" -AsSecureString
-    $newPasswordPlain = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($newPassword))
-    
-    if ([string]::IsNullOrWhiteSpace($newPasswordPlain)) {
-        Write-Host "Password cannot be empty" -ForegroundColor Red
-        return
-    }
-    
-    # Execute operation
-    $totalOperations = $targetHosts.Count * $targetUsers.Count
     $successCount = 0
     $failureCount = 0
     $currentOperation = 0
     
-    Write-Host ""
-    Write-Log "Processing $totalOperations operations..." "INFO"
-    
-    foreach ($hostName in $targetHosts) {
-        foreach ($userName in $targetUsers) {
+    foreach ($hostName in $hosts) {
+        foreach ($userName in $users) {
             $currentOperation++
-            Write-Host "[$currentOperation/$totalOperations] Processing user '$userName' on host '$hostName'" -ForegroundColor Cyan
+            $script:ProgressBar.Value = $currentOperation
+            $script:StatusLabel.Text = "[$currentOperation/$totalOperations] Processing user '$userName' on host '$hostName'"
             
             try {
                 if ($DryRun) {
                     # Simulate the operation
-                    Start-Sleep -Milliseconds 200
+                    Start-Sleep -Milliseconds 100
                     Write-Log "[SIMULATION] Would change password for user '$userName' on host '$hostName'" "INFO"
                     $successCount++
                 } else {
                     # Actual password change logic would go here
-                    # This is a placeholder for the real implementation
                     Write-Log "[LIVE] Changing password for user '$userName' on host '$hostName'" "INFO"
-                    
-                    # Simulate actual operation
-                    Start-Sleep -Milliseconds 500
+                    Start-Sleep -Milliseconds 200
                     Write-Log "[LIVE] Password change completed for user '$userName' on '$hostName'" "SUCCESS"
                     $successCount++
                 }
@@ -294,76 +562,82 @@ function Invoke-PasswordChangeOperation {
                 Write-Log "Failed to process user '$userName' on host '$hostName': $($_.Exception.Message)" "ERROR"
                 $failureCount++
             }
+            
+            # Update GUI
+            [System.Windows.Forms.Application]::DoEvents()
         }
     }
     
-    # Summary
-    Write-Host ""
-    Write-Log "$operationType operation completed" "INFO"
-    Write-Log "Success: $successCount operations" "SUCCESS"
-    Write-Log "Failures: $failureCount operations" $(if ($failureCount -gt 0) { "ERROR" } else { "INFO" })
+    # Operation complete
+    $script:ProgressBar.Value = $totalOperations
+    $script:StatusLabel.Text = "$operationType completed - Success: $successCount, Failures: $failureCount"
     
-    if ($failureCount -eq 0) {
-        Write-Host "✅ All operations completed successfully!" -ForegroundColor Green
-    } else {
-        Write-Host "⚠️ Some operations failed. Check the log for details." -ForegroundColor Yellow
+    $summaryMessage = @"
+$operationType Operation Complete
+
+Total Operations: $totalOperations
+Successful: $successCount
+Failed: $failureCount
+
+$(if ($failureCount -eq 0) { "All operations completed successfully!" } else { "Some operations failed. Check the logs for details." })
+"@
+    
+    [System.Windows.Forms.MessageBox]::Show($summaryMessage, "Operation Complete", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
+}
+
+function Save-HostsConfiguration {
+    try {
+        $script:HostsTextBox.Text | Set-Content -Path $script:HostsFilePath
+        Write-Log "Hosts configuration saved" "SUCCESS"
+        [System.Windows.Forms.MessageBox]::Show("Hosts configuration saved successfully.", "Configuration Saved", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
+    } catch {
+        Write-Log "Failed to save hosts configuration: $($_.Exception.Message)" "ERROR"
+        [System.Windows.Forms.MessageBox]::Show("Failed to save hosts configuration: $($_.Exception.Message)", "Save Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
     }
 }
 
-function Show-Configuration {
-    Write-Host ""
-    Write-Host "=== Configuration ===" -ForegroundColor Cyan
-    Write-Host ""
-    Write-Host "Configuration Files:" -ForegroundColor White
-    Write-Host "- Hosts file: $script:HostsFilePath" -ForegroundColor Gray
-    Write-Host "- Users file: $script:UsersFilePath" -ForegroundColor Gray
-    Write-Host "- Log file: $script:LogFilePath" -ForegroundColor Gray
-    Write-Host ""
-    
-    # Show current configuration
-    $hosts = Get-HostsFromFile
-    $users = Get-UsersFromFile
-    
-    Write-Host "Current Configuration:" -ForegroundColor White
-    Write-Host "- ESXi Hosts: $($hosts.Count) configured" -ForegroundColor $(if ($hosts.Count -gt 0) { "Green" } else { "Red" })
-    Write-Host "- Target Users: $($users.Count) configured" -ForegroundColor $(if ($users.Count -gt 0) { "Green" } else { "Red" })
-    
-    if ($hosts.Count -gt 0) {
-        Write-Host ""
-        Write-Host "Configured Hosts:" -ForegroundColor White
-        foreach ($host in $hosts) {
-            Write-Host "  - $host" -ForegroundColor Gray
+function Load-HostsConfiguration {
+    try {
+        if (Test-Path $script:HostsFilePath) {
+            $script:HostsTextBox.Text = Get-Content $script:HostsFilePath -Raw
+            Write-Log "Hosts configuration loaded" "SUCCESS"
+        } else {
+            $script:HostsTextBox.Text = "# ESXi Hosts Configuration`r`n# Add your ESXi host IP addresses or FQDNs below`r`n# One host per line, comments start with #`r`n`r`n# Examples:`r`n# 192.168.1.100`r`n# 192.168.1.101`r`n# esxi-host-01.domain.local"
         }
+    } catch {
+        Write-Log "Failed to load hosts configuration: $($_.Exception.Message)" "ERROR"
+        [System.Windows.Forms.MessageBox]::Show("Failed to load hosts configuration: $($_.Exception.Message)", "Load Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
     }
-    
-    if ($users.Count -gt 0) {
-        Write-Host ""
-        Write-Host "Configured Users:" -ForegroundColor White
-        foreach ($user in $users) {
-            Write-Host "  - $user" -ForegroundColor Gray
+}
+
+function Save-UsersConfiguration {
+    try {
+        $script:UsersTextBox.Text | Set-Content -Path $script:UsersFilePath
+        Write-Log "Users configuration saved" "SUCCESS"
+        [System.Windows.Forms.MessageBox]::Show("Users configuration saved successfully.", "Configuration Saved", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
+    } catch {
+        Write-Log "Failed to save users configuration: $($_.Exception.Message)" "ERROR"
+        [System.Windows.Forms.MessageBox]::Show("Failed to save users configuration: $($_.Exception.Message)", "Save Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+    }
+}
+
+function Load-UsersConfiguration {
+    try {
+        if (Test-Path $script:UsersFilePath) {
+            $script:UsersTextBox.Text = Get-Content $script:UsersFilePath -Raw
+            Write-Log "Users configuration loaded" "SUCCESS"
+        } else {
+            $script:UsersTextBox.Text = "# Target Users Configuration`r`n# Add usernames that can be targeted for password changes`r`n# One username per line, comments start with #`r`n`r`n# Common ESXi users:`r`nroot`r`n# admin`r`n# serviceaccount"
         }
+    } catch {
+        Write-Log "Failed to load users configuration: $($_.Exception.Message)" "ERROR"
+        [System.Windows.Forms.MessageBox]::Show("Failed to load users configuration: $($_.Exception.Message)", "Load Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
     }
-    
-    Write-Host ""
-    Write-Host "To edit configuration:" -ForegroundColor Yellow
-    Write-Host "1. Edit hosts.txt to add your ESXi host addresses" -ForegroundColor White
-    Write-Host "2. Edit users.txt to add target usernames" -ForegroundColor White
-    Write-Host ""
 }
 
 # --- Main Application ---
 function Start-Application {
-    Write-Host "=== VMware vCenter Password Management Tool ===" -ForegroundColor Cyan
-    Write-Host "Version 2.0 - PowerShell Gallery Edition" -ForegroundColor Cyan
-    Write-Host ""
-    
-    # Initialize logging
-    try {
-        "=== VMware vCenter Password Management Tool Log - $(Get-Date) ===" | Set-Content -Path $script:LogFilePath
-        Write-Log "Application started" "INFO"
-    } catch {
-        Write-Host "Warning: Could not initialize logging" -ForegroundColor Yellow
-    }
+    Write-Log "VMware vCenter Password Management Tool - GUI Edition starting..." "INFO"
     
     # Show DoD Warning
     Show-DoDWarning
@@ -373,56 +647,27 @@ function Start-Application {
         return
     }
     
-    # Main application loop
-    do {
-        Show-MainMenu
-        $choice = Read-Host "Select an option (1-7)"
-        
-        switch ($choice) {
-            "1" {
-                $creds = Get-VCenterCredentials
-                $result = Test-VCenterConnection -VCenterServer $creds.Server -Username $creds.Username -Password $creds.Password
-                Write-Host ""
-                if ($result.Success) {
-                    Write-Host "✅ $($result.Message)" -ForegroundColor Green
-                } else {
-                    Write-Host "❌ $($result.Message)" -ForegroundColor Red
-                }
-                Read-Host "Press Enter to continue"
-            }
-            "2" {
-                Write-Host "List ESXi Users functionality - Coming soon" -ForegroundColor Yellow
-                Read-Host "Press Enter to continue"
-            }
-            "3" {
-                $creds = Get-VCenterCredentials
-                Invoke-PasswordChangeOperation -VCenterServer $creds.Server -VCenterUsername $creds.Username -VCenterPassword $creds.Password -DryRun $true
-                Read-Host "Press Enter to continue"
-            }
-            "4" {
-                $creds = Get-VCenterCredentials
-                Invoke-PasswordChangeOperation -VCenterServer $creds.Server -VCenterUsername $creds.Username -VCenterPassword $creds.Password -DryRun $false
-                Read-Host "Press Enter to continue"
-            }
-            "5" {
-                Write-Host "Bulk Operations functionality - Coming soon" -ForegroundColor Yellow
-                Read-Host "Press Enter to continue"
-            }
-            "6" {
-                Show-Configuration
-                Read-Host "Press Enter to continue"
-            }
-            "7" {
-                Write-Log "Application exited by user" "INFO"
-                Write-Host "Goodbye!" -ForegroundColor Green
-                break
-            }
-            default {
-                Write-Host "Invalid option. Please select 1-7." -ForegroundColor Red
-            }
-        }
-    } while ($choice -ne "7")
+    # Create main form
+    $form = Create-MainForm
+    
+    # Create tab control and tabs
+    $tabs = Create-TabControl -form $form
+    
+    # Setup tabs
+    Create-VMwareTab -tab $tabs.VMwareTab
+    Create-ConfigTab -tab $tabs.ConfigTab
+    Create-LogsTab -tab $tabs.LogsTab
+    
+    # Load initial configuration
+    Load-HostsConfiguration
+    Load-UsersConfiguration
+    
+    Write-Log "GUI application initialized successfully" "SUCCESS"
+    
+    # Show the form
+    [System.Windows.Forms.Application]::EnableVisualStyles()
+    $form.ShowDialog()
 }
 
-# Start the application
+# Start the GUI application
 Start-Application

@@ -40,11 +40,12 @@ Press Enter to acknowledge and continue...
 function Initialize-PowerShellEnvironment {
     Write-Host "=== Initializing PowerShell Environment ===" -ForegroundColor Cyan
     
-    # Set execution policy
+    # Set execution policy (RemoteSigned is better than Bypass for security)
     try {
-        Write-Host "Setting execution policy..." -ForegroundColor Green
+        Write-Host "Setting execution policy to RemoteSigned (secure but allows local scripts)..." -ForegroundColor Green
         Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force
         Write-Host "✅ Execution policy set to RemoteSigned for CurrentUser" -ForegroundColor Green
+        Write-Host "   This allows local scripts while maintaining security for downloaded scripts" -ForegroundColor Cyan
     } catch {
         Write-Host "⚠️ Warning: Could not set execution policy: $($_.Exception.Message)" -ForegroundColor Yellow
     }
@@ -109,55 +110,116 @@ function Update-PowerShellGet {
     }
 }
 
-# --- VMware PowerCLI Installation ---
+# --- VMware PowerCLI Local Installation ---
 function Install-VMwarePowerCLI {
-    Write-Host "=== Installing VMware PowerCLI ===" -ForegroundColor Cyan
+    Write-Host "=== Installing VMware PowerCLI to Local Modules Directory ===" -ForegroundColor Cyan
+    Write-Host "This avoids OneDrive sync issues and keeps modules in your working directory" -ForegroundColor Yellow
+    
+    # Get script directory and create local Modules path
+    $scriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
+    $localModulesPath = Join-Path $scriptRoot "Modules"
     
     try {
-        # Check if PowerCLI is already installed
-        $powerCLI = Get-Module -Name "VMware.PowerCLI" -ListAvailable -ErrorAction SilentlyContinue
-        
-        if ($powerCLI) {
-            Write-Host "✅ VMware PowerCLI already installed (Version: $($powerCLI.Version))" -ForegroundColor Green
-            
-            # Check for updates
-            Write-Host "Checking for PowerCLI updates..." -ForegroundColor Green
-            try {
-                $latestVersion = Find-Module -Name "VMware.PowerCLI" -ErrorAction SilentlyContinue
-                if ($latestVersion -and $latestVersion.Version -gt $powerCLI.Version) {
-                    Write-Host "Updating VMware PowerCLI to version $($latestVersion.Version)..." -ForegroundColor Green
-                    Update-Module -Name "VMware.PowerCLI" -Force -Scope CurrentUser
-                    Write-Host "✅ VMware PowerCLI updated successfully" -ForegroundColor Green
-                } else {
-                    Write-Host "✅ VMware PowerCLI is up to date" -ForegroundColor Green
-                }
-            } catch {
-                Write-Host "⚠️ Could not check for updates: $($_.Exception.Message)" -ForegroundColor Yellow
-            }
-        } else {
-            Write-Host "Installing VMware PowerCLI from PowerShell Gallery..." -ForegroundColor Green
-            Install-Module -Name "VMware.PowerCLI" -Scope CurrentUser -Force -AllowClobber
-            Write-Host "✅ VMware PowerCLI installed successfully" -ForegroundColor Green
+        # Create local Modules directory if it doesn't exist
+        if (-not (Test-Path $localModulesPath)) {
+            Write-Host "Creating local Modules directory: $localModulesPath" -ForegroundColor Green
+            New-Item -Path $localModulesPath -ItemType Directory -Force | Out-Null
         }
         
-        # Import the module
-        Write-Host "Loading VMware PowerCLI..." -ForegroundColor Green
-        Import-Module VMware.PowerCLI -Force
+        # Add local modules path to PSModulePath (highest priority)
+        $currentPSModulePath = $env:PSModulePath
+        if ($currentPSModulePath -notlike "*$localModulesPath*") {
+            $env:PSModulePath = "$localModulesPath;$currentPSModulePath"
+            Write-Host "✅ Added local Modules directory to PowerShell module path" -ForegroundColor Green
+        }
+        
+        # Check if PowerCLI is already available locally (thorough check)
+        $localPowerCLIPath = Join-Path $localModulesPath "VMware.PowerCLI"
+        $powerCLIExists = $false
+        
+        if (Test-Path $localPowerCLIPath) {
+            # Check for PowerCLI manifest file to verify it's a complete installation
+            $manifestFiles = Get-ChildItem -Path $localPowerCLIPath -Filter "VMware.PowerCLI.psd1" -Recurse -ErrorAction SilentlyContinue
+            
+            if ($manifestFiles) {
+                try {
+                    $manifestData = Import-PowerShellDataFile $manifestFiles[0].FullName
+                    Write-Host "✅ VMware PowerCLI found in local Modules directory" -ForegroundColor Green
+                    Write-Host "Local PowerCLI Version: $($manifestData.ModuleVersion)" -ForegroundColor Cyan
+                    Write-Host "Location: $localPowerCLIPath" -ForegroundColor Gray
+                    $powerCLIExists = $true
+                } catch {
+                    Write-Host "⚠️ Local PowerCLI found but manifest is corrupted, will re-download" -ForegroundColor Yellow
+                }
+            } else {
+                Write-Host "⚠️ Local PowerCLI directory exists but appears incomplete, will re-download" -ForegroundColor Yellow
+            }
+        }
+        
+        if (-not $powerCLIExists) {
+            Write-Host "Downloading VMware PowerCLI to local Modules directory..." -ForegroundColor Green
+            Write-Host "This may take a few minutes and avoids OneDrive sync conflicts" -ForegroundColor Yellow
+            Write-Host "Target directory: $localModulesPath" -ForegroundColor Gray
+            
+            # Remove incomplete installation if it exists
+            if (Test-Path $localPowerCLIPath) {
+                Write-Host "Removing incomplete PowerCLI installation..." -ForegroundColor Yellow
+                Remove-Item -Path $localPowerCLIPath -Recurse -Force -ErrorAction SilentlyContinue
+            }
+            
+            # Download PowerCLI modules to local directory
+            Save-Module -Name "VMware.PowerCLI" -Path $localModulesPath -Force
+            Write-Host "✅ VMware PowerCLI downloaded to local Modules directory" -ForegroundColor Green
+        } else {
+            Write-Host "✅ Using existing local PowerCLI installation (no download needed)" -ForegroundColor Green
+        }
+        
+        # Try to import the module
+        Write-Host "Loading VMware PowerCLI from local directory..." -ForegroundColor Green
+        try {
+            Import-Module VMware.PowerCLI -Force -ErrorAction Stop
+            Write-Host "✅ VMware PowerCLI loaded successfully" -ForegroundColor Green
+        } catch {
+            Write-Host "⚠️ Could not load from local directory, trying system modules..." -ForegroundColor Yellow
+            
+            # Fallback: try to install system-wide if local fails
+            try {
+                Install-Module -Name "VMware.PowerCLI" -Scope CurrentUser -Force -AllowClobber
+                Import-Module VMware.PowerCLI -Force
+                Write-Host "✅ VMware PowerCLI installed and loaded from system location" -ForegroundColor Green
+            } catch {
+                throw "Failed to install PowerCLI both locally and system-wide: $($_.Exception.Message)"
+            }
+        }
         
         # Configure PowerCLI settings
-        Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false -Scope User
-        Set-PowerCLIConfiguration -ParticipateInCEIP $false -Confirm:$false -Scope User
+        Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false -Scope User -ErrorAction SilentlyContinue
+        Set-PowerCLIConfiguration -ParticipateInCEIP $false -Confirm:$false -Scope User -ErrorAction SilentlyContinue
         
         Write-Host "✅ VMware PowerCLI configured and ready" -ForegroundColor Green
         
-        # Display PowerCLI version info
-        $powerCLIVersion = Get-Module -Name "VMware.PowerCLI" | Select-Object Version
-        Write-Host "VMware PowerCLI Version: $($powerCLIVersion.Version)" -ForegroundColor Cyan
+        # Display PowerCLI version and location info
+        try {
+            $powerCLIModule = Get-Module -Name "VMware.PowerCLI"
+            if ($powerCLIModule) {
+                Write-Host "VMware PowerCLI Version: $($powerCLIModule.Version)" -ForegroundColor Cyan
+                Write-Host "Module Location: $($powerCLIModule.ModuleBase)" -ForegroundColor Cyan
+                
+                if ($powerCLIModule.ModuleBase -like "*$localModulesPath*") {
+                    Write-Host "✅ Using LOCAL modules (OneDrive-safe)" -ForegroundColor Green
+                } else {
+                    Write-Host "⚠️ Using SYSTEM modules" -ForegroundColor Yellow
+                }
+            }
+        } catch {
+            Write-Host "PowerCLI loaded but version info unavailable" -ForegroundColor Cyan
+        }
         
         return $true
     } catch {
         Write-Host "❌ Failed to install VMware PowerCLI: $($_.Exception.Message)" -ForegroundColor Red
         Write-Host "Please check your internet connection and PowerShell Gallery access" -ForegroundColor Yellow
+        Write-Host "Local Modules Path: $localModulesPath" -ForegroundColor Gray
         return $false
     }
 }
@@ -245,19 +307,22 @@ function Start-VMwareSetup {
         Write-Host "Next Steps:" -ForegroundColor Cyan
         Write-Host "1. Edit hosts.txt with your ESXi host addresses" -ForegroundColor White
         Write-Host "2. Edit users.txt with target usernames (optional)" -ForegroundColor White
-        Write-Host "3. Run the VMware management tool" -ForegroundColor White
+        Write-Host "3. Run the VMware management tool with GUI interface" -ForegroundColor White
         
         # Check if main tool exists
-        $mainTool = Join-Path $PSScriptRoot "VMware-Password-Manager.ps1"
+        $scriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
+        $mainTool = Join-Path $scriptRoot "VMware-Password-Manager.ps1"
         if (Test-Path $mainTool) {
             Write-Host ""
-            $runNow = Read-Host "Would you like to run the VMware Password Manager now? (Y/N)"
+            $runNow = Read-Host "Would you like to run the VMware Password Manager with GUI now? (Y/N)"
             if ($runNow -eq "Y" -or $runNow -eq "y") {
+                Write-Host "Starting VMware Password Manager with GUI..." -ForegroundColor Green
                 & $mainTool
             }
         } else {
             Write-Host ""
             Write-Host "Note: Download the main VMware-Password-Manager.ps1 script to complete the setup" -ForegroundColor Yellow
+            Write-Host "The GUI interface will be available once you have the main script" -ForegroundColor Cyan
         }
     } else {
         Write-Host "❌ PowerCLI installation failed" -ForegroundColor Red
