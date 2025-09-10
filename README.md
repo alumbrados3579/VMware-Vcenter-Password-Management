@@ -210,7 +210,7 @@ Alternative: Use offline installation method
 - **Compliance**: DoD standards with comprehensive audit logging
 - **Platform**: Windows PowerShell with VMware PowerCLI
 - 
-<img width="1318" height="1031" alt="image" src="https://github.com/user-attachments/assets/3e730100-e65f-4ef5-900a-e15b4520b2ac" />
+<img width="650" height="542" alt="image" src="https://github.com/user-attachments/assets/3e730100-e65f-4ef5-900a-e15b4520b2ac" />
 
 ### Author and Development
 
