@@ -283,13 +283,13 @@ function Create-VMwareTab {
     
     # Password
     $passwordLabel = New-Object System.Windows.Forms.Label
-    $passwordLabel.Text = "Admin Password:"
-    $passwordLabel.Location = New-Object System.Drawing.Point(590, 25)
-    $passwordLabel.Size = New-Object System.Drawing.Size(100, 20)
+    $passwordLabel.Text = "Password:"
+    $passwordLabel.Location = New-Object System.Drawing.Point(610, 25)
+    $passwordLabel.Size = New-Object System.Drawing.Size(70, 20)
     
     $script:PasswordTextBox = New-Object System.Windows.Forms.TextBox
-    $script:PasswordTextBox.Location = New-Object System.Drawing.Point(700, 23)
-    $script:PasswordTextBox.Size = New-Object System.Drawing.Size(130, 20)
+    $script:PasswordTextBox.Location = New-Object System.Drawing.Point(690, 23)
+    $script:PasswordTextBox.Size = New-Object System.Drawing.Size(140, 20)
     $script:PasswordTextBox.UseSystemPasswordChar = $true
     
     # Test Connection Button
@@ -390,7 +390,7 @@ function Create-VMwareTab {
     # Operation Status Group (below Password Operations)
     $operationStatusGroup = New-Object System.Windows.Forms.GroupBox
     $operationStatusGroup.Text = "Operation Status"
-    $operationStatusGroup.Size = New-Object System.Drawing.Size(840, 280)
+    $operationStatusGroup.Size = New-Object System.Drawing.Size(840, 320)
     $operationStatusGroup.Location = New-Object System.Drawing.Point(10, 270)
     
     # Progress Bar
@@ -414,7 +414,7 @@ function Create-VMwareTab {
     
     $script:OperationStatusTextBox = New-Object System.Windows.Forms.TextBox
     $script:OperationStatusTextBox.Location = New-Object System.Drawing.Point(10, 100)
-    $script:OperationStatusTextBox.Size = New-Object System.Drawing.Size(820, 170)
+    $script:OperationStatusTextBox.Size = New-Object System.Drawing.Size(820, 210)
     $script:OperationStatusTextBox.Multiline = $true
     $script:OperationStatusTextBox.ScrollBars = "Vertical"
     $script:OperationStatusTextBox.ReadOnly = $true
@@ -1068,17 +1068,7 @@ function Load-HostsConfiguration {
             }
             Write-Log "Hosts configuration loaded" "SUCCESS"
         } else {
-            $defaultHosts = @"
-# ESXi Hosts Configuration
-# Add your ESXi host IP addresses or FQDNs below
-# One host per line, comments start with #
-
-# Examples:
-# 192.168.1.100
-# 192.168.1.101
-# esxi-host-01.domain.local
-# esxi-host-02.domain.local
-"@
+            $defaultHosts = ""
             $script:HostsTextBox.Text = $defaultHosts
         }
     } catch {
@@ -1115,19 +1105,7 @@ function Load-UsersConfiguration {
             }
             Write-Log "Users configuration loaded" "SUCCESS"
         } else {
-            $defaultUsers = @"
-# Target ESXi Users Configuration
-# Add ESXi usernames for password operations
-# One username per line, comments start with #
-# Note: vCenter admin users (like administrator@vsphere.local) are entered directly in the GUI
-
-# Common ESXi users:
-root
-# admin_swm
-# admin_kms
-# admin
-# serviceaccount
-"@
+            $defaultUsers = "root"
             $script:UsersTextBox.Text = $defaultUsers
         }
     } catch {
