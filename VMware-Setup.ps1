@@ -49,8 +49,8 @@ function Write-Progress {
     )
     
     $script:CurrentStep++
-    $progressChar = "█"
-    $emptyChar = "░"
+    $progressChar = "="
+    $emptyChar = " "
     $totalBars = 50
     $filledBars = [math]::Floor(($PercentComplete / 100) * $totalBars)
     $emptyBars = $totalBars - $filledBars

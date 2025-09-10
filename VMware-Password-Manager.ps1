@@ -200,9 +200,10 @@ function Create-MainForm {
     $form = New-Object System.Windows.Forms.Form
     $form.Text = "VMware vCenter Password Management Tool - Version 0.5 BETA"
     $form.Size = New-Object System.Drawing.Size(900, 700)
+    $form.MinimumSize = New-Object System.Drawing.Size(900, 700)
     $form.StartPosition = "CenterScreen"
-    $form.FormBorderStyle = "FixedDialog"
-    $form.MaximizeBox = $false
+    $form.FormBorderStyle = "Sizable"
+    $form.MaximizeBox = $true
     $form.Icon = [System.Drawing.SystemIcons]::Shield
     
     return $form
@@ -282,13 +283,13 @@ function Create-VMwareTab {
     
     # Password
     $passwordLabel = New-Object System.Windows.Forms.Label
-    $passwordLabel.Text = "Password:"
+    $passwordLabel.Text = "Admin Password:"
     $passwordLabel.Location = New-Object System.Drawing.Point(590, 25)
-    $passwordLabel.Size = New-Object System.Drawing.Size(80, 20)
+    $passwordLabel.Size = New-Object System.Drawing.Size(100, 20)
     
     $script:PasswordTextBox = New-Object System.Windows.Forms.TextBox
-    $script:PasswordTextBox.Location = New-Object System.Drawing.Point(680, 23)
-    $script:PasswordTextBox.Size = New-Object System.Drawing.Size(150, 20)
+    $script:PasswordTextBox.Location = New-Object System.Drawing.Point(700, 23)
+    $script:PasswordTextBox.Size = New-Object System.Drawing.Size(130, 20)
     $script:PasswordTextBox.UseSystemPasswordChar = $true
     
     # Test Connection Button
@@ -389,7 +390,7 @@ function Create-VMwareTab {
     # Operation Status Group (below Password Operations)
     $operationStatusGroup = New-Object System.Windows.Forms.GroupBox
     $operationStatusGroup.Text = "Operation Status"
-    $operationStatusGroup.Size = New-Object System.Drawing.Size(840, 180)
+    $operationStatusGroup.Size = New-Object System.Drawing.Size(840, 280)
     $operationStatusGroup.Location = New-Object System.Drawing.Point(10, 270)
     
     # Progress Bar
@@ -413,7 +414,7 @@ function Create-VMwareTab {
     
     $script:OperationStatusTextBox = New-Object System.Windows.Forms.TextBox
     $script:OperationStatusTextBox.Location = New-Object System.Drawing.Point(10, 100)
-    $script:OperationStatusTextBox.Size = New-Object System.Drawing.Size(820, 70)
+    $script:OperationStatusTextBox.Size = New-Object System.Drawing.Size(820, 170)
     $script:OperationStatusTextBox.Multiline = $true
     $script:OperationStatusTextBox.ScrollBars = "Vertical"
     $script:OperationStatusTextBox.ReadOnly = $true
@@ -505,9 +506,9 @@ function Create-CLITab {
     
     # Command input
     $commandLabel = New-Object System.Windows.Forms.Label
-    $commandLabel.Text = "PowerCLI Command:"
+    $commandLabel.Text = "PowerCLI Command (Press Enter to execute):"
     $commandLabel.Location = New-Object System.Drawing.Point(10, 25)
-    $commandLabel.Size = New-Object System.Drawing.Size(120, 20)
+    $commandLabel.Size = New-Object System.Drawing.Size(300, 20)
     
     $script:CLICommandTextBox = New-Object System.Windows.Forms.TextBox
     $script:CLICommandTextBox.Location = New-Object System.Drawing.Point(10, 50)
@@ -516,6 +517,31 @@ function Create-CLITab {
     $script:CLICommandTextBox.Add_KeyDown({
         if ($_.KeyCode -eq "Enter") {
             Execute-CLICommand
+        }
+        if ($_.KeyCode -eq "Up") {
+            # Command history - previous command
+            if ($script:CLICommandHistory -and $script:CLICommandHistory.Count -gt 0) {
+                if ($script:CLIHistoryIndex -eq -1) {
+                    $script:CLIHistoryIndex = $script:CLICommandHistory.Count - 1
+                } elseif ($script:CLIHistoryIndex -gt 0) {
+                    $script:CLIHistoryIndex--
+                }
+                $script:CLICommandTextBox.Text = $script:CLICommandHistory[$script:CLIHistoryIndex]
+                $script:CLICommandTextBox.SelectionStart = $script:CLICommandTextBox.Text.Length
+            }
+        }
+        if ($_.KeyCode -eq "Down") {
+            # Command history - next command
+            if ($script:CLICommandHistory -and $script:CLICommandHistory.Count -gt 0) {
+                if ($script:CLIHistoryIndex -lt ($script:CLICommandHistory.Count - 1)) {
+                    $script:CLIHistoryIndex++
+                    $script:CLICommandTextBox.Text = $script:CLICommandHistory[$script:CLIHistoryIndex]
+                } else {
+                    $script:CLIHistoryIndex = -1
+                    $script:CLICommandTextBox.Text = ""
+                }
+                $script:CLICommandTextBox.SelectionStart = $script:CLICommandTextBox.Text.Length
+            }
         }
     })
     
@@ -554,13 +580,22 @@ function Create-CLITab {
     $script:CLIOutputTextBox.ForeColor = [System.Drawing.Color]::Lime
     $script:CLIOutputTextBox.Font = New-Object System.Drawing.Font("Consolas", 9)
     
+    # Initialize command history
+    $script:CLICommandHistory = @()
+    $script:CLIHistoryIndex = -1
+    
     # Add welcome message
     $script:CLIOutputTextBox.Text = "PowerCLI Command Workspace - Version 0.5 BETA`r`n"
-    $script:CLIOutputTextBox.AppendText("Connect to vCenter above, then execute PowerCLI commands below.`r`n`r`n")
+    $script:CLIOutputTextBox.AppendText("Interactive Terminal Mode - Connect to vCenter above, then type commands below.`r`n`r`n")
+    $script:CLIOutputTextBox.AppendText("Terminal Features:`r`n")
+    $script:CLIOutputTextBox.AppendText("  - Press ENTER to execute commands`r`n")
+    $script:CLIOutputTextBox.AppendText("  - Use UP/DOWN arrows for command history`r`n")
+    $script:CLIOutputTextBox.AppendText("  - Type 'help' for PowerCLI help`r`n")
+    $script:CLIOutputTextBox.AppendText("  - Type 'clear' to clear this window`r`n`r`n")
     $script:CLIOutputTextBox.AppendText("Example commands:`r`n")
     $script:CLIOutputTextBox.AppendText("  Get-VMHost`r`n")
     $script:CLIOutputTextBox.AppendText("  Get-VM | Select Name, PowerState`r`n")
-    $script:CLIOutputTextBox.AppendText("  Get-Datastore`r`n")
+    $script:CLIOutputTextBox.AppendText("  Get-Datastore | Sort FreeSpaceGB`r`n")
     $script:CLIOutputTextBox.AppendText("  Get-Cluster`r`n`r`n")
     $script:CLIOutputTextBox.AppendText("Ready for commands...`r`n")
     
@@ -1033,7 +1068,18 @@ function Load-HostsConfiguration {
             }
             Write-Log "Hosts configuration loaded" "SUCCESS"
         } else {
-            $script:HostsTextBox.Text = "# ESXi Hosts Configuration`r`n# Add your ESXi host IP addresses or FQDNs below`r`n# One host per line, comments start with #`r`n`r`n# Examples:`r`n# 192.168.1.100`r`n# 192.168.1.101`r`n# esxi-host-01.domain.local`r`n# esxi-host-02.domain.local"
+            $defaultHosts = @"
+# ESXi Hosts Configuration
+# Add your ESXi host IP addresses or FQDNs below
+# One host per line, comments start with #
+
+# Examples:
+# 192.168.1.100
+# 192.168.1.101
+# esxi-host-01.domain.local
+# esxi-host-02.domain.local
+"@
+            $script:HostsTextBox.Text = $defaultHosts
         }
     } catch {
         Write-Log "Failed to load hosts configuration: $($_.Exception.Message)" "ERROR"
@@ -1069,7 +1115,20 @@ function Load-UsersConfiguration {
             }
             Write-Log "Users configuration loaded" "SUCCESS"
         } else {
-            $script:UsersTextBox.Text = "# Target ESXi Users Configuration`r`n# Add ESXi usernames for password operations`r`n# One username per line, comments start with #`r`n# Note: vCenter admin users (like administrator@vsphere.local) are entered directly in the GUI`r`n`r`n# Common ESXi users:`r`nroot`r`n# admin_swm`r`n# admin_kms`r`n# admin`r`n# serviceaccount"
+            $defaultUsers = @"
+# Target ESXi Users Configuration
+# Add ESXi usernames for password operations
+# One username per line, comments start with #
+# Note: vCenter admin users (like administrator@vsphere.local) are entered directly in the GUI
+
+# Common ESXi users:
+root
+# admin_swm
+# admin_kms
+# admin
+# serviceaccount
+"@
+            $script:UsersTextBox.Text = $defaultUsers
         }
     } catch {
         Write-Log "Failed to load users configuration: $($_.Exception.Message)" "ERROR"
@@ -1248,10 +1307,46 @@ function Execute-CLICommand {
             return
         }
         
-        # Check if connected
-        if (-not $global:DefaultVIServers) {
-            $script:CLIOutputTextBox.AppendText("`r`n[ERROR] Not connected to vCenter. Please connect first.`r`n`r`n")
+        # Add to command history
+        if ($script:CLICommandHistory -notcontains $command) {
+            $script:CLICommandHistory += $command
+            # Keep only last 50 commands
+            if ($script:CLICommandHistory.Count -gt 50) {
+                $script:CLICommandHistory = $script:CLICommandHistory[-50..-1]
+            }
+        }
+        $script:CLIHistoryIndex = -1
+        
+        # Handle special commands
+        if ($command -eq "clear") {
+            $script:CLIOutputTextBox.Clear()
+            $script:CLIOutputTextBox.AppendText("PowerCLI Command Workspace - Terminal Cleared`r`n")
+            $script:CLIOutputTextBox.AppendText("Ready for commands...`r`n")
+            $script:CLICommandTextBox.Clear()
+            return
+        }
+        
+        if ($command -eq "help") {
+            $script:CLIOutputTextBox.AppendText("`r`n[$(Get-Date -Format 'HH:mm:ss')] PS> $command`r`n")
+            $script:CLIOutputTextBox.AppendText("PowerCLI Command Workspace Help:`r`n")
+            $script:CLIOutputTextBox.AppendText("  clear          - Clear the terminal window`r`n")
+            $script:CLIOutputTextBox.AppendText("  help           - Show this help`r`n")
+            $script:CLIOutputTextBox.AppendText("  Get-Command    - List all available PowerCLI commands`r`n")
+            $script:CLIOutputTextBox.AppendText("  Get-Help <cmd> - Get help for a specific command`r`n")
+            $script:CLIOutputTextBox.AppendText("`r`nCommon PowerCLI commands:`r`n")
+            $script:CLIOutputTextBox.AppendText("  Get-VMHost, Get-VM, Get-Datastore, Get-Cluster`r`n")
+            $script:CLIOutputTextBox.AppendText("  Connect-VIServer, Disconnect-VIServer`r`n`r`n")
+            $script:CLICommandTextBox.Clear()
             $script:CLIOutputTextBox.ScrollToCaret()
+            return
+        }
+        
+        # Check if connected for PowerCLI commands
+        if (-not $global:DefaultVIServers -and $command -notlike "Get-Command*" -and $command -notlike "Get-Help*") {
+            $script:CLIOutputTextBox.AppendText("`r`n[ERROR] Not connected to vCenter. Please connect first.`r`n")
+            $script:CLIOutputTextBox.AppendText("Use the Connect button above or try: Connect-VIServer -Server <server>`r`n`r`n")
+            $script:CLIOutputTextBox.ScrollToCaret()
+            $script:CLICommandTextBox.Clear()
             return
         }
         
@@ -1274,8 +1369,9 @@ function Execute-CLICommand {
         $script:CLIOutputTextBox.AppendText("`r`n")
         $script:CLIOutputTextBox.ScrollToCaret()
         
-        # Clear command input
+        # Clear command input and focus back to it
         $script:CLICommandTextBox.Clear()
+        $script:CLICommandTextBox.Focus()
         
         Write-Log "CLI command executed: $command" "INFO"
     } catch {
