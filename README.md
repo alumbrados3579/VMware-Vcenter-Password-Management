@@ -1,7 +1,8 @@
 # VMware vCenter Password Management Tool
 ## Version 1.0 - Professional DoD-Compliant Password Management
 
-<img width="656" height="513" alt="Config_Window" src="https://github.com/user-attachments/assets/c934a418-fb02-4e46-a6d4-deb346b00548" />
+<img width="1024" height="847" alt="image" src="https://github.com/user-attachments/assets/e2e738fd-e334-4f88-814d-4004d6dd13a7" />
+
 
 ### Overview
 
