@@ -1,39 +1,8 @@
-# Critical scripts should NOT be in LFS for GitHub accessibility
-Startup-Script.ps1 text
-VMware-Vcenter-Password-Management.ps1 text
+# VMware vCenter Password Management Tool - Git LFS Configuration
+# ONLY .zip files should be in LFS for module distribution
 
-# Everything else in LFS
+# LFS for large binary files only
 *.zip filter=lfs diff=lfs merge=lfs -text
-*.gitignore filter=lfs diff=lfs merge=lfs -text
-*.md filter=lfs diff=lfs merge=lfs -text
-*.ps1 filter=lfs diff=lfs merge=lfs -text
-*.sh filter=lfs diff=lfs merge=lfs -text
-/LICENSE filter=lfs diff=lfs merge=lfs -text
-*.rtf filter=lfs diff=lfs merge=lfs -text
-*.xml filter=lfs diff=lfs merge=lfs -text
-*.cat filter=lfs diff=lfs merge=lfs -text
-*.psd1 filter=lfs diff=lfs merge=lfs -text
-*.psm1 filter=lfs diff=lfs merge=lfs -text
-*.json filter=lfs diff=lfs merge=lfs -text
-*.dll filter=lfs diff=lfs merge=lfs -text
-*.txt filter=lfs diff=lfs merge=lfs -text
-*.py filter=lfs diff=lfs merge=lfs -text
-*.pyc filter=lfs diff=lfs merge=lfs -text
-*.pyd filter=lfs diff=lfs merge=lfs -text
-*.rng filter=lfs diff=lfs merge=lfs -text
-*.cert filter=lfs diff=lfs merge=lfs -text
-*.crl filter=lfs diff=lfs merge=lfs -text
-*.so filter=lfs diff=lfs merge=lfs -text
-*.nuspec filter=lfs diff=lfs merge=lfs -text
-*.rels filter=lfs diff=lfs merge=lfs -text
-*.psmdcp filter=lfs diff=lfs merge=lfs -text
-*.cs filter=lfs diff=lfs merge=lfs -text
-/Modules/VMware.VimAutomation.Core/13.3.0.24145081/net472/Scripts/GuestDiskExpansion_LinuxGuest filter=lfs diff=lfs merge=lfs -text
-*.bat filter=lfs diff=lfs merge=lfs -text
-/Modules/VMware.VimAutomation.Core/13.3.0.24145081/net472/Scripts/GuestDiskExpansion_rhel5Guest filter=lfs diff=lfs merge=lfs -text
-/Modules/VMware.VimAutomation.Core/13.3.0.24145081/netcoreapp3.1/Scripts/GuestDiskExpansion_LinuxGuest filter=lfs diff=lfs merge=lfs -text
-/Modules/VMware.VimAutomation.Core/13.3.0.24145081/netcoreapp3.1/Scripts/GuestDiskExpansion_rhel5Guest filter=lfs diff=lfs merge=lfs -text
-/Modules/VMware.VimAutomation.Core/13.4.0.24798382/net472/Scripts/GuestDiskExpansion_LinuxGuest filter=lfs diff=lfs merge=lfs -text
-/Modules/VMware.VimAutomation.Core/13.4.0.24798382/net472/Scripts/GuestDiskExpansion_rhel5Guest filter=lfs diff=lfs merge=lfs -text
-/Modules/VMware.VimAutomation.Core/13.4.0.24798382/netcoreapp3.1/Scripts/GuestDiskExpansion_LinuxGuest filter=lfs diff=lfs merge=lfs -text
-/Modules/VMware.VimAutomation.Core/13.4.0.24798382/netcoreapp3.1/Scripts/GuestDiskExpansion_rhel5Guest filter=lfs diff=lfs merge=lfs -text
+
+# Everything else should be regular git files for GitHub web accessibility
+# This ensures scripts can be viewed and copied directly from GitHub
