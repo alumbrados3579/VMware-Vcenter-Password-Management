@@ -15,16 +15,20 @@ This project has migrated to **Forgejo** for enhanced security:
 
 A professional, DoD-compliant solution for managing passwords across VMware vCenter and ESXi environments. This tool provides both a comprehensive GUI interface and fast standalone components for specific tasks.
 
-### Key Features
+## 🎯 **KEY FEATURES**
 
-- DoD compliance with government warning banners and audit logging
-- Safe operations with mandatory dry-run testing before live changes
-- Role separation between admin and target users
-- Comprehensive logging with export capabilities
-- Modular architecture for fast individual tool usage
-- Interactive PowerCLI workspace for advanced users
-- Professional interface without decorative elements
-- Enterprise-grade security and audit capabilities
+- **Professional GUI Interface** with 8 comprehensive tabs for complete workflow management
+- **Modular Architecture** with individual tools for specific tasks (70% faster startup)
+- **Enterprise-Grade Security** with comprehensive logging and audit trails
+- **DoD compliance** with government warning banners and audit logging
+- **PowerCLI Integration** with local module installation (OneDrive-safe)
+- **Automated Setup** with one-line installation and dependency management
+- **Host Manager Integration** - Direct access to ESXi host management tools
+- **Agent Manager** - Automated system for remote repository management
+- **DoD Compliance Manager** - Easy compliance switching for government environments
+- **Comprehensive Documentation** with guides for all components
+- **Cross-Platform Compatibility** supporting Windows environments
+- **Professional Branding** suitable for enterprise and government use
 
 ### 🔐 Secure Installation
 
