@@ -222,25 +222,48 @@ function Create-TabControl {
     # Create tabs
     $passwordTab = New-Object System.Windows.Forms.TabPage
     $passwordTab.Text = "Password Management"
-    Create-VMwareTab $passwordTab
+    $passwordTab.BackColor = [System.Drawing.Color]::White
     
     $configTab = New-Object System.Windows.Forms.TabPage
     $configTab.Text = "Configuration"
-    Create-ConfigTab $configTab
+    $configTab.BackColor = [System.Drawing.Color]::White
     
     $cliTab = New-Object System.Windows.Forms.TabPage
-    $cliTab.Text = "CLI Workspace"
-    Create-CLITab $cliTab
+    $cliTab.Text = "PowerCLI Terminal"
+    $cliTab.BackColor = [System.Drawing.Color]::White
+    
+    $hostTab = New-Object System.Windows.Forms.TabPage
+    $hostTab.Text = "Host Manager"
+    $hostTab.BackColor = [System.Drawing.Color]::White
+    
+    $agentTab = New-Object System.Windows.Forms.TabPage
+    $agentTab.Text = "Agent Manager"
+    $agentTab.BackColor = [System.Drawing.Color]::White
+    
+    $dodTab = New-Object System.Windows.Forms.TabPage
+    $dodTab.Text = "DoD Compliance"
+    $dodTab.BackColor = [System.Drawing.Color]::White
     
     $githubTab = New-Object System.Windows.Forms.TabPage
-    $githubTab.Text = "GitHub Manager"
-    Create-GitHubTab $githubTab
+    $githubTab.Text = "Repository Manager"
+    $githubTab.BackColor = [System.Drawing.Color]::White
     
     $logsTab = New-Object System.Windows.Forms.TabPage
-    $logsTab.Text = "Logs"
+    $logsTab.Text = "Logs & Audit"
+    $logsTab.BackColor = [System.Drawing.Color]::White
+    
+    # Create tab content
+    Create-VMwareTab $passwordTab
+    Create-ConfigTab $configTab
+    Create-CLITab $cliTab
+    Create-HostTab $hostTab
+    Create-AgentTab $agentTab
+    Create-DoDTab $dodTab
+    Create-GitHubTab $githubTab
     Create-LogsTab $logsTab
     
-    $tabControl.TabPages.AddRange(@($passwordTab, $configTab, $cliTab, $githubTab, $logsTab))
+    # Add tabs to control
+    $tabControl.TabPages.AddRange(@($passwordTab, $configTab, $cliTab, $hostTab, $agentTab, $dodTab, $githubTab, $logsTab))
     
     $form.Controls.Add($tabControl)
     
@@ -1465,6 +1488,104 @@ function Start-Application {
     # Show the form
     [System.Windows.Forms.Application]::EnableVisualStyles()
     $form.ShowDialog()
+}
+
+# --- New Tab Functions ---
+function Create-HostTab {
+    param($tab)
+    
+    # Create host management interface
+    $hostGroup = New-Object System.Windows.Forms.GroupBox
+    $hostGroup.Text = "ESXi Host Management"
+    $hostGroup.Size = New-Object System.Drawing.Size(840, 580)
+    $hostGroup.Location = New-Object System.Drawing.Point(10, 10)
+    
+    # Launch Host Manager button
+    $launchHostMgrButton = New-Object System.Windows.Forms.Button
+    $launchHostMgrButton.Text = "Launch Host Manager Tool"
+    $launchHostMgrButton.Size = New-Object System.Drawing.Size(200, 40)
+    $launchHostMgrButton.Location = New-Object System.Drawing.Point(20, 30)
+    $launchHostMgrButton.BackColor = [System.Drawing.Color]::LightBlue
+    $launchHostMgrButton.Add_Click({
+        try {
+            $hostMgrPath = Join-Path $PSScriptRoot "VMware-Host-Manager.ps1"
+            if (Test-Path $hostMgrPath) {
+                Start-Process PowerShell -ArgumentList "-File `"$hostMgrPath`"" -WindowStyle Normal
+                Write-Log "Launched Host Manager tool" "SUCCESS"
+            } else {
+                [System.Windows.Forms.MessageBox]::Show("Host Manager tool not found: $hostMgrPath", "Error", "OK", "Error")
+            }
+        } catch {
+            [System.Windows.Forms.MessageBox]::Show("Error launching Host Manager: $($_.Exception.Message)", "Error", "OK", "Error")
+        }
+    })
+    
+    $hostGroup.Controls.Add($launchHostMgrButton)
+    $tab.Controls.Add($hostGroup)
+}
+
+function Create-AgentTab {
+    param($tab)
+    
+    # Create agent management interface
+    $agentGroup = New-Object System.Windows.Forms.GroupBox
+    $agentGroup.Text = "Automated Agent System"
+    $agentGroup.Size = New-Object System.Drawing.Size(840, 580)
+    $agentGroup.Location = New-Object System.Drawing.Point(10, 10)
+    
+    # Install agent button
+    $installButton = New-Object System.Windows.Forms.Button
+    $installButton.Text = "Install Agent"
+    $installButton.Size = New-Object System.Drawing.Size(120, 30)
+    $installButton.Location = New-Object System.Drawing.Point(20, 30)
+    $installButton.Add_Click({
+        try {
+            $agentPath = Join-Path $PSScriptRoot "VMware-Agent.ps1"
+            if (Test-Path $agentPath) {
+                Start-Process PowerShell -ArgumentList "-File `"$agentPath`" -Install" -Verb RunAs
+                Write-Log "Agent installation initiated" "SUCCESS"
+            } else {
+                [System.Windows.Forms.MessageBox]::Show("Agent script not found: $agentPath", "Error", "OK", "Error")
+            }
+        } catch {
+            [System.Windows.Forms.MessageBox]::Show("Error installing agent: $($_.Exception.Message)", "Error", "OK", "Error")
+        }
+    })
+    
+    $agentGroup.Controls.Add($installButton)
+    $tab.Controls.Add($agentGroup)
+}
+
+function Create-DoDTab {
+    param($tab)
+    
+    # Create DoD compliance interface
+    $dodGroup = New-Object System.Windows.Forms.GroupBox
+    $dodGroup.Text = "DoD Compliance Management"
+    $dodGroup.Size = New-Object System.Drawing.Size(840, 580)
+    $dodGroup.Location = New-Object System.Drawing.Point(10, 10)
+    
+    # Add DoD warnings button
+    $addDoDButton = New-Object System.Windows.Forms.Button
+    $addDoDButton.Text = "Add DoD Warnings"
+    $addDoDButton.Size = New-Object System.Drawing.Size(150, 30)
+    $addDoDButton.Location = New-Object System.Drawing.Point(20, 30)
+    $addDoDButton.Add_Click({
+        try {
+            $dodPath = Join-Path $PSScriptRoot "DoDify.ps1"
+            if (Test-Path $dodPath) {
+                Start-Process PowerShell -ArgumentList "-File `"$dodPath`" -AllScripts" -WindowStyle Normal
+                Write-Log "DoD warnings processing initiated" "SUCCESS"
+            } else {
+                [System.Windows.Forms.MessageBox]::Show("DoDify script not found: $dodPath", "Error", "OK", "Error")
+            }
+        } catch {
+            [System.Windows.Forms.MessageBox]::Show("Error adding DoD warnings: $($_.Exception.Message)", "Error", "OK", "Error")
+        }
+    })
+    
+    $dodGroup.Controls.Add($addDoDButton)
+    $tab.Controls.Add($dodGroup)
 }
 
 # Start the GUI application with error handling
